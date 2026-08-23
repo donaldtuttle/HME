@@ -1,8 +1,12 @@
 # Repository Assembly Record
 
 **Assembly date:** 2026-08-23  
-**Target repository:** `donaldtuttle/qosmos-hme`  
-**Visibility:** private
+**Initial target repository:** `donaldtuttle/qosmos-hme`  
+**Initial visibility:** private
+
+## Publication transition
+
+On 2026-08-23, the assembled tree was published at `donaldtuttle/HME` for public inspection and research discussion under proprietary rights. Copyright remains with Donald Tuttle; all rights are reserved. Public visibility does not make the project open source or promote this DEVELOP realization into canon.
 
 ## Byte-preserved inputs
 

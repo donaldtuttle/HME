@@ -7,12 +7,14 @@ name = "qosmos-hme"
 version = "2.2.0"
 description = "QOSMOS Holographic Memory Engine typed realization"
 readme = "README.md"
+license = {file = "LICENSE"}
 requires-python = ">=3.10"
 dependencies = [
   "numpy>=1.24",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
+  "License :: Other/Proprietary License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",

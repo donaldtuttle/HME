@@ -1,6 +1,6 @@
 # QOSMOS Holographic Memory Engine (HME)
 
-> Private QOFT/QOSMOS research repository. Typed Realization / DEVELOP. Canonical weight: none.
+> Publicly viewable, proprietary QOFT/QOSMOS research repository. Typed Realization / DEVELOP. Canonical weight: none.
 
 ![QOSMOS HME symbolic overlay](assets/qosmos_hme_symbolic_overlay.gif)
 
@@ -119,4 +119,6 @@ Excluded:
 
 ## Status and rights
 
-This is a private research repository. No public software license has been assigned. Implementation conformance does not validate QOFT as physics, establish consciousness, or promote this realization into canon.
+This is a publicly viewable proprietary research repository, not an open-source project. Copyright is retained and all rights are reserved; see [`LICENSE`](LICENSE). Except for the limited platform rights arising under GitHub's Terms of Service, no permission is granted to copy, modify, redistribute, sublicense, sell, or create derivative works without prior written permission, except where applicable law expressly permits otherwise.
+
+Implementation conformance does not validate QOFT as physics, establish consciousness, or promote this realization into canon.

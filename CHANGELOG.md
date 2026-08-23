@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-23 — Public visibility with proprietary rights
+
+- published the repository for public inspection and research discussion;
+- retained copyright and all rights under a proprietary rights notice;
+- made explicit that public visibility does not make the project open source;
+- preserved the HME implementation, evidence, operator contracts, and DEVELOP/noncanonical classification unchanged.
+
 ## 2026-08-23 — Initial private repository assembly
 
 - selected the later HME operator-conformance source as active;

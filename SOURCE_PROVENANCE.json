@@ -1,6 +1,7 @@
 {
-  "repository_target": "donaldtuttle/qosmos-hme",
-  "visibility": "private",
+  "repository_target": "donaldtuttle/HME",
+  "visibility": "public",
+  "rights": "proprietary; copyright retained; all rights reserved",
   "assembly_date": "2026-08-23",
   "classification": "Typed Realization / DEVELOP",
   "canonical_weight": "none",
