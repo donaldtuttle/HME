@@ -5,6 +5,7 @@
 - published the repository for public inspection and research discussion;
 - retained copyright and all rights under a proprietary rights notice;
 - made explicit that public visibility does not make the project open source;
+- declared the repository owner-maintained and closed to external contributions;
 - preserved the HME implementation, evidence, operator contracts, and DEVELOP/noncanonical classification unchanged.
 
 ## 2026-08-23 — Initial private repository assembly

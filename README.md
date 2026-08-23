@@ -122,3 +122,7 @@ Excluded:
 This is a publicly viewable proprietary research repository, not an open-source project. Copyright is retained and all rights are reserved; see [`LICENSE`](LICENSE). Except for the limited platform rights arising under GitHub's Terms of Service, no permission is granted to copy, modify, redistribute, sublicense, sell, or create derivative works without prior written permission, except where applicable law expressly permits otherwise.
 
 Implementation conformance does not validate QOFT as physics, establish consciousness, or promote this realization into canon.
+
+## Contribution policy
+
+This is a closed-source, owner-maintained repository. External contributions are not accepted. Public users may fork the repository or propose changes through GitHub, but those actions cannot alter this repository or its `main` branch unless the owner explicitly accepts and merges them. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
