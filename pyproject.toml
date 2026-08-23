@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "qosmos-hme"
 version = "2.2.0"
-description = "QOSMOS Holographic Memory Engine typed realization"
+description = "Deterministic hybrid field-plus-ledger memory engine with reconstructive storage, auditable provenance, ranked retrieval, and lineage tracking"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"

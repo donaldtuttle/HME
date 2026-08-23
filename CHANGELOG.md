@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-23 — Standalone HME positioning
+
+- made HME the primary repository and package identity;
+- reframed the public description around deterministic memory, reconstruction, provenance, retrieval, and lineage;
+- retained QOFT/QOSMOS only as origin and compatibility context;
+- left the engine implementation, API, evidence, and historical provenance unchanged.
+
 ## 2026-08-23 — Public visibility with proprietary rights
 
 - published the repository for public inspection and research discussion;

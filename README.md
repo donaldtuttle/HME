@@ -1,12 +1,12 @@
-# QOSMOS Holographic Memory Engine (HME)
+# Holographic Memory Engine (HME)
 
-> Publicly viewable, proprietary QOFT/QOSMOS research repository. Typed Realization / DEVELOP. Canonical weight: none.
+> Deterministic hybrid field-plus-ledger memory engine with reconstructive storage, auditable provenance, ranked retrieval, and lineage tracking.
 
-![QOSMOS HME symbolic overlay](assets/qosmos_hme_symbolic_overlay.gif)
+![HME symbolic overlay](assets/qosmos_hme_symbolic_overlay.gif)
 
-## What this repository contains
+## Overview
 
-This repository isolates the current HME implementation from a mixed July 2026 archive whose surrounding QOFT/QOSMOS material includes superseded generations. The active engine is the later operator-conformance source, preserved byte-for-byte at `qosmos_hme_engine.py`.
+HME combines a complex 2D field with an artifact ledger and QMesh lineage graph. SHA-256-derived encodings make repeated storage, replay, and comparison deterministic under the same implementation, dependencies, inputs, configuration, and numeric environment. The active engine is preserved byte-for-byte at `qosmos_hme_engine.py`.
 
 HME is a **hybrid field-plus-ledger memory realization**:
 
@@ -16,22 +16,9 @@ HME is a **hybrid field-plus-ledger memory realization**:
 - QMesh records memory/collapse lineage;
 - ranked retrieval combines position, query, and pattern similarity;
 - Ψmeta telemetry is emitted before the realization-local Λψ predicate;
-- W(t) is a visualization/diagnostic projection, not a canonical physical coordinate.
+- W(t) is a visualization and diagnostic projection, not a physical coordinate.
 
 Artifact identity retrieval is **not field-only**. The field can retain a decoded surface when the ledger is removed, while exact artifact identification depends on the ledger.
-
-## Operator ownership in the active realization
-
-| Construct | Realization role |
-|---|---|
-| `Ψmeta` | pre-collapse telemetry |
-| `Λψ` | collapse / projection event |
-| `Σ◯` | consolidation and durable HME write |
-| `Θλ` | retrieval / recall or replay-plan record |
-| `ApplyReplay` | explicit state mutation after retrieval |
-| `Π↺` | recurrence and ordered lineage |
-
-The numerical HME algorithms were not changed by the semantic conformance patch. See `docs/OPERATOR_CONFORMANCE_PATCH.md`.
 
 ## Quick start
 
@@ -62,7 +49,7 @@ receipt = hme.retrieve_memory((20, 22), query=[0.1, 0.4, 0.9, 0.2])
 print(artifact.artifact_id, receipt.confidence)
 ```
 
-## Verified ingest baseline
+## Verified implementation baseline
 
 Active engine source:
 
@@ -104,25 +91,39 @@ The current `confidence` value is the highest available retrieval score, not a c
 
 Included:
 
-- current HME/QMesh/collapse-layer engine;
-- current SFD → HME bridge module and deterministic example;
-- HME-specific audit harness and evidence;
-- current operator-typing governance references;
-- pre-conformance HME source as provenance only.
+- standalone HME engine and command-line self-test;
+- hybrid field reconstruction and ledger-backed ranked retrieval;
+- QMesh memory and event lineage;
+- deterministic tests, audit harnesses, and evidence;
+- optional SFD integration;
+- compatibility, provenance, and preserved legacy-source records.
 
 Excluded:
 
-- obsolete canon generations;
-- T-01 and unrelated experiment packages;
-- broad Visual World claims and generated output sets;
+- broader framework canon and unrelated research packages;
+- unrelated experiments and generated-world packages;
+- claims beyond the tested HME realization;
 - codec probes, toy agents, caches, and Finder metadata.
 
-## Status and rights
+## Framework compatibility and provenance
 
-This is a publicly viewable proprietary research repository, not an open-source project. Copyright is retained and all rights are reserved; see [`LICENSE`](LICENSE). Except for the limited platform rights arising under GitHub's Terms of Service, no permission is granted to copy, modify, redistribute, sublicense, sell, or create derivative works without prior written permission, except where applicable law expressly permits otherwise.
+HME originated within the QOSMOS research stack and retains a declared mapping to the QOFT operator vocabulary. These mappings describe provenance and integration compatibility; they do not promote the implementation into canon or validate broader framework claims. Within that governance system, HME remains a DEVELOP typed realization with no canonical weight.
 
-Implementation conformance does not validate QOFT as physics, establish consciousness, or promote this realization into canon.
+| Construct | HME role |
+|---|---|
+| `Ψmeta` | pre-collapse telemetry |
+| `Λψ` | collapse / projection event |
+| `Σ◯` | consolidation and durable HME write |
+| `Θλ` | retrieval / recall or replay-plan record |
+| `ApplyReplay` | explicit state mutation after retrieval |
+| `Π↺` | recurrence and ordered lineage |
 
-## Contribution policy
+The numerical HME algorithms were not changed by the compatibility patch documented in `docs/OPERATOR_CONFORMANCE_PATCH.md`.
 
-This is a closed-source, owner-maintained repository. External contributions are not accepted. Public users may fork the repository or propose changes through GitHub, but those actions cannot alter this repository or its `main` branch unless the owner explicitly accepts and merges them. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+## Rights and maintenance
+
+HME is publicly readable but proprietary and is not open source. Copyright is retained and all rights are reserved; see [`LICENSE`](LICENSE). External contributions are not accepted, and only the owner or an explicitly authorized maintainer can modify this repository or its `main` branch. Public forks are independent copies and cannot change this repository.
+
+Except for the limited platform rights arising under GitHub's Terms of Service, no permission is granted to use, copy, modify, redistribute, sublicense, sell, or create derivative works without prior written permission, except where applicable law expressly permits otherwise. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the closed-contribution policy.
+
+Passing tests and implementation-conformance checks demonstrate the behavior documented here. They do not establish consciousness, physical collapse, or universal memory dynamics.
