@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "artifact_hash_deterministic": true,
+  "field_deterministic": true,
+  "telemetry_count": 1,
+  "event_count": 1,
+  "qmesh_nodes": 3,
+  "qmesh_edges": 3,
+  "retrieval_confidence": 0.9596330551084596
+}

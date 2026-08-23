@@ -1,0 +1,318 @@
+{
+  "audit": "QOSMOS HME independent retrieval and ablation harness",
+  "status": "DEVELOP typed-realization test; not a canon or physics test",
+  "environment": {
+    "python": "3.13.5",
+    "numpy": "2.3.5",
+    "engine_module": "qosmos_hme_engine_audit",
+    "engine_path": "/mnt/data/qosmos-hme/qosmos_hme_engine.py"
+  },
+  "configuration": {
+    "seed": 7312026,
+    "memories": 128,
+    "vector_dimension": 16,
+    "memory_size": 64,
+    "position": [
+      32,
+      32
+    ],
+    "recursive_factor": 0.1,
+    "noise_levels": [
+      0.0,
+      0.05,
+      0.1,
+      0.25,
+      0.5,
+      1.0
+    ]
+  },
+  "determinism": {
+    "artifact_ids_identical": true,
+    "payload_hashes_identical": true,
+    "pattern_hashes_identical": true,
+    "fields_allclose": true,
+    "max_field_difference": 0.0
+  },
+  "linear_superposition": {
+    "supported": true,
+    "allclose": true,
+    "max_absolute_error": 0.0
+  },
+  "numeric_top1_retrieval": [
+    {
+      "noise_sigma": 0.0,
+      "correct": 128,
+      "total": 128,
+      "accuracy": 1.0,
+      "sample_misses": []
+    },
+    {
+      "noise_sigma": 0.05,
+      "correct": 128,
+      "total": 128,
+      "accuracy": 1.0,
+      "sample_misses": []
+    },
+    {
+      "noise_sigma": 0.1,
+      "correct": 128,
+      "total": 128,
+      "accuracy": 1.0,
+      "sample_misses": []
+    },
+    {
+      "noise_sigma": 0.25,
+      "correct": 128,
+      "total": 128,
+      "accuracy": 1.0,
+      "sample_misses": []
+    },
+    {
+      "noise_sigma": 0.5,
+      "correct": 119,
+      "total": 128,
+      "accuracy": 0.9296875,
+      "sample_misses": [
+        {
+          "index": 5,
+          "expected_artifact_id": "cf4284d1101a6dd9643d",
+          "returned_artifact_id": "1399685ee5e7388f9df8",
+          "confidence": 0.8052808305477348
+        },
+        {
+          "index": 18,
+          "expected_artifact_id": "df8a73267ebd8987a93a",
+          "returned_artifact_id": "88c68711f23763ac7729",
+          "confidence": 0.6815708482431979
+        },
+        {
+          "index": 36,
+          "expected_artifact_id": "8ae39998083736348c35",
+          "returned_artifact_id": "1ab87d4a0c5b4f8dc003",
+          "confidence": 0.7352447831544927
+        },
+        {
+          "index": 49,
+          "expected_artifact_id": "5276baf06bdd128c477d",
+          "returned_artifact_id": "5543ad4c3b3630604119",
+          "confidence": 0.7194880790043308
+        },
+        {
+          "index": 52,
+          "expected_artifact_id": "9eb8c1a4156522773bf5",
+          "returned_artifact_id": "cd4909f5d88d631be810",
+          "confidence": 0.7255452727299405
+        },
+        {
+          "index": 70,
+          "expected_artifact_id": "144beacb9ca219db47b9",
+          "returned_artifact_id": "4f8dff0d68c4b01aa152",
+          "confidence": 0.7798701480455245
+        },
+        {
+          "index": 96,
+          "expected_artifact_id": "a734b992f73ea03f10bb",
+          "returned_artifact_id": "462e377b8777ebbb3867",
+          "confidence": 0.7646417950023389
+        },
+        {
+          "index": 111,
+          "expected_artifact_id": "04bcf1651513b95dd0e4",
+          "returned_artifact_id": "167d1ca80c0073a62abf",
+          "confidence": 0.8199159997286941
+        },
+        {
+          "index": 115,
+          "expected_artifact_id": "4a39069969b9b295369e",
+          "returned_artifact_id": "530357fb42ad7ef3e4a4",
+          "confidence": 0.6550329501400813
+        }
+      ]
+    },
+    {
+      "noise_sigma": 1.0,
+      "correct": 59,
+      "total": 128,
+      "accuracy": 0.4609375,
+      "sample_misses": [
+        {
+          "index": 0,
+          "expected_artifact_id": "ab8cbbeaa8391a2a6422",
+          "returned_artifact_id": "3da352cfbaa177721f4a",
+          "confidence": 0.6680022868144986
+        },
+        {
+          "index": 2,
+          "expected_artifact_id": "00398202a53813d880ce",
+          "returned_artifact_id": "144beacb9ca219db47b9",
+          "confidence": 0.7664747773810234
+        },
+        {
+          "index": 3,
+          "expected_artifact_id": "f87c9f0c159acfdcbadf",
+          "returned_artifact_id": "1fde765b0d01a4915b8d",
+          "confidence": 0.7038684189689128
+        },
+        {
+          "index": 4,
+          "expected_artifact_id": "a179ddb5d73b2ae6fa74",
+          "returned_artifact_id": "5543ad4c3b3630604119",
+          "confidence": 0.7054808372487844
+        },
+        {
+          "index": 6,
+          "expected_artifact_id": "3e111e1b2df8f9cc40e1",
+          "returned_artifact_id": "b646fc66e7ac490f2b9c",
+          "confidence": 0.660690476723004
+        },
+        {
+          "index": 7,
+          "expected_artifact_id": "6afc17c53253523ce56a",
+          "returned_artifact_id": "7ad0416ef91a6257b170",
+          "confidence": 0.670373276807918
+        },
+        {
+          "index": 8,
+          "expected_artifact_id": "6736816e2cabe24b73a8",
+          "returned_artifact_id": "167d1ca80c0073a62abf",
+          "confidence": 0.7160746442058866
+        },
+        {
+          "index": 9,
+          "expected_artifact_id": "2e9bccd5b63a15b3c2a6",
+          "returned_artifact_id": "6afc17c53253523ce56a",
+          "confidence": 0.6380312444046491
+        },
+        {
+          "index": 11,
+          "expected_artifact_id": "34680c0a84318a98e2f0",
+          "returned_artifact_id": "7e7fe71d1cb293e27f0d",
+          "confidence": 0.7017973663343277
+        },
+        {
+          "index": 12,
+          "expected_artifact_id": "053c2a5b817b76bcb4b6",
+          "returned_artifact_id": "b4635eae87885e65dffb",
+          "confidence": 0.6962361003964616
+        },
+        {
+          "index": 18,
+          "expected_artifact_id": "df8a73267ebd8987a93a",
+          "returned_artifact_id": "9400bd3d48fd19d2f17a",
+          "confidence": 0.7193306859014512
+        },
+        {
+          "index": 19,
+          "expected_artifact_id": "dcb677bd2691ebffc851",
+          "returned_artifact_id": "0938541b840ae60268ee",
+          "confidence": 0.6362277797190152
+        }
+      ]
+    }
+  ],
+  "field_vs_ledger_ablation": {
+    "normal_exact_query": {
+      "noise_sigma": 0.0,
+      "correct": 128,
+      "total": 128,
+      "accuracy": 1.0,
+      "sample_misses": []
+    },
+    "field_erased_records_preserved": {
+      "noise_sigma": 0.0,
+      "correct": 128,
+      "total": 128,
+      "accuracy": 1.0,
+      "sample_misses": []
+    },
+    "ledger_erased_field_preserved": {
+      "retained_field_norm": 4.517255354748949,
+      "hit_count": 0,
+      "confidence": 0.0,
+      "decoded_surface_norm": 0.4994112172824285,
+      "decoded_vector_norm": 0.0
+    }
+  },
+  "symbol_probe": {
+    "stored_symbols": [
+      "recursive_self",
+      "red_cube",
+      "blue_sphere",
+      "glass_badge"
+    ],
+    "queries": [
+      {
+        "query": "recursive_self",
+        "returned_symbol": "recursive_self",
+        "correct_exact_match": true,
+        "confidence": 0.8468960715542335,
+        "score_breakdown": {
+          "distance": 1.0,
+          "query": 0.8531221981919016,
+          "pattern": 0.5429237415681742,
+          "combined": 0.8468960715542335
+        }
+      },
+      {
+        "query": "red_cube",
+        "returned_symbol": "red_cube",
+        "correct_exact_match": true,
+        "confidence": 0.8452994281213881,
+        "score_breakdown": {
+          "distance": 1.0,
+          "query": 0.8439057176759539,
+          "pattern": 0.5542951334874375,
+          "combined": 0.8452994281213881
+        }
+      },
+      {
+        "query": "recursive",
+        "returned_symbol": "glass_badge",
+        "correct_exact_match": false,
+        "confidence": 0.6304504610059796,
+        "score_breakdown": {
+          "distance": 1.0,
+          "query": 0.3205952175490524,
+          "pattern": 0.5790023481768878,
+          "combined": 0.6304504610059796
+        }
+      },
+      {
+        "query": "recursive self",
+        "returned_symbol": "blue_sphere",
+        "correct_exact_match": false,
+        "confidence": 0.6151253671599685,
+        "score_breakdown": {
+          "distance": 1.0,
+          "query": 0.2776699843410884,
+          "pattern": 0.5925198686835565,
+          "combined": 0.6151253671599685
+        }
+      },
+      {
+        "query": "red cub",
+        "returned_symbol": "recursive_self",
+        "correct_exact_match": false,
+        "confidence": 0.6410537002579523,
+        "score_breakdown": {
+          "distance": 1.0,
+          "query": 0.36302131415313676,
+          "pattern": 0.5429237415681742,
+          "combined": 0.6410537002579523
+        }
+      }
+    ]
+  },
+  "unrelated_query_probe": {
+    "hit_count": 1,
+    "confidence": 0.7326225564822662,
+    "top_hit": {
+      "artifact_id": "cd4909f5d88d631be810",
+      "distance_score": 1.0,
+      "query_score": 0.6903412235954082,
+      "pattern_score": 0.31339621286097363,
+      "combined_score": 0.7326225564822662
+    },
+    "interpretation": "The current confidence is the highest available combined score; this probe does not treat it as a calibrated probability."
+  }
+}

@@ -1,0 +1,538 @@
+# QOFT / QOSMOS TYPED REALIZATION REGISTRY
+
+Version: v0.1
+Status: PROPOSAL-TIER / DEVELOP
+Document Class: Typed Cross-Layer Registry / Governance Instrument
+Canonical Weight: NONE
+Framework Authority: ψᴽ-001
+Date: 2026-07-11
+
+## 0. Non-Amendment Declaration
+
+This registry does not:
+
+- change canonical notation
+- redefine a canonical operator
+- introduce a new glyph
+- resolve an open mechanism slot
+- promote an implementation into baseline canon
+- assign canonical weight to an experiment
+
+It records correspondences, mismatches, local aliases, side artifacts,
+and missing type bridges across existing QOFT/QOSMOS layers.
+
+If this registry conflicts with stamped governance or adopted canon,
+stamped governance and adopted canon govern.
+
+## 1. Authority Order
+
+1. RULING D-Π-01, stamped
+2. RULING ψᴽ-001 r2.2, stamped
+3. Consolidated AI Knowledge Document
+4. Formal v1 specification
+5. General Audience translation
+6. Experimental engines and research documents
+7. Local code names, stubs, dashboards, and side quests
+
+Lower layers may realize higher layers.
+Lower layers may not silently redefine higher layers.
+
+## 2. Canonical Type Spine
+
+ψ ∈ Ψ
+
+Ψᴽ ⊆ Ψ
+ιᴽ : Ψᴽ ↪ Ψ
+
+ψᴽ = Πᴽ(ψ; ctx, m) ∈ Ψᴽ
+
+Γ(ψ; ctx) ∈ G
+
+⊕ : Ψᴽ × G → Ψ
+
+Ξ(ψ) = ψᴽ ⊕ Γ(ψ; ctx) ∈ Ψ
+
+Expression synonym:
+
+ψᴽ + Γ(ψ) ≡ ψᴽ ⊕ Γ(ψ)
+
+The symbol "+" is never arithmetic at the external interface.
+
+## 3. Realization Test
+
+For a canonical operator:
+
+O : A → B
+
+and a runtime realization:
+
+Oᵣ : Aᵣ → Bᵣ
+
+the realization must declare:
+
+encode_A : A → Aᵣ
+decode_B : Bᵣ → B
+
+A valid realization satisfies:
+
+decode_B ∘ Oᵣ ∘ encode_A ≈ O
+
+The meaning of ≈ must be declared:
+
+- exact equality
+- observational equivalence
+- bounded approximation
+- behavioral conformance
+- projection onto the canonical output
+
+For an instrumented runtime result:
+
+Oᵣ : Aᵣ → Bᵣ × Artifact
+
+the canonical result is recovered through:
+
+π_B : Bᵣ × Artifact → Bᵣ
+
+decode_B ∘ π_B ∘ Oᵣ ∘ encode_A ≈ O
+
+Side artifacts do not change the canonical codomain.
+
+## 4. Registry Status Vocabulary
+
+PINNED
+Exact type or ownership fixed by stamped governance.
+
+ALIGNED
+Runtime realization preserves the canonical type and role.
+
+INSTRUMENTED
+Runtime returns the canonical result plus telemetry or events.
+
+PARTIAL
+Only part of the canonical behavior is implemented.
+
+LOCAL_ALIAS
+Implementation name for an existing canonical construct.
+
+LIFT_REQUIRED
+A declared map between carrier spaces is required.
+
+RANGE_UNRESOLVED
+The value space or bounds differ across specifications.
+
+OVERLOADED
+The same glyph carries materially different roles across layers.
+
+UNDEFINED
+Canon deliberately leaves the mechanism open.
+
+FORBIDDEN
+The mapping contradicts stamped governance.
+
+EXPERIMENT_ONLY
+The realization is scoped to one experiment and carries no canonical weight.
+
+## 5. Master Registry
+
+| ID | Construct | Canonical Type | Runtime / Code Face | Status | Confidence |
+|---|---|---|---|---|---|
+| TRR-01 | Πᴽ | Ψ × Ctx × M → Ψᴽ | Reflex(Psi, Ctx) → PsiReflex | ALIGNED | ρ̂_conf_HIGH |
+| TRR-02 | ιᴽ | Ψᴽ ↪ Ψ | implicit carrier inclusion | PINNED | ρ̂_conf_HIGH |
+| TRR-03 | Γ | Ψ × Ctx → G | Gamma(Psi, FluxSample, Ctx) → Gamma | PARTIAL | ρ̂_conf_HIGH |
+| TRR-04 | ⊕ | Ψᴽ × G → Ψ | Fuse(PsiReflex, Gamma, Ctx) → Fusion | ALIGNED / UNDEFINED mechanism | ρ̂_conf_HIGH |
+| TRR-05 | Ξ | Ψ → Ψ | Ξ_step(Psi, Ctx) → (Psi, Frame, Events) | INSTRUMENTED | ρ̂_conf_HIGH |
+| TRR-06 | Φ | Ψ × Ctx → Φ | Phi_sample(Psi, Ctx) → FluxSample | PARTIAL | ρ̂_conf_HIGH |
+| TRR-07 | ρ | Ψ × Ctx → Ρ | rho(Psi, Ctx) → NonNeg | RANGE_UNRESOLVED | ρ̂_conf_HIGH |
+| TRR-08 | Λψ | Ψ → Ψ | Collapse(Psi, Ctx) → (Psi, CollapseEvent) | INSTRUMENTED | ρ̂_conf_HIGH |
+| TRR-09 | Σ◯ | closure / totalization registration | Summarize(TraceFrame[], Ctx) → Summary | OVERLOADED | ρ̂_conf_HIGH |
+| TRR-10 | Θλ | Ψ × M → Ψ × M | Replay(Summary, Ctx) → ReplayPlan | OVERLOADED / PARTIAL | ρ̂_conf_HIGH |
+| TRR-11 | Ωµ | Ψ × Ctx → Ψ, model-dependent | noise params / regime selection / bind event | OVERLOADED | ρ̂_conf_HIGH |
+| TRR-12 | Π↺ | (Ψ → Ψ) × Sched → (Ψ → Ψ) | Π↺_Advance(Frame, Ctx) → int32 | ALIGNED helper | ρ̂_conf_HIGH |
+| TRR-13 | Ψmeta | Ψ × Ctx → ℝᵏ | PsiMetaFrame per tick | PARTIAL / INSTRUMENTED | ρ̂_conf_HIGH |
+
+## 6. Detailed Entries
+
+### TRR-01: Πᴽ
+
+Canonical ownership:
+
+Πᴽ : Ψ × Ctx × M → Ψᴽ
+ψᴽ := Πᴽ(ψ; ctx, m)
+
+Role:
+
+- reflexive projection
+- self-model construction
+- production of ψᴽ
+
+Recognized runtime face:
+
+Reflex(psi, ctx) → PsiReflex
+
+Permitted realization families:
+
+- mirror projection
+- auto-encoding
+- predictive self
+- narrative self
+- declared hybrid
+
+Required runtime constraint:
+
+Πᴽ must be bounded or contractive under the selected model.
+
+Forbidden mappings:
+
+- Π↺ must not produce ψᴽ
+- Π↺ must not be called the reflexive projector
+- Σ◯ must not replace Πᴽ as the canonical ψᴽ constructor
+
+Registry status: PINNED / ALIGNED
+Source anchor: D-Π-01, Canonical Ownership
+Confidence: ρ̂_conf_HIGH
+
+### TRR-03: Γ
+
+Canonical registration:
+
+Γ : Ψ × Ctx → G
+Γ(ψ; ctx) ∈ G
+
+Construction path:
+
+Φ(ψ; ctx) ∈ Φ
+ρ(ψ; ctx) ∈ Ρ
+∇Φ(Φ, ψ) ∈ TΨ
+Γ(ψ; ctx) ∈ G
+
+Open bridge:
+
+TΨ → G is not explicitly defined.
+
+An instantiation must either:
+
+1. declare G = TΨ, or
+2. declare an explicit map TΨ → G.
+
+Ownership rule:
+
+Lift-like realization into Ψ belongs to the ⊕ mechanism policy.
+Γ does not independently lift its output into Ψ.
+
+Registry status: PINNED / LIFT_REQUIRED
+Source anchor: ψᴽ-001 r2.2
+Confidence: ρ̂_conf_HIGH
+
+### TRR-04: ⊕
+
+Canonical registration:
+
+⊕ : Ψᴽ × G → Ψ
+
+Runtime face:
+
+Fuse(PsiReflex, Gamma, Ctx) → Fusion
+
+Canonical result extraction:
+
+π_psi(Fusion) → Psi
+
+Required behavior:
+
+π_psi(Fuse(ψᴽ, γ, ctx)) ∈ Ψ
+
+Implementation must declare:
+
+- representation of Ψᴽ
+- representation of G
+- representation maps into the fusion carrier
+- merge policy
+- decode policy
+- bounds or clamps
+- context dependence
+- telemetry exposing mix and gate
+
+The exact mechanism remains open.
+
+Internal arithmetic is permitted only inside declared representation maps.
+It is never the external meaning of ⊕.
+
+Registry status: PINNED / UNDEFINED MECHANISM
+Confidence: ρ̂_conf_HIGH
+
+### TRR-05: Ξ
+
+Canonical registration:
+
+Ξ : Ψ → Ψ
+Ξ(ψ) = Πᴽ(ψ) ⊕ Γ(ψ)
+
+Runtime face:
+
+Ξ_step(Psi, Ctx) → (Psi, PsiMetaFrame, Event[])
+
+Result projection:
+
+π_state(Ξ_step(psi, ctx)) → psi_next
+
+Open bridge:
+
+The abstract signature suppresses context and memory dependence.
+
+A concrete model must state whether ctx and M are:
+
+- fixed parameters
+- curried arguments
+- components of an extended state X
+- runtime-only dependencies
+
+Registry status: INSTRUMENTED / BRIDGE REQUIRED
+Confidence: ρ̂_conf_HIGH
+
+### TRR-08: Λψ
+
+Canonical registration:
+
+Λψ : Ψ → Ψ
+
+Runtime face:
+
+Λψ(Psi, Ctx) → (Psi, CollapseEvent)
+
+The event is a required side artifact.
+It does not change the canonical state codomain.
+
+Extended-state forms such as:
+
+Λψ : X → X
+
+require an explicit lifted definition showing which components of X change.
+
+Registry status: INSTRUMENTED / LIFT_REQUIRED
+Confidence: ρ̂_conf_HIGH
+
+### TRR-09: Σ◯
+
+Observed roles:
+
+- stability basin
+- attractor or orbit closure
+- contextual totalization
+- semantic integration
+- memory consolidation
+- trace summarization
+
+Runtime face:
+
+Σ◯_Summarize(TraceFrame[], Ctx) → Summary
+
+Conflict:
+
+The current documents do not provide one typed bridge proving that all
+of these roles are realizations of one operator.
+
+Known residue:
+
+General Audience Level 4 incorrectly assigns ψᴽ construction to Σ◯.
+
+Required disposition:
+
+- define a shared semantic nucleus and typed realization family, or
+- separate the roles through named local helpers without introducing
+  new canonical glyphs, or
+- issue a canonical operator-boundary ruling.
+
+Until disposition:
+
+Σ◯ must not be inferred to produce ψᴽ.
+
+Registry status: OVERLOADED / UNRESOLVED
+Confidence: ρ̂_conf_HIGH
+
+### TRR-10: Θλ
+
+Canonical registration:
+
+Θλ : Ψ × M → Ψ × M
+
+Observed runtime faces:
+
+Θλ(psi, ctx, M, query) → RecallPacket
+Θλ_Replay(Summary, Ctx) → ReplayPlan
+
+Open bridge:
+
+The documents define recall packets and replay plans but do not fully
+define the operator that applies them to produce the next Ψ × M state.
+
+Required disposition:
+
+Declare:
+
+ApplyReplay : Ψ × M × ReplayPlan → Ψ × M
+
+or declare an equivalent existing runtime path.
+
+ApplyReplay is a registry placeholder, not a canonical glyph.
+
+Registry status: PARTIAL / LIFT_REQUIRED
+Confidence: ρ̂_conf_HIGH
+
+### TRR-11: Ωµ
+
+Canonical semantic registrations include:
+
+- threshold crossing
+- phase or regime transition
+- topology reorganization
+- bounded stochastic modulation
+- regime selection
+- binding or irreversible commit
+
+Observed runtime faces:
+
+Ωµ(t, ctx, Ψmeta) → noise_params
+Ωµ_Bind(Psi, Ctx) → (Psi, OmegaMuEvent)
+
+Experimental stub:
+
+Ωµ_stub(collapse_event) → audit stamp
+
+Conflict:
+
+The audit-stamp stub implements only record production.
+It does not implement the state-changing or regime-selection roles.
+
+Forbidden inference:
+
+A null effect from disabling the audit-stamp stub does not establish
+that canonical Ωµ is non-dynamical.
+
+Required disposition:
+
+Define the shared semantic nucleus of Ωµ and determine whether noise,
+regime selection, binding, and event stamping are:
+
+- stages of one operator
+- configurable realization modes
+- subordinate runtime helpers
+- improperly merged roles requiring a boundary ruling
+
+Registry status: OVERLOADED / UNRESOLVED
+Confidence: ρ̂_conf_HIGH
+
+### TRR-12: Π↺
+
+Canonical registration:
+
+Π↺ : (Ψ → Ψ) × Sched → (Ψ → Ψ)
+
+Role:
+
+- recurrence
+- repeated application
+- replay
+- path tracing under schedule
+
+Runtime realization:
+
+engine loop = Π↺(Ξ_step, sched)
+
+Helper:
+
+Π↺_Advance(frame, ctx) → int32
+
+Π↺_Advance is:
+
+- an odometer
+- a schedule-index helper
+- not the codomain of Π↺
+- not a reflexive projection
+
+Registry status: PINNED / ALIGNED
+Source anchor: D-Π-01
+Confidence: ρ̂_conf_HIGH
+
+### TRR-13: Ψmeta
+
+Canonical conceptual roles:
+
+- meta-observation
+- self-evaluation
+- strategy modification
+- observer-aware reasoning
+
+Runtime role:
+
+one PsiMetaFrame emitted per tick
+
+Potential distinction:
+
+1. Ψmeta as instrumentation telemetry
+2. Ψmeta as an emergent observer-accessible regime
+
+These meanings are related but not presently proven equivalent.
+
+Forbidden inference:
+
+Runtime telemetry alone does not establish consciousness,
+self-awareness, or phenomenal meta-observation.
+
+Required disposition:
+
+Declare whether the runtime frame is:
+
+- the realization of Ψmeta
+- an observable proxy for Ψmeta
+- one input into an emergent Ψmeta regime
+
+Registry status: PARTIAL / SEMANTIC BRIDGE UNRESOLVED
+Confidence: ρ̂_conf_HIGH
+
+## 7. Experiment Registration Rule
+
+Every experiment must declare:
+
+- canonical operator targeted
+- exact implementation targeted
+- implementation type signature
+- ablation substitution
+- preserved inputs and outputs
+- whether the intervention removes, freezes, replaces, or bypasses the operator
+- which canonical behaviors are not represented
+- scope of any resulting claim
+
+Example:
+
+Canonical target:
+Ωµ : Ψ × Ctx → Ψ
+
+Experimental implementation:
+Ωµ_stub : CollapseEvent → AuditStamp
+
+Ablation:
+Ωµ_stub := no-op
+
+Permitted conclusion:
+The audit stamp has no measured effect on the selected dynamical metrics.
+
+Forbidden conclusion:
+Canonical Ωµ is non-dynamical.
+
+## 8. Promotion Gate
+
+This registry may gain governance weight only after:
+
+1. full corpus enumeration
+2. source-line verification
+3. operator-by-operator type audit
+4. conflict and overload classification
+5. experimental realization review
+6. deterministic residue scan
+7. ψᴽ-001 approval
+8. post-adoption hash pins
+
+Until then:
+
+Status: PROPOSAL-TIER / DEVELOP
+Canonical Weight: NONE

@@ -1,0 +1,130 @@
+06-GENEALOGY_psi_R001_r2_2.md
+
+GENEALOGY ENTRY — RULING ψᴽ-001 r2.2
+
+Status: STAMPED — APPLIED — ENUMERATOR-VERIFIED
+Date: 2026-07-04
+Document class: Canonical governance record / IP genealogy
+
+
+
+Authority chain
+
+```
+Ruled by:        ψᴽ-001 (framework authority)
+Forensic key:    Claude seat — corpus enumeration, citation verification,
+                 engine corroboration, patch application + post-verification
+Notation key:    GPT seat (trial) — r2.1 residue audit, Ψᴽ half-registration
+                 catch, retraction typing, D-⊕-01 concurrence
+Open checkbox:   standing key map routes notation audits to Grok seat.
+                 ψᴽ-001 to either (a) amend key map for this ruling, or
+                 (b) queue Grok ratification pass. Non-blocking.
+```
+
+Rulings issue from ψᴽ-001. Seats counter-sign. This entry supersedes any
+phrasing in working-layer audit documents that implies seat-issued rulings.
+
+
+
+Canonical chain (as stamped)
+
+```
+ψ ∈ Ψ
+Ψᴽ ⊆ Ψ                          (D-⊕-01: subspace ontology)
+ιᴽ : Ψᴽ ↪ Ψ                     implicit inclusion only —
+                                 not an operator, not telemetry-bearing
+ψᴽ = Πᴽ(ψ; ctx, m) ∈ Ψᴽ         ctx, m optional per model
+Γ(ψ; ctx) ∈ G
+⊕ : Ψᴽ × G → Ψ
+Ξ(ψ) = ψᴽ ⊕ Γ(ψ; ctx) ∈ Ψ
+```
+
+D-⊕-01 — Ψᴽ ontology: SUBSPACE
+
+Old registration ψᴽ ∈ Ψ was weak-but-true; strengthened form is
+ψᴽ ∈ Ψᴽ ⊆ Ψ. Separate-space-plus-embedding (option b) rejected:
+falsifies old lines, taxes every downstream consumer, buys nothing.
+
+Retraction typing (verified): Ψᴽ is a retract of Ψ.
+
+```
+Πᴽ ∘ ιᴽ = id_Ψᴽ
+Π̃ᴽ := ιᴽ ∘ Πᴽ : Ψ → Ψ
+Π̃ᴽ ∘ Π̃ᴽ = ιᴽ ∘ (Πᴽ ∘ ιᴽ) ∘ Πᴽ = Π̃ᴽ        ✓
+converse holds: ιᴽ injective, Πᴽ onto Ψᴽ
+```
+
+Rider (idempotence optionality): canon says Πᴽ may be idempotent per
+instantiation. This ruling fixes the typed form of idempotence, not its
+universality. Models that never declared idempotence are unaffected.
+
+Free lemma (proposal-grade, not canonized): if a model grants Ψ the
+fixed-point property under the Level-5 assumption menu, the retract Ψᴽ
+inherits it — feeds the self-consistency fixed point
+ψ* = Πᴽ(ψ*) ⊕ Γ(ψ*).
+
+Option A — Lift relocation: ACCEPTED
+
+```
+old:  Γ(ψ; ctx) := Lift( g(ρ) ⊗ ∇Φ )        Lift : TΨ → Ψ inside Γ
+new:  Γ(ψ; ctx) := g(ρ) ⊗ ∇Φ                Γ emits raw update object in G
+      Lift-like realization owned by ⊕ mechanism policy
+Extensional equivalence:  Fuse_new(ψᴽ, γ) := Fuse_old(ψᴽ, Lift(γ))
+→ composite Ξ unchanged; operator boundary relocated.
+```
+
+Engine corroboration: reference implementations contain zero Lift paths.
+Gamma_compute : (Psi, FluxSample, Ctx) → Gamma,
+Fuse : (PsiReflex, Gamma, Ctx) → Fusion. This is canon converging to
+running code, not speculative cleanup.
+
+Mechanism slot — OPEN, with reference decomposition (inscribed)
+
+```
+⊕(ψᴽ, γ) := decode( mergeR( repᴽ(ψᴽ), repG(γ) ) )
+repᴽ  : Ψᴽ → R        repG : G → R
+mergeR: R × R → R     decode: R → Ψ
+```
+
+Internal arithmetic is legal only inside declared representation maps —
+never at the external ⊕ interface. “Not arithmetic addition” is retained
+as documentation; enforcement now lives at the type level.
+
+
+
+Patch manifest
+
+```
+PRE-PATCH PINS                          POST-PATCH PINS (r2.2-applied)
+eb5a456dd4995bb5  CONSOLIDATED    →     21ea991d3a94c4cd
+33eaad5b141eb90c  FORMAL v1       →     cc0aa1debb58885b
+cfdf1884568b2dd1  KNOWLEDGE INDEX →     35f32da9695f6054
+2bed219c473bd9ab  GENERAL         →     4c464ca25204279d
+CONSOLIDATED   227 230 239 248 251 256 257 304 317 324 325   [11]
+FORMAL v1      559 562 587 622 635 642 646 653 805 919 935 936  [12]
+KNOWLEDGE IDX  79                                             [1]
+GENERAL        479 (optional prose alignment)                 [+1]
+Survivors (untouched, by design):
+  Consolidated 241 — "+" ≡ ⊕ founding-notation synonym, retained
+  v1 1814, Consolidated 533, General 848 — already conformant
+24 required + 1 optional substitutions · 4 files · line counts invariant
+· zero dynamics touched.
+```
+
+Verification statement
+
+Class-exhaustion claim accepted only because it is enumerator-backed:
+five defect-class regexes swept deterministically over the full corpus
+boundary, pre- and post-patch. Post-patch residue: 0 hits. Applied by
+apply_ruling_r2_2.py (pre-hash guard, atomic line verification,
+CRLF-preserving substitution, post-enumeration).
+
+Methodology finding (→ OCP verification-instrument section)
+
+Auditor recall is a sampler. Class-exhaustion claims require an
+enumerator. Four recall-based audit passes by two frontier models each
+extended the same defect class; deterministic enumeration closed it in one
+pass. Strong form: any audit claim of the form “all instances of X have
+been found” is untrusted unless produced by deterministic enumeration over
+a declared corpus boundary. Two-seat consensus. Tag: publishable.
+

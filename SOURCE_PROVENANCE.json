@@ -1,0 +1,31 @@
+{
+  "repository_target": "donaldtuttle/qosmos-hme",
+  "visibility": "private",
+  "assembly_date": "2026-08-23",
+  "classification": "Typed Realization / DEVELOP",
+  "canonical_weight": "none",
+  "source_archive": {
+    "name": "QOFT QOSMOS HME JULY2026.zip",
+    "sha256": "6a147099bbbf4fa859a5e1378ba3929ae4cf45eb78acc89dfd9d784cec7a6776"
+  },
+  "active_engine": {
+    "path": "qosmos_hme_engine.py",
+    "sha256": "f81fb49e265d83f5206220584dfc6cabf28aeee5266aca33654182be1549c080",
+    "byte_preserved": true
+  },
+  "legacy_engine": {
+    "path": "legacy/qosmos_hme_engine_pre_conformance.py",
+    "sha256": "6780f974db55380fb4841d3b35c135be10eac8e0c79bc55ff7ff349138febaa6",
+    "byte_preserved": true
+  },
+  "symbolic_field_dynamics": {
+    "path": "integrations/symbolic_field_dynamics.py",
+    "sha256": "75500eb65b8ab7184454a6aa3475eb1fa60fdd2142aa1239866523ff3f41c406",
+    "byte_preserved": true
+  },
+  "audit_harness": {
+    "path": "tests/hme_independent_audit.py",
+    "sha256": "c6a9c13f2304fbef0de6cf1ba9ab44b664bc6eb0d1695fda2849ea41c81eb21d",
+    "repository_change": "two write-glyph literals Θλ -> Σ◯; algorithms unchanged"
+  }
+}

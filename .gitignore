@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Runtime outputs
+outputs/
+*.jsonl
+*.npz
+qosmos_hme_demo_state.json
+qosmos_hme_demo_telemetry.jsonl
+qosmos_hme_demo_events.jsonl
+/qosmos_hme_symbolic_overlay.png
+/qosmos_hme_symbolic_overlay.gif
+
+# OS metadata
+.DS_Store
+__MACOSX/
+._*

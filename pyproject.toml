@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qosmos-hme"
+version = "2.2.0"
+description = "QOSMOS Holographic Memory Engine typed realization"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+
+[project.optional-dependencies]
+visual = [
+  "matplotlib>=3.7",
+  "Pillow>=10",
+]
+sfd = [
+  "Pillow>=10",
+]
+test = [
+  "pytest>=8",
+  "Pillow>=10",
+]
+
+[project.scripts]
+qosmos-hme = "qosmos_hme_engine:main"
+
+[tool.setuptools]
+py-modules = ["qosmos_hme_engine"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]

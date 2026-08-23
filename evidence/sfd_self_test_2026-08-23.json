@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "deterministic_trajectory": true,
+  "deterministic_signature": true,
+  "finite_and_unsaturated": true,
+  "distinct_glyph_hashes": true,
+  "xi_omega_signature_cosine": 0.7653605889229232,
+  "observer_ablation_effect_detected": true,
+  "observer_ablation_signature_cosine": 0.9972218854441997,
+  "observer_ablation_final_rmse": 0.06820571806714663,
+  "hme_payload_norm": 1.0,
+  "legacy_api_compatible": true,
+  "signature_hash": "7fef693477ffaf55104f12f25be9b91b72a8ab8e4aed8d13c4c3604fa5719ce9",
+  "trajectory_hash": "e90921fbd2fd990efab3b684249de68a28e7186e8fc226d2f3ca3a4038e8f5db"
+}

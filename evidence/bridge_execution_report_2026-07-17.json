@@ -1,0 +1,131 @@
+{
+ "artifact_type": "bridge_execution_report",
+ "subject": "SymbolicFieldDynamicsEngine.commit_to_hme -> QOSMOSCoreHME.encode_memory -> retrieve_memory (end-to-end)",
+ "executing_seat": "Claude (Anthropic) — forensic/counter-audit seat",
+ "timestamp_utc": "2026-07-17T22:42:13.696669+00:00",
+ "environment": {
+  "platform": "Linux-6.18.5-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "numpy": "2.4.4",
+  "pillow": "12.1.1"
+ },
+ "sources_under_test": {
+  "QOSMOS_symbolic_field_dynamics_v1_0.py": "75500eb65b8ab7184454a6aa3475eb1fa60fdd2142aa1239866523ff3f41c406",
+  "qosmos_hme_engine.py": "6780f974db55380fb4841d3b35c135be10eac8e0c79bc55ff7ff349138febaa6"
+ },
+ "hme_engine_self_test": "PASS (artifact_hash_deterministic, field_deterministic; retrieval_confidence 0.9596330551)",
+ "protocol": [
+  "1. Field run: glyph Ξ, self-test configuration (grid=96, steps=120, lattice=6, seed=7312026, sig=24)",
+  "2. commit_to_hme(position=(32,32), recursive_factor=0.15) into QOSMOSCoreHME(memory_size=64, encoding_resolution=16, seed=7)",
+  "3. retrieve_memory((32,32), query=<committed payload>, top_k=3); verify top hit is the committed artifact",
+  "4. Entire cycle repeated fresh; artifact hashes compared for determinism"
+ ],
+ "committed_artifact": {
+  "artifact_id": "d902825c52772941b345",
+  "t": 0,
+  "tag": "hme:000001",
+  "glyph": "Σ◯",
+  "position": [
+   32,
+   32
+  ],
+  "gain": 0.15,
+  "observer_weight": 1.0,
+  "payload_size": 16,
+  "payload_hash": "d363f67bdd7ac2d963c7884cd1750211872314cac8b198fb8c43681c46d80b4b",
+  "pattern_hash": "f28f0fa635dd31ad745d096fa948791ab0e5a7bddbe3e142a414c4ed97f754b3",
+  "metadata": {
+   "typed_bridge": "SymbolicFieldResult -> HME payload",
+   "source_engine": "qosmos_core_v2.X+symbolic-field-dynamics-v1.0.0",
+   "source_glyph": "Ξ",
+   "source_signature_hash": "7fef693477ffaf55104f12f25be9b91b72a8ab8e4aed8d13c4c3604fa5719ce9",
+   "source_trajectory_hash": "e90921fbd2fd990efab3b684249de68a28e7186e8fc226d2f3ca3a4038e8f5db",
+   "source_integration_mode": "stable",
+   "source_ablation": {
+    "glyph_seed": true,
+    "initial_noise": true,
+    "observer_modulation": true,
+    "recursive_drive": true,
+    "diffusion": true,
+    "damping": true
+   },
+   "source_collapse_proxy_steps": [],
+   "claim_scope": "tested realization only"
+  }
+ },
+ "retrieval": {
+  "position": [
+   32,
+   32
+  ],
+  "radius": 4,
+  "confidence": 0.9307851800354882,
+  "hits": [
+   {
+    "artifact_id": "d902825c52772941b345",
+    "score": 0.9307851800354882,
+    "distance_score": 1.0,
+    "query_score": 0.835202809608305,
+    "pattern_score": 1.0000000000000004
+   }
+  ],
+  "decoded_vector": {
+   "real": [
+    0.0,
+    0.027806876550537804,
+    -0.03231642761427591,
+    -0.0674891746203514,
+    -0.11250492841636374,
+    0.3734797873907053,
+    0.13292494160009558,
+    0.09045405925995034,
+    0.1632917934810336,
+    -0.8099359765209588,
+    -0.21733099360767238,
+    -0.11844545851497953,
+    0.2660824417026871,
+    -0.02898724849738841,
+    -0.00833308610315153,
+    0.0
+   ],
+   "imag": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "shape": [
+    16
+   ]
+  }
+ },
+ "checks": {
+  "commit_returned_artifact": true,
+  "commit_glyph_is_sigma_ring": true,
+  "provenance_signature_hash_carried": true,
+  "provenance_trajectory_hash_carried": true,
+  "retrieval_top_hit_is_committed_artifact": true,
+  "retrieval_confidence": 0.93078518,
+  "retrieval_top_score": 0.93078518,
+  "determinism_payload_hash": true,
+  "determinism_pattern_hash": true,
+  "determinism_artifact_id": true
+ },
+ "verdict": "BRIDGE EXECUTED AND VERIFIED",
+ "notes": [
+  "Callee default glyph for encode_memory is 'Θλ'; the v1.0 bridge overrides with 'Σ◯'. Typing discipline currently lives in the caller — see accompanying finding.",
+  "Retrieval is reconstructive (field) + ledger-ranked (artifacts); verification uses artifact identity + provenance hashes, per engine semantics."
+ ]
+}

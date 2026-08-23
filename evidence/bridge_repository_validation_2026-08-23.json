@@ -1,0 +1,100 @@
+{
+  "signature_hash": "7fef693477ffaf55104f12f25be9b91b72a8ab8e4aed8d13c4c3604fa5719ce9",
+  "trajectory_hash": "e90921fbd2fd990efab3b684249de68a28e7186e8fc226d2f3ca3a4038e8f5db",
+  "artifact": {
+    "artifact_id": "d902825c52772941b345",
+    "t": 0,
+    "tag": "hme:000001",
+    "glyph": "Σ◯",
+    "position": [
+      32,
+      32
+    ],
+    "gain": 0.15,
+    "observer_weight": 1.0,
+    "payload_size": 16,
+    "payload_hash": "d363f67bdd7ac2d963c7884cd1750211872314cac8b198fb8c43681c46d80b4b",
+    "pattern_hash": "f28f0fa635dd31ad745d096fa948791ab0e5a7bddbe3e142a414c4ed97f754b3",
+    "metadata": {
+      "typed_bridge": "SymbolicFieldResult -> HME payload",
+      "source_engine": "qosmos_core_v2.X+symbolic-field-dynamics-v1.0.0",
+      "source_glyph": "Ξ",
+      "source_signature_hash": "7fef693477ffaf55104f12f25be9b91b72a8ab8e4aed8d13c4c3604fa5719ce9",
+      "source_trajectory_hash": "e90921fbd2fd990efab3b684249de68a28e7186e8fc226d2f3ca3a4038e8f5db",
+      "source_integration_mode": "stable",
+      "source_ablation": {
+        "glyph_seed": true,
+        "initial_noise": true,
+        "observer_modulation": true,
+        "recursive_drive": true,
+        "diffusion": true,
+        "damping": true
+      },
+      "source_collapse_proxy_steps": [],
+      "claim_scope": "tested realization only"
+    }
+  },
+  "retrieval": {
+    "position": [
+      32,
+      32
+    ],
+    "radius": 4,
+    "confidence": 0.9307851800354882,
+    "hits": [
+      {
+        "artifact_id": "d902825c52772941b345",
+        "score": 0.9307851800354882,
+        "distance_score": 1.0,
+        "query_score": 0.8352028096083051,
+        "pattern_score": 1.0000000000000004
+      }
+    ],
+    "decoded_vector": {
+      "real": [
+        0.0,
+        0.027806876550537804,
+        -0.03231642761427591,
+        -0.0674891746203514,
+        -0.11250492841636374,
+        0.3734797873907053,
+        0.13292494160009558,
+        0.09045405925995034,
+        0.1632917934810336,
+        -0.8099359765209588,
+        -0.21733099360767238,
+        -0.11844545851497953,
+        0.2660824417026871,
+        -0.02898724849738841,
+        -0.00833308610315153,
+        0.0
+      ],
+      "imag": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "shape": [
+        16
+      ]
+    }
+  },
+  "checks": {
+    "top_hit": "d902825c52772941b345",
+    "top_is_artifact": true,
+    "glyph": "Σ◯"
+  }
+}
