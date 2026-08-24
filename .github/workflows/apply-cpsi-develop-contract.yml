@@ -1,0 +1,171 @@
+name: Apply HME Cpsi DEVELOP contract
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-cpsi-develop-contract.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Apply paired engine and skill patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, re
+
+          def replace_once(text, old, new, label):
+              if old not in text:
+                  raise SystemExit(f'anchor missing: {label}')
+              if text.count(old) != 1:
+                  raise SystemExit(f'anchor not unique: {label} ({text.count(old)})')
+              return text.replace(old, new, 1)
+
+          engine_path = Path('qosmos_hme_engine.py')
+          engine = engine_path.read_text(encoding='utf-8')
+
+          # Base semantic eligibility belongs to HMEConfig, not C(psi) salience.
+          engine = replace_once(engine,
+          '''    retrieval_distance_scale: float = 0.25\n\n    def __post_init__(self) -> None:\n''',
+          '''    retrieval_distance_scale: float = 0.25\n    relevance_threshold: float = 0.0\n\n    def __post_init__(self) -> None:\n''', 'HMEConfig relevance_threshold')
+          engine = replace_once(engine,
+          '''        if self.retrieval_distance_scale <= 0.0:\n            raise ValueError("retrieval_distance_scale must be positive")\n\n\n@dataclass(slots=True)\nclass CollapseConfig:\n''',
+          '''        if self.retrieval_distance_scale <= 0.0:\n            raise ValueError("retrieval_distance_scale must be positive")\n        if not np.isfinite(self.relevance_threshold) or not 0.0 <= self.relevance_threshold <= 1.0:\n            raise ValueError("relevance_threshold must be finite and in [0, 1]")\n\n\n@dataclass(slots=True)\nclass CollapseConfig:\n''', 'HMEConfig relevance validation')
+
+          engine = replace_once(engine,
+          '''    quantization_levels: int = 12\n    stable_drift_max: float = 0.08\n\n    def __post_init__(self) -> None:\n''',
+          '''    quantization_levels: int = 12\n    stable_drift_max: float = 0.08\n\n    # DEVELOP realization-only salience switches. Disabled by default.\n    influence_write_gain: bool = False\n    influence_retrieval: bool = False\n    enable_inscription_rejection: bool = False\n    write_gain_scale: float = 0.25\n    write_gain_floor: float = 0.05\n    write_gain_ceiling: float = 1.5\n    retrieval_weight: float = 0.15\n    rejection_threshold: float | None = None\n\n    def __post_init__(self) -> None:\n''', 'CollapseConfig salience fields')
+          engine = replace_once(engine,
+          '''        if self.quantization_levels < 2:\n            raise ValueError("quantization_levels must be at least 2")\n\n\n@dataclass(slots=True)\nclass HMEArtifact:\n''',
+          '''        if self.quantization_levels < 2:\n            raise ValueError("quantization_levels must be at least 2")\n        if not np.isfinite(self.write_gain_scale) or self.write_gain_scale < 0.0:\n            raise ValueError("write_gain_scale must be finite and non-negative")\n        if not np.isfinite(self.write_gain_floor) or self.write_gain_floor < 0.0:\n            raise ValueError("write_gain_floor must be finite and non-negative")\n        if not np.isfinite(self.write_gain_ceiling) or self.write_gain_ceiling < self.write_gain_floor:\n            raise ValueError("write_gain_ceiling must be finite and >= write_gain_floor")\n        if not np.isfinite(self.retrieval_weight) or not 0.0 <= self.retrieval_weight <= 1.0:\n            raise ValueError("retrieval_weight must be finite and in [0, 1]")\n        if self.rejection_threshold is not None and not np.isfinite(self.rejection_threshold):\n            raise ValueError("rejection_threshold must be finite or None")\n\n\n@dataclass(slots=True)\nclass HMEArtifact:\n''', 'CollapseConfig salience validation')
+
+          old_records = '''@dataclass(slots=True)\nclass RetrievalHit:\n    artifact_id: str\n    score: float\n    distance_score: float\n    query_score: float\n    pattern_score: float\n\n    def to_dict(self) -> dict[str, Any]:\n        return _jsonable(asdict(self))\n\n\n@dataclass(slots=True)\nclass HMERetrieval:\n    position: tuple[int, int]\n    radius: int\n    window: ComplexArray\n    decoded_surface: ComplexArray\n    decoded_vector: ComplexArray\n    confidence: float\n    hits: list[RetrievalHit]\n'''
+          new_records = '''@dataclass(slots=True)\nclass RetrievalHit:\n    artifact_id: str\n    base_score: float\n    collapse_salience: float\n    final_score: float\n    distance_score: float\n    query_score: float\n    pattern_score: float\n\n    @property\n    def score(self) -> float:\n        \"\"\"Legacy alias: score is the ephemeral final retrieval score.\"\"\"\n        return self.final_score\n\n    def to_dict(self) -> dict[str, Any]:\n        data = _jsonable(asdict(self))\n        data[\"score\"] = self.final_score\n        return data\n\n\n@dataclass(slots=True)\nclass HMERetrieval:\n    position: tuple[int, int]\n    radius: int\n    window: ComplexArray\n    decoded_surface: ComplexArray\n    decoded_vector: ComplexArray\n    confidence: float\n    hits: list[RetrievalHit]\n    outcome: str = \"MATCH\"\n    rejected: bool = False\n    rejection_reason: str | None = None\n'''
+          engine = replace_once(engine, old_records, new_records, 'retrieval records')
+          engine = replace_once(engine,
+          '''            "confidence": self.confidence,\n            "hits": [hit.to_dict() for hit in self.hits],\n            "decoded_vector": _jsonable(self.decoded_vector),\n''',
+          '''            "confidence": self.confidence,\n            "outcome": self.outcome,\n            "rejected": self.rejected,\n            "rejection_reason": self.rejection_reason,\n            "hits": [hit.to_dict() for hit in self.hits],\n            "decoded_vector": _jsonable(self.decoded_vector),\n''', 'retrieval receipt serialization')
+
+          retrieve_pattern = re.compile(r'''    def retrieve\(\n        self,\n        position: tuple\[int, int\],\n        resolution_scale: int = 4,\n        \*,\n        query: ArrayLike \| str \| None = None,\n        top_k: int = 5,\n    \) -> HMERetrieval:\n.*?\n        return HMERetrieval\(\n            position=position,\n            radius=int\(resolution_scale\),\n            window=window,\n            decoded_surface=decoded_surface,\n            decoded_vector=decoded_vector,\n            confidence=confidence,\n            hits=hits,\n        \)\n''', re.S)
+          m = retrieve_pattern.search(engine)
+          if not m:
+              raise SystemExit('retrieve implementation anchor missing')
+          new_retrieve = '''    def retrieve(\n        self,\n        position: tuple[int, int],\n        resolution_scale: int = 4,\n        *,\n        query: ArrayLike | str | None = None,\n        top_k: int = 5,\n        relevance_threshold: float | None = None,\n        influence_retrieval: bool = False,\n        retrieval_weight: float = 0.15,\n        enable_inscription_rejection: bool = False,\n        rejection_threshold: float | None = None,\n    ) -> HMERetrieval:\n        if top_k < 1:\n            raise ValueError("top_k must be positive")\n        threshold = (\n            self.config.relevance_threshold\n            if relevance_threshold is None\n            else float(relevance_threshold)\n        )\n        if not np.isfinite(threshold) or not 0.0 <= threshold <= 1.0:\n            raise ValueError("relevance_threshold must be finite and in [0, 1]")\n        if not np.isfinite(retrieval_weight) or not 0.0 <= retrieval_weight <= 1.0:\n            raise ValueError("retrieval_weight must be finite and in [0, 1]")\n        if rejection_threshold is not None and not np.isfinite(rejection_threshold):\n            raise ValueError("rejection_threshold must be finite or None")\n\n        position = (int(position[0]), int(position[1]))\n        window, _ = self._extract_window(position, resolution_scale)\n        decoded_surface = np.fft.ifft2(window)\n\n        query_vector: ComplexArray | None = None\n        if isinstance(query, str):\n            query_vector = deterministic_symbol_vector(\n                query, self.encoding_resolution\n            ).astype(np.complex128)\n        elif query is not None:\n            query_vector = _as_1d_complex(\n                query, target_size=self.encoding_resolution\n            )\n            query_vector = _normalize(query_vector).astype(np.complex128)\n\n        candidates: list[RetrievalHit] = []\n        field_norm = float(np.linalg.norm(self.field))\n        distance_sigma = max(\n            self.memory_size * self.config.retrieval_distance_scale, 1.0\n        )\n\n        for artifact_id, artifact in self.records.items():\n            dx = artifact.position[0] - position[0]\n            dy = artifact.position[1] - position[1]\n            distance = math.sqrt(dx * dx + dy * dy)\n            distance_score = math.exp(-0.5 * (distance / distance_sigma) ** 2)\n\n            payload = self._payloads[artifact_id]\n            if query_vector is None:\n                query_score = 1.0\n            else:\n                denom = float(np.linalg.norm(payload) * np.linalg.norm(query_vector))\n                query_score = (\n                    float(abs(np.vdot(payload, query_vector)) / denom)\n                    if denom > _EPS\n                    else 0.0\n                )\n\n            pattern = self._patterns[artifact_id]\n            grid_slice, pattern_slice = self._patch_slices(\n                artifact.position, pattern.shape\n            )\n            field_patch = self.field[grid_slice]\n            pattern_patch = pattern[pattern_slice]\n            denom = float(np.linalg.norm(field_patch) * np.linalg.norm(pattern_patch))\n            pattern_score = (\n                float(abs(np.vdot(field_patch, pattern_patch)) / denom)\n                if denom > _EPS and field_norm > _EPS\n                else 0.0\n            )\n\n            base_score = float(np.clip(\n                0.38 * distance_score + 0.42 * query_score + 0.20 * pattern_score,\n                0.0,\n                1.0,\n            ))\n\n            # Eligibility is decided from base relevance only. C(psi) cannot\n            # manufacture a semantic match. threshold=0.0 preserves prior\n            # always-return-top_k behavior.\n            if base_score < threshold:\n                continue\n\n            raw_c = artifact.metadata.get("c_psi")\n            if raw_c is None:\n                collapse_salience = 0.0\n            else:\n                try:\n                    c_value = float(raw_c)\n                except (TypeError, ValueError):\n                    c_value = 0.0\n                if not np.isfinite(c_value):\n                    c_value = 0.0\n                positive_c = max(c_value, 0.0)\n                collapse_salience = positive_c / (1.0 + positive_c)\n\n            # Headroom form only: salience can use remaining score headroom\n            # among already-eligible artifacts, never alter eligibility.\n            final_score = base_score\n            if influence_retrieval:\n                final_score = base_score + (\n                    retrieval_weight\n                    * collapse_salience\n                    * (1.0 - base_score)\n                )\n            final_score = float(np.clip(final_score, 0.0, 1.0))\n\n            candidates.append(\n                RetrievalHit(\n                    artifact_id=artifact_id,\n                    base_score=base_score,\n                    collapse_salience=collapse_salience,\n                    final_score=final_score,\n                    distance_score=distance_score,\n                    query_score=query_score,\n                    pattern_score=pattern_score,\n                )\n            )\n\n        candidates.sort(key=lambda hit: hit.final_score, reverse=True)\n        hits = candidates[:top_k]\n\n        if hits:\n            weights = np.asarray([max(hit.final_score, _EPS) for hit in hits])\n            payloads = np.stack([self._payloads[hit.artifact_id] for hit in hits])\n            decoded_vector = np.average(payloads, axis=0, weights=weights)\n            confidence = float(hits[0].final_score)\n            outcome = "MATCH"\n        else:\n            decoded_vector = np.zeros(\n                self.encoding_resolution, dtype=np.complex128\n            )\n            confidence = 0.0\n            outcome = "NO_MATCH"\n\n        rejected = False\n        rejection_reason: str | None = None\n        if (\n            hits\n            and enable_inscription_rejection\n            and rejection_threshold is not None\n        ):\n            best_artifact = self.records[hits[0].artifact_id]\n            raw_c = best_artifact.metadata.get("c_psi")\n            try:\n                origin_c = float(raw_c) if raw_c is not None else None\n            except (TypeError, ValueError):\n                origin_c = None\n            if origin_c is not None and np.isfinite(origin_c) and origin_c < rejection_threshold:\n                rejected = True\n                outcome = "LOW_INSCRIPTION_SALIENCE"\n                rejection_reason = (\n                    f"originating c_psi {origin_c:.6g} below "\n                    f"rejection_threshold {float(rejection_threshold):.6g}"\n                )\n\n        return HMERetrieval(\n            position=position,\n            radius=int(resolution_scale),\n            window=window,\n            decoded_surface=decoded_surface,\n            decoded_vector=decoded_vector,\n            confidence=confidence,\n            hits=hits,\n            outcome=outcome,\n            rejected=rejected,\n            rejection_reason=rejection_reason,\n        )\n'''
+          engine = engine[:m.start()] + new_retrieve + engine[m.end():]
+
+          # Write-time salience helper and wrapper wiring.
+          engine = replace_once(engine,
+          '''    def encode_memory(\n        self,\n        data: ArrayLike | str,\n''',
+          '''    def _write_gain_multiplier(self, c_psi: Any) -> float:\n        cfg = self.collapse_config\n        if not cfg.influence_write_gain or c_psi is None:\n            return 1.0\n        try:\n            value = float(c_psi)\n        except (TypeError, ValueError):\n            return 1.0\n        if not np.isfinite(value):\n            return 1.0\n        raw = 1.0 + cfg.write_gain_scale * max(value, 0.0)\n        return float(np.clip(raw, cfg.write_gain_floor, cfg.write_gain_ceiling))\n\n    def encode_memory(\n        self,\n        data: ArrayLike | str,\n''', 'write gain helper')
+          engine = replace_once(engine,
+          '''    ) -> HMEArtifact:\n        tick = self.step_index if t is None else int(t)\n        if isinstance(data, str):\n''',
+          '''    ) -> HMEArtifact:\n        tick = self.step_index if t is None else int(t)\n        durable_metadata = dict(metadata or {})\n        effective_recursive_factor = float(recursive_factor) * self._write_gain_multiplier(\n            durable_metadata.get("c_psi")\n        )\n        if isinstance(data, str):\n''', 'encode_memory gain prelude')
+          engine = replace_once(engine,
+          '''                recursive_factor,\n                glyph=glyph,\n                observer_weight=observer_weight,\n                t=tick,\n                metadata=metadata,\n''',
+          '''                effective_recursive_factor,\n                glyph=glyph,\n                observer_weight=observer_weight,\n                t=tick,\n                metadata=durable_metadata,\n''', 'encode_symbol write gain')
+          engine = replace_once(engine,
+          '''                recursive_factor,\n                tag=tag,\n                glyph=glyph,\n                observer_weight=observer_weight,\n                t=tick,\n                metadata=metadata,\n''',
+          '''                effective_recursive_factor,\n                tag=tag,\n                glyph=glyph,\n                observer_weight=observer_weight,\n                t=tick,\n                metadata=durable_metadata,\n''', 'encode vector write gain')
+
+          engine = replace_once(engine,
+          '''        return self.hme.retrieve(\n            position,\n            resolution_scale,\n            query=query,\n            top_k=top_k,\n        )\n''',
+          '''        return self.hme.retrieve(\n            position,\n            resolution_scale,\n            query=query,\n            top_k=top_k,\n            relevance_threshold=self.hme.config.relevance_threshold,\n            influence_retrieval=self.collapse_config.influence_retrieval,\n            retrieval_weight=self.collapse_config.retrieval_weight,\n            enable_inscription_rejection=self.collapse_config.enable_inscription_rejection,\n            rejection_threshold=self.collapse_config.rejection_threshold,\n        )\n''', 'retrieve wrapper config')
+
+          engine = replace_once(engine,
+          '''                metadata={\n                    "committed_after_collapse": collapse_event is not None,\n                    **dict(metadata or {}),\n                },\n''',
+          '''                metadata={\n                    "committed_after_collapse": collapse_event is not None,\n                    "c_psi": float(meta_pre.c_psi),\n                    **dict(metadata or {}),\n                },\n''', 'step c_psi persistence')
+          engine = replace_once(engine,
+          '''                "psi_meta": psi_meta_value,\n                "C_psi": c_psi,\n                "collapsed": collapse_event is not None,\n''',
+          '''                "psi_meta": psi_meta_value,\n                "c_psi": float(c_psi),\n                "collapsed": collapse_event is not None,\n''', 'step_core c_psi persistence')
+
+          engine_path.write_text(engine, encoding='utf-8')
+
+          # Skill revision: realization boundary, ordered retrieval, ownership, outcomes, gate, defaults.
+          skill_path = Path('skills/hme/SKILL.md')
+          skill = skill_path.read_text(encoding='utf-8')
+          skill = replace_once(skill,
+          '''11. No LaTeX. Unicode glyphs only.\n''',
+          '''11. No LaTeX. Unicode glyphs only.\n12. C(ψ) may drive the collapse trigger, optional inscription/write-gain salience,\n    and optional retrieval salience. It must never determine semantic match\n    eligibility. `NO_MATCH` is decided solely from base relevance.\n13. Anti-drift: do not infer that stronger C(ψ) means a memory is more\n    semantically relevant, more accurate, more truthful, or higher-confidence.\n    C(ψ)-derived salience is realization-local provenance about the originating\n    collapse/inscription event only.\n''', 'skill non-negotiable rules')
+
+          old_retrieve = '''Retrieve path:\n\n    position + optional query\n      → local field decode\n      → candidate artifacts from the ledger\n      → 0.38 distance + 0.42 query + 0.20 pattern\n      → ranked HMERetrieval (confidence = top hit score)\n'''
+          new_retrieve_skill = '''Retrieve (ordered pipeline — do not reorder):\n\n    position + optional query\n      → local field decode\n      → base semantic relevance (distance + query + pattern)\n      → relevance eligibility / NO_MATCH          ← gate first\n      → eligible candidate set\n      → optional C(ψ) salience reranking          ← headroom form only\n      → best relevant hit\n      → optional artifact-relative inscription rejection\n      → ranked HMERetrieval receipt\n\nPersistent vs ephemeral data ownership:\n\nDurable (`artifact.metadata` only):\n\n    "c_psi"          — write-time collapse diagnostic, if present\n\nEphemeral (`RetrievalHit` / `HMERetrieval` only):\n\n    base_score\n    collapse_salience\n    final_score\n\nNever write query-dependent scores back onto `HMEArtifact`.\n\nThree distinct outcomes — do not conflate:\n\n`NO_MATCH`\n: No artifact passed semantic relevance. `hits = []`.\n\n`LOW_INSCRIPTION_SALIENCE`\n: A relevant artifact exists, but inscription policy rejected it on the basis of\n  its originating C(ψ). Hits are retained; `rejected=True`;\n  `rejection_reason` is set.\n\n`MATCH`\n: A relevant artifact exists and was not policy-rejected.\n\nForbidden: turning `LOW_INSCRIPTION_SALIENCE` into `NO_MATCH` or deleting the\nhits under an inscription-policy rejection.\n'''
+          skill = replace_once(skill, old_retrieve, new_retrieve_skill, 'skill retrieve path')
+
+          skill = replace_once(skill,
+          '''Default class λ_c ≈ 1.67, κ_damp ≈ 0.15 when v27 constants are absent.\nDemo / test thresholds are local and must be labeled as such.\n''',
+          '''Default class λ_c ≈ 1.67, κ_damp ≈ 0.15 when v27 constants are absent.\nDemo / test thresholds are local and must be labeled as such.\n\nCurrent realization defaults (implementation settings, not HME invariants):\n\n    write_gain_scale      = 0.25\n    write_gain_floor      = 0.05\n    write_gain_ceiling    = 1.5\n    retrieval_weight      = 0.15\n    relevance_threshold   = 0.0   (preserves prior “always return top_k”)\n    rejection_threshold   = None\n    influence_* flags     = False\n\nSalience mechanisms (write-gain, retrieval salience, inscription rejection) are\noptional DEVELOP switches. Before any claim that they improve HME behavior, run\nthe full C0–C7 ablation family and report main effects plus interactions. Until\nthen they remain experimental machinery with no efficacy claim.\n''', 'skill defaults and claim gate')
+
+          skill = replace_once(skill,
+          '''- Do not interpret a top-1 hit as identity without a declared threshold.\n  Reported repository audit (linked below; not rerun for this packaging change):\n  unrelated query scored ~0.733; σ=0.50 noise yielded 119/128 correct; σ=1.00\n  yielded 59/128. `NO_MATCH` policy is UNDEFINED.\n''',
+          '''- Do not interpret a top-1 hit as identity without a declared base-relevance\n  threshold. `NO_MATCH` is now a base-relevance outcome; C(ψ) cannot create or\n  erase semantic eligibility. Reported historical audit figures below predate\n  the optional salience switches and are not evidence of efficacy.\n''', 'skill public API note')
+
+          skill_path.write_text(skill, encoding='utf-8')
+
+          # Add contract tests without claiming C0-C7 efficacy.
+          tests_path = Path('tests/test_hme_engine.py')
+          tests = tests_path.read_text(encoding='utf-8')
+          if 'test_no_match_gate_precedes_cpsi_salience' not in tests:
+              tests += '''\n\ndef test_no_match_gate_precedes_cpsi_salience() -> None:\n    engine = hme.QOSMOSHMEEngine(\n        memory_size=24,\n        encoding_resolution=8,\n        hme_config=hme.HMEConfig(memory_size=24, encoding_resolution=8, relevance_threshold=0.99),\n        collapse_config=hme.CollapseConfig(influence_retrieval=True, retrieval_weight=1.0),\n        seed=1,\n    )\n    artifact = engine.encode_memory(\n        \"alpha\", (12, 12), metadata={\"c_psi\": 1.0e6}\n    )\n    result = engine.retrieve_memory((0, 0), query=\"unrelated\")\n    assert result.outcome == \"NO_MATCH\"\n    assert result.hits == []\n    assert \"base_score\" not in artifact.metadata\n    assert \"collapse_salience\" not in artifact.metadata\n    assert \"final_score\" not in artifact.metadata\n\n\ndef test_retrieval_salience_uses_headroom_after_eligibility() -> None:\n    engine = hme.QOSMOSHMEEngine(\n        memory_size=24,\n        encoding_resolution=8,\n        collapse_config=hme.CollapseConfig(influence_retrieval=True, retrieval_weight=0.5),\n        seed=2,\n    )\n    artifact = engine.encode_memory(\"alpha\", (12, 12), metadata={\"c_psi\": 2.0})\n    result = engine.retrieve_memory((12, 12), query=\"alpha\")\n    hit = next(hit for hit in result.hits if hit.artifact_id == artifact.artifact_id)\n    expected_salience = 2.0 / 3.0\n    expected = hit.base_score + 0.5 * expected_salience * (1.0 - hit.base_score)\n    assert np.isclose(hit.collapse_salience, expected_salience)\n    assert np.isclose(hit.final_score, expected)\n    assert hit.final_score >= hit.base_score\n\n\ndef test_low_inscription_salience_retains_relevant_hits() -> None:\n    engine = hme.QOSMOSHMEEngine(\n        memory_size=24,\n        encoding_resolution=8,\n        collapse_config=hme.CollapseConfig(\n            enable_inscription_rejection=True,\n            rejection_threshold=0.5,\n        ),\n        seed=3,\n    )\n    artifact = engine.encode_memory(\"alpha\", (12, 12), metadata={\"c_psi\": 0.1})\n    result = engine.retrieve_memory((12, 12), query=\"alpha\")\n    assert result.outcome == \"LOW_INSCRIPTION_SALIENCE\"\n    assert result.rejected is True\n    assert result.rejection_reason\n    assert result.hits\n    assert result.hits[0].artifact_id == artifact.artifact_id\n\n\ndef test_write_gain_is_optional_bounded_and_cpsi_is_durable() -> None:\n    base = hme.QOSMOSHMEEngine(memory_size=24, encoding_resolution=8, seed=4)\n    influenced = hme.QOSMOSHMEEngine(\n        memory_size=24,\n        encoding_resolution=8,\n        collapse_config=hme.CollapseConfig(\n            influence_write_gain=True,\n            write_gain_scale=0.25,\n            write_gain_floor=0.05,\n            write_gain_ceiling=1.5,\n        ),\n        seed=4,\n    )\n    a = base.encode_memory(\"alpha\", (12, 12), recursive_factor=0.2, metadata={\"c_psi\": 4.0})\n    b = influenced.encode_memory(\"alpha\", (12, 12), recursive_factor=0.2, metadata={\"c_psi\": 4.0})\n    assert np.isclose(a.gain, 0.2)\n    assert np.isclose(b.gain, 0.3)  # multiplier clips from 2.0 to ceiling 1.5\n    assert b.metadata[\"c_psi\"] == 4.0\n\n\ndef test_step_persists_lowercase_cpsi_only_for_new_salience_contract() -> None:\n    engine = hme.QOSMOSHMEEngine(memory_size=24, encoding_resolution=8, seed=5)\n    result = engine.step(\n        np.ones((24, 24), dtype=np.complex128),\n        memory_payload=\"tick-memory\",\n        memory_position=(12, 12),\n        collapse_override=False,\n    )\n    assert result.memory_artifact is not None\n    assert \"c_psi\" in result.memory_artifact.metadata\n    assert \"C_psi\" not in result.memory_artifact.metadata\n'''
+          tests_path.write_text(tests, encoding='utf-8')
+
+          # Refresh source pin references after the engine edit.
+          engine_hash = hashlib.sha256(engine_path.read_bytes()).hexdigest()
+          old_hash = 'f81fb49e265d83f5206220584dfc6cabf28aeee5266aca33654182be1549c080'
+          skill = skill_path.read_text(encoding='utf-8').replace(old_hash, engine_hash)
+          skill_path.write_text(skill, encoding='utf-8')
+          tests = tests_path.read_text(encoding='utf-8').replace(old_hash, engine_hash)
+          tests_path.write_text(tests, encoding='utf-8')
+
+          doc_path = Path('docs/agent-skill.md')
+          doc = doc_path.read_text(encoding='utf-8')
+          doc = doc.replace(old_hash, engine_hash)
+          doc = re.sub(\n              r'The source pin was verified against `qosmos_hme_engine.py` on repository commit\n`64e3bba879bc9c29a4721081351b43871f8a9feb`\.',\n              'The source pin above identifies the current DEVELOP realization after the paired C(ψ) salience contract patch. The C0–C7 efficacy gate has not been executed by this documentation/runtime update.',\n              doc,\n          )
+          doc_path.write_text(doc, encoding='utf-8')
+
+          # Refresh manifest hashes for every changed durable file.
+          manifest_path = Path('MANIFEST.sha256')
+          manifest = manifest_path.read_text(encoding='utf-8').splitlines()
+          changed = [\n              'qosmos_hme_engine.py',\n              'skills/hme/SKILL.md',\n              'tests/test_hme_engine.py',\n              'docs/agent-skill.md',\n          ]
+          digests = {p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in changed}
+          out = []
+          seen = set()
+          for line in manifest:
+              parts = line.split('  ', 1)
+              if len(parts) == 2 and parts[1] in digests:
+                  out.append(f'{digests[parts[1]]}  {parts[1]}')
+                  seen.add(parts[1])
+              else:
+                  out.append(line)
+          missing = set(changed) - seen
+          if missing:
+              raise SystemExit(f'manifest paths missing: {sorted(missing)}')
+          manifest_path.write_text('\n'.join(out) + '\n', encoding='utf-8')
+
+          print('engine_sha256', engine_hash)
+          PY
+      - name: Verify contract tests
+        run: |
+          python qosmos_hme_engine.py --self-test
+          python -m pytest -q
+      - name: Commit paired DEVELOP patch and remove one-shot workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-cpsi-develop-contract.yml
+          git add qosmos_hme_engine.py skills/hme/SKILL.md tests/test_hme_engine.py docs/agent-skill.md MANIFEST.sha256
+          git commit -m "Apply C(psi) DEVELOP salience contract" -m "Gate NO_MATCH on base relevance before optional salience, keep retrieval scores ephemeral, persist write-time c_psi provenance, preserve LOW_INSCRIPTION_SALIENCE hits, and keep all salience switches disabled by default. No efficacy claim; C0-C7 remains required."
+          git push
