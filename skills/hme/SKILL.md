@@ -91,7 +91,7 @@ https://github.com/donaldtuttle/HME
 
 Active source pin (SHA-256):
 
-    e3115b1447df0d1e1212156855214f16562162b78957ca35439cbb1b1821cb8c
+    1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11
 
 Determinism is conditional on the same implementation, dependencies, inputs,
 configuration, and numeric environment. Seeds use SHA-256, never Python `hash()`.

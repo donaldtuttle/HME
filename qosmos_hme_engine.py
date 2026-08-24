@@ -2282,13 +2282,13 @@ class QOSMOSCoreHME(QOSMOSHMEEngine):
             glyph="Σ◯",
             observer_weight=observer_weight,
             metadata={
+                **dict(metadata or {}),
                 "source_glyph": glyph,
                 "observer_id": observer_id,
                 "psi_meta": psi_meta_value,
                 "c_psi": float(c_psi),
                 "collapsed": collapse_event is not None,
                 "rsbt_map": rsbt_map,
-                **dict(metadata or {}),
             },
             t=self.step_index,
         )

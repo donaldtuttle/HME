@@ -34,7 +34,7 @@ def test_field_and_ledger_have_distinct_roles() -> None:
 def test_active_source_pin() -> None:
     source = Path(hme.__file__).resolve()
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
-    assert digest == "e3115b1447df0d1e1212156855214f16562162b78957ca35439cbb1b1821cb8c"
+    assert digest == "1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11"
 
 
 def test_collapse_write_emits_sigma_lineage() -> None:
