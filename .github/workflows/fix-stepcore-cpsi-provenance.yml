@@ -26,48 +26,20 @@ jobs:
           from pathlib import Path
           import hashlib
 
-          def rep(path, old, new, label):
-              p = Path(path)
-              text = p.read_text(encoding='utf-8')
-              if text.count(old) != 1:
-                  raise SystemExit(f'{label}: expected one anchor, got {text.count(old)}')
-              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          engine_path = Path('qosmos_hme_engine.py')
+          engine = engine_path.read_text(encoding='utf-8')
+          old = '            metadata={\n                "source_glyph": glyph,\n                "observer_id": observer_id,\n                "psi_meta": psi_meta_value,\n                "c_psi": float(c_psi),\n                "collapsed": collapse_event is not None,\n                "rsbt_map": rsbt_map,\n                **dict(metadata or {}),\n            },\n'
+          new = '            metadata={\n                **dict(metadata or {}),\n                "source_glyph": glyph,\n                "observer_id": observer_id,\n                "psi_meta": psi_meta_value,\n                "c_psi": float(c_psi),\n                "collapsed": collapse_event is not None,\n                "rsbt_map": rsbt_map,\n            },\n'
+          if engine.count(old) != 1:
+              raise SystemExit(f'step_core anchor count={engine.count(old)}')
+          engine_path.write_text(engine.replace(old, new, 1), encoding='utf-8')
 
-          rep(
-              'qosmos_hme_engine.py',
-              '''            metadata={
-                "source_glyph": glyph,
-                "observer_id": observer_id,
-                "psi_meta": psi_meta_value,
-                "c_psi": float(c_psi),
-                "collapsed": collapse_event is not None,
-                "rsbt_map": rsbt_map,
-                **dict(metadata or {}),
-            },
-''',
-              '''            metadata={
-                **dict(metadata or {}),
-                "source_glyph": glyph,
-                "observer_id": observer_id,
-                "psi_meta": psi_meta_value,
-                "c_psi": float(c_psi),
-                "collapsed": collapse_event is not None,
-                "rsbt_map": rsbt_map,
-            },
-''',
-              'step_core metadata ownership',
-          )
-
-          engine = Path('qosmos_hme_engine.py')
-          new_hash = hashlib.sha256(engine.read_bytes()).hexdigest()
-          # Find and replace the current active engine pin instead of hard-coding a prior run.
+          new_hash = hashlib.sha256(engine_path.read_bytes()).hexdigest()
           skill = Path('skills/hme/SKILL.md')
           skill_text = skill.read_text(encoding='utf-8')
           marker = 'Active source pin (SHA-256):\n\n    '
           start = skill_text.index(marker) + len(marker)
           old_hash = skill_text[start:start+64]
-          if len(old_hash) != 64:
-              raise SystemExit('active source pin malformed')
           for name in ['skills/hme/SKILL.md', 'tests/test_hme_engine.py', 'docs/agent-skill.md']:
               p = Path(name)
               text = p.read_text(encoding='utf-8')
@@ -88,7 +60,7 @@ jobs:
               else:
                   out.append(line)
           if found != set(changed):
-              raise SystemExit(f'manifest missing changed paths: {set(changed)-found}')
+              raise SystemExit(f'manifest missing: {set(changed)-found}')
           manifest.write_text('\n'.join(out) + '\n', encoding='utf-8')
           print('engine_sha256', new_hash)
           PY
