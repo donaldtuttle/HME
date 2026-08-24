@@ -1,0 +1,95 @@
+name: Fix Cpsi confidence semantics
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-cpsi-confidence-semantics.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Apply semantic correction and refresh pins
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          def rep(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if text.count(old) != 1:
+                  raise SystemExit(f'{path}: expected one anchor, got {text.count(old)}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          rep('qosmos_hme_engine.py',
+              '            confidence = float(hits[0].final_score)\n            outcome = "MATCH"\n',
+              '            # Confidence remains semantic: C(psi) salience may rerank an\n            # eligible hit but must not raise its semantic confidence.\n            confidence = float(hits[0].base_score)\n            outcome = "MATCH"\n')
+
+          rep('qosmos_hme_engine.py',
+              '                metadata={\n                    "committed_after_collapse": collapse_event is not None,\n                    "c_psi": float(meta_pre.c_psi),\n                    **dict(metadata or {}),\n                },\n',
+              '                metadata={\n                    **dict(metadata or {}),\n                    "committed_after_collapse": collapse_event is not None,\n                    "c_psi": float(meta_pre.c_psi),\n                },\n')
+
+          rep('skills/hme/SKILL.md',
+              '4. Do not read `confidence` as a calibrated probability or a rejection decision. It is the highest retrieval score.\n',
+              '4. Do not read `confidence` as a calibrated probability or a rejection decision. It is the base semantic relevance of the selected hit; C(ψ)-derived salience never raises it.\n')
+
+          rep('tests/test_hme_engine.py',
+              '    assert hit.final_score >= hit.base_score\n',
+              '    assert hit.final_score >= hit.base_score\n    assert np.isclose(result.confidence, hit.base_score)\n')
+
+          rep('tests/test_hme_engine.py',
+              '    assert "c_psi" in result.memory_artifact.metadata\n    assert "C_psi" not in result.memory_artifact.metadata\n',
+              '    assert "c_psi" in result.memory_artifact.metadata\n    assert "C_psi" not in result.memory_artifact.metadata\n\n    override = engine.step(\n        np.ones((24, 24), dtype=np.complex128),\n        memory_payload="tick-memory-2",\n        memory_position=(12, 12),\n        collapse_override=False,\n        metadata={"c_psi": -999.0},\n    )\n    assert override.memory_artifact is not None\n    assert override.memory_artifact.metadata["c_psi"] == override.meta.c_psi\n')
+
+          engine = Path('qosmos_hme_engine.py')
+          new_hash = hashlib.sha256(engine.read_bytes()).hexdigest()
+          old_hash = 'a0ee919152d5dd1855737ba22d4067434681ee3757d244e13b9cc298bed5bffc'
+          for name in ['skills/hme/SKILL.md', 'tests/test_hme_engine.py', 'docs/agent-skill.md']:
+              p = Path(name)
+              text = p.read_text(encoding='utf-8')
+              if old_hash not in text:
+                  raise SystemExit(f'{name}: old source pin missing')
+              p.write_text(text.replace(old_hash, new_hash), encoding='utf-8')
+
+          changed = ['qosmos_hme_engine.py','skills/hme/SKILL.md','tests/test_hme_engine.py','docs/agent-skill.md']
+          manifest = Path('MANIFEST.sha256')
+          lines = manifest.read_text(encoding='utf-8').splitlines()
+          digests = {p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in changed}
+          found = set()
+          out = []
+          for line in lines:
+              parts = line.split('  ', 1)
+              if len(parts) == 2 and parts[1] in digests:
+                  out.append(f'{digests[parts[1]]}  {parts[1]}')
+                  found.add(parts[1])
+              else:
+                  out.append(line)
+          if found != set(changed):
+              raise SystemExit(f'manifest missing changed paths: {set(changed)-found}')
+          manifest.write_text('\n'.join(out) + '\n', encoding='utf-8')
+          print('engine_sha256', new_hash)
+          PY
+      - name: Verify
+        run: |
+          python qosmos_hme_engine.py --self-test
+          python -m pytest -q
+      - name: Commit correction
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/fix-cpsi-confidence-semantics.yml
+          git add qosmos_hme_engine.py skills/hme/SKILL.md tests/test_hme_engine.py docs/agent-skill.md MANIFEST.sha256
+          git commit -m "Keep C(psi) salience out of semantic confidence" -m "Confidence now reports base relevance for the selected hit, write-time c_psi cannot be overridden by caller metadata, and contract tests pin both invariants. DEVELOP only; no efficacy claim."
+          git push
