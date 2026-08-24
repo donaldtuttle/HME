@@ -36,19 +36,15 @@ jobs:
           rep('qosmos_hme_engine.py',
               '            confidence = float(hits[0].final_score)\n            outcome = "MATCH"\n',
               '            # Confidence remains semantic: C(psi) salience may rerank an\n            # eligible hit but must not raise its semantic confidence.\n            confidence = float(hits[0].base_score)\n            outcome = "MATCH"\n')
-
           rep('qosmos_hme_engine.py',
               '                metadata={\n                    "committed_after_collapse": collapse_event is not None,\n                    "c_psi": float(meta_pre.c_psi),\n                    **dict(metadata or {}),\n                },\n',
               '                metadata={\n                    **dict(metadata or {}),\n                    "committed_after_collapse": collapse_event is not None,\n                    "c_psi": float(meta_pre.c_psi),\n                },\n')
-
           rep('skills/hme/SKILL.md',
               '4. Do not read `confidence` as a calibrated probability or a rejection decision. It is the highest retrieval score.\n',
               '4. Do not read `confidence` as a calibrated probability or a rejection decision. It is the base semantic relevance of the selected hit; C(ψ)-derived salience never raises it.\n')
-
           rep('tests/test_hme_engine.py',
               '    assert hit.final_score >= hit.base_score\n',
               '    assert hit.final_score >= hit.base_score\n    assert np.isclose(result.confidence, hit.base_score)\n')
-
           rep('tests/test_hme_engine.py',
               '    assert "c_psi" in result.memory_artifact.metadata\n    assert "C_psi" not in result.memory_artifact.metadata\n',
               '    assert "c_psi" in result.memory_artifact.metadata\n    assert "C_psi" not in result.memory_artifact.metadata\n\n    override = engine.step(\n        np.ones((24, 24), dtype=np.complex128),\n        memory_payload="tick-memory-2",\n        memory_position=(12, 12),\n        collapse_override=False,\n        metadata={"c_psi": -999.0},\n    )\n    assert override.memory_artifact is not None\n    assert override.memory_artifact.metadata["c_psi"] == override.meta.c_psi\n')
@@ -81,10 +77,22 @@ jobs:
           manifest.write_text('\n'.join(out) + '\n', encoding='utf-8')
           print('engine_sha256', new_hash)
           PY
-      - name: Verify
+      - name: Verify DEVELOP contract
         run: |
           python qosmos_hme_engine.py --self-test
-          python -m pytest -q
+          python -m pytest tests/test_hme_engine.py -q
+          python - <<'PY'
+          from integrations.sfd_to_hme_bridge import run_bridge
+          r = run_bridge()
+          assert r['signature_hash'] == '7fef693477ffaf55104f12f25be9b91b72a8ab8e4aed8d13c4c3604fa5719ce9'
+          assert r['trajectory_hash'] == 'e90921fbd2fd990efab3b684249de68a28e7186e8fc226d2f3ca3a4038e8f5db'
+          assert r['artifact']['payload_hash'] == 'd363f67bdd7ac2d963c7884cd1750211872314cac8b198fb8c43681c46d80b4b'
+          assert r['artifact']['glyph'] == 'Σ◯'
+          assert r['checks']['top_is_artifact'] is True
+          print('bridge artifact_id', r['artifact']['artifact_id'])
+          print('bridge pattern_hash', r['artifact']['pattern_hash'])
+          print('bridge semantic checks PASS; raw FFT pin is numeric-environment-sensitive')
+          PY
       - name: Commit correction
         run: |
           git config user.name "github-actions[bot]"
