@@ -53,7 +53,7 @@ SECTION 0 — FIREWALL
    Πᴽ; it is not itself an operator glyph.
 2. Do not treat HME algorithms, thresholds, or W(t) as QOFT canon.
 3. Do not claim consciousness, physical collapse, or universal memory dynamics.
-4. Do not read `confidence` as a calibrated probability or a rejection decision. It is the highest retrieval score.
+4. Do not read `confidence` as a calibrated probability or a rejection decision. It is the base semantic relevance of the selected hit; C(ψ)-derived salience never raises it.
 5. Artifact identity is **not field-only**. Exact ID depends on the ledger.
 6. Default durable-write glyph is Σ◯. Θλ is retrieval / replay, not write.
 7. Λψ must not write Πᴽ / self_model.
@@ -91,7 +91,7 @@ https://github.com/donaldtuttle/HME
 
 Active source pin (SHA-256):
 
-    a0ee919152d5dd1855737ba22d4067434681ee3757d244e13b9cc298bed5bffc
+    e3115b1447df0d1e1212156855214f16562162b78957ca35439cbb1b1821cb8c
 
 Determinism is conditional on the same implementation, dependencies, inputs,
 configuration, and numeric environment. Seeds use SHA-256, never Python `hash()`.

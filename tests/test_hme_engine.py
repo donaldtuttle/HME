@@ -34,7 +34,7 @@ def test_field_and_ledger_have_distinct_roles() -> None:
 def test_active_source_pin() -> None:
     source = Path(hme.__file__).resolve()
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
-    assert digest == "a0ee919152d5dd1855737ba22d4067434681ee3757d244e13b9cc298bed5bffc"
+    assert digest == "e3115b1447df0d1e1212156855214f16562162b78957ca35439cbb1b1821cb8c"
 
 
 def test_collapse_write_emits_sigma_lineage() -> None:
@@ -98,6 +98,7 @@ def test_retrieval_salience_uses_headroom_after_eligibility() -> None:
     assert np.isclose(hit.collapse_salience, expected_salience)
     assert np.isclose(hit.final_score, expected)
     assert hit.final_score >= hit.base_score
+    assert np.isclose(result.confidence, hit.base_score)
 
 
 def test_low_inscription_salience_retains_relevant_hits() -> None:
@@ -150,3 +151,13 @@ def test_step_persists_lowercase_cpsi_only_for_new_salience_contract() -> None:
     assert result.memory_artifact is not None
     assert "c_psi" in result.memory_artifact.metadata
     assert "C_psi" not in result.memory_artifact.metadata
+
+    override = engine.step(
+        np.ones((24, 24), dtype=np.complex128),
+        memory_payload="tick-memory-2",
+        memory_position=(12, 12),
+        collapse_override=False,
+        metadata={"c_psi": -999.0},
+    )
+    assert override.memory_artifact is not None
+    assert override.memory_artifact.metadata["c_psi"] == override.meta.c_psi

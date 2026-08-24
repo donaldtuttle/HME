@@ -1117,7 +1117,9 @@ class HME:
             weights = np.asarray([max(hit.final_score, _EPS) for hit in hits])
             payloads = np.stack([self._payloads[hit.artifact_id] for hit in hits])
             decoded_vector = np.average(payloads, axis=0, weights=weights)
-            confidence = float(hits[0].final_score)
+            # Confidence remains semantic: C(psi) salience may rerank an
+            # eligible hit but must not raise its semantic confidence.
+            confidence = float(hits[0].base_score)
             outcome = "MATCH"
         else:
             decoded_vector = np.zeros(
@@ -1621,9 +1623,9 @@ class QOSMOSHMEEngine:
                 glyph=memory_glyph,
                 observer_weight=observer_weight,
                 metadata={
+                    **dict(metadata or {}),
                     "committed_after_collapse": collapse_event is not None,
                     "c_psi": float(meta_pre.c_psi),
-                    **dict(metadata or {}),
                 },
                 t=self.step_index,
             )

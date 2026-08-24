@@ -9,7 +9,7 @@ implementation, an independent rerun of the evidence, or QOFT canon.
 
 Status: DEVELOP Typed Realization  
 Canonical weight: none  
-Engine pin: `a0ee919152d5dd1855737ba22d4067434681ee3757d244e13b9cc298bed5bffc`  
+Engine pin: `e3115b1447df0d1e1212156855214f16562162b78957ca35439cbb1b1821cb8c`  
 Companion calculus: `qoft-qosmos` Kernel v1.1 DEVELOP candidate (pending adoption)  
 License: [`skills/hme/LICENSE.txt`](../skills/hme/LICENSE.txt)
 
