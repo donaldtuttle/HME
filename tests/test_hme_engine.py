@@ -34,7 +34,7 @@ def test_field_and_ledger_have_distinct_roles() -> None:
 def test_active_source_pin() -> None:
     source = Path(hme.__file__).resolve()
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
-    assert digest == "f81fb49e265d83f5206220584dfc6cabf28aeee5266aca33654182be1549c080"
+    assert digest == "a0ee919152d5dd1855737ba22d4067434681ee3757d244e13b9cc298bed5bffc"
 
 
 def test_collapse_write_emits_sigma_lineage() -> None:
@@ -62,3 +62,91 @@ def test_collapse_write_emits_sigma_lineage() -> None:
     assert result.memory_artifact.glyph == "Σ◯"
     relations = {edge.relation for edge in engine.qmesh.edges}
     assert "Λψ→Σ◯:consolidate" in relations
+
+
+def test_no_match_gate_precedes_cpsi_salience() -> None:
+    engine = hme.QOSMOSHMEEngine(
+        memory_size=24,
+        encoding_resolution=8,
+        hme_config=hme.HMEConfig(memory_size=24, encoding_resolution=8, relevance_threshold=0.99),
+        collapse_config=hme.CollapseConfig(influence_retrieval=True, retrieval_weight=1.0),
+        seed=1,
+    )
+    artifact = engine.encode_memory(
+        "alpha", (12, 12), metadata={"c_psi": 1.0e6}
+    )
+    result = engine.retrieve_memory((0, 0), query="unrelated")
+    assert result.outcome == "NO_MATCH"
+    assert result.hits == []
+    assert "base_score" not in artifact.metadata
+    assert "collapse_salience" not in artifact.metadata
+    assert "final_score" not in artifact.metadata
+
+
+def test_retrieval_salience_uses_headroom_after_eligibility() -> None:
+    engine = hme.QOSMOSHMEEngine(
+        memory_size=24,
+        encoding_resolution=8,
+        collapse_config=hme.CollapseConfig(influence_retrieval=True, retrieval_weight=0.5),
+        seed=2,
+    )
+    artifact = engine.encode_memory("alpha", (12, 12), metadata={"c_psi": 2.0})
+    result = engine.retrieve_memory((12, 12), query="alpha")
+    hit = next(hit for hit in result.hits if hit.artifact_id == artifact.artifact_id)
+    expected_salience = 2.0 / 3.0
+    expected = hit.base_score + 0.5 * expected_salience * (1.0 - hit.base_score)
+    assert np.isclose(hit.collapse_salience, expected_salience)
+    assert np.isclose(hit.final_score, expected)
+    assert hit.final_score >= hit.base_score
+
+
+def test_low_inscription_salience_retains_relevant_hits() -> None:
+    engine = hme.QOSMOSHMEEngine(
+        memory_size=24,
+        encoding_resolution=8,
+        collapse_config=hme.CollapseConfig(
+            enable_inscription_rejection=True,
+            rejection_threshold=0.5,
+        ),
+        seed=3,
+    )
+    artifact = engine.encode_memory("alpha", (12, 12), metadata={"c_psi": 0.1})
+    result = engine.retrieve_memory((12, 12), query="alpha")
+    assert result.outcome == "LOW_INSCRIPTION_SALIENCE"
+    assert result.rejected is True
+    assert result.rejection_reason
+    assert result.hits
+    assert result.hits[0].artifact_id == artifact.artifact_id
+
+
+def test_write_gain_is_optional_bounded_and_cpsi_is_durable() -> None:
+    base = hme.QOSMOSHMEEngine(memory_size=24, encoding_resolution=8, seed=4)
+    influenced = hme.QOSMOSHMEEngine(
+        memory_size=24,
+        encoding_resolution=8,
+        collapse_config=hme.CollapseConfig(
+            influence_write_gain=True,
+            write_gain_scale=0.25,
+            write_gain_floor=0.05,
+            write_gain_ceiling=1.5,
+        ),
+        seed=4,
+    )
+    a = base.encode_memory("alpha", (12, 12), recursive_factor=0.2, metadata={"c_psi": 4.0})
+    b = influenced.encode_memory("alpha", (12, 12), recursive_factor=0.2, metadata={"c_psi": 4.0})
+    assert np.isclose(a.gain, 0.2)
+    assert np.isclose(b.gain, 0.3)
+    assert b.metadata["c_psi"] == 4.0
+
+
+def test_step_persists_lowercase_cpsi_only_for_new_salience_contract() -> None:
+    engine = hme.QOSMOSHMEEngine(memory_size=24, encoding_resolution=8, seed=5)
+    result = engine.step(
+        np.ones((24, 24), dtype=np.complex128),
+        memory_payload="tick-memory",
+        memory_position=(12, 12),
+        collapse_override=False,
+    )
+    assert result.memory_artifact is not None
+    assert "c_psi" in result.memory_artifact.metadata
+    assert "C_psi" not in result.memory_artifact.metadata

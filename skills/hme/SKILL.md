@@ -65,6 +65,13 @@ SECTION 0 — FIREWALL
 9. C(ψ) and W(t) are Tier 2 runtime metrics. They are not glyph operators and not universal QOFT law.
 10. If a term is not defined here, write `UNDEFINED in this document: <term>`.
 11. No LaTeX. Unicode glyphs only.
+12. C(ψ) may drive the collapse trigger, optional inscription/write-gain salience,
+    and optional retrieval salience. It must never determine semantic match
+    eligibility. `NO_MATCH` is decided solely from base relevance.
+13. Anti-drift: do not infer that stronger C(ψ) means a memory is more
+    semantically relevant, more accurate, more truthful, or higher-confidence.
+    C(ψ)-derived salience is realization-local provenance about the originating
+    collapse/inscription event only.
 
 ────────────────────────────────────────
 SECTION 1 — WHAT HME IS
@@ -84,7 +91,7 @@ https://github.com/donaldtuttle/HME
 
 Active source pin (SHA-256):
 
-    f81fb49e265d83f5206220584dfc6cabf28aeee5266aca33654182be1549c080
+    a0ee919152d5dd1855737ba22d4067434681ee3757d244e13b9cc298bed5bffc
 
 Determinism is conditional on the same implementation, dependencies, inputs,
 configuration, and numeric environment. Seeds use SHA-256, never Python `hash()`.
@@ -125,13 +132,47 @@ Encode path:
       → HMEArtifact ledger record
       → QMesh memory node / lineage edge
 
-Retrieve path:
+Retrieve (ordered pipeline — do not reorder):
 
     position + optional query
       → local field decode
-      → candidate artifacts from the ledger
-      → 0.38 distance + 0.42 query + 0.20 pattern
-      → ranked HMERetrieval (confidence = top hit score)
+      → base semantic relevance (distance + query + pattern)
+      → relevance eligibility / NO_MATCH          ← gate first
+      → eligible candidate set
+      → optional C(ψ) salience reranking          ← headroom form only
+      → best relevant hit
+      → optional artifact-relative inscription rejection
+      → ranked HMERetrieval receipt
+
+Persistent vs ephemeral data ownership:
+
+Durable (`artifact.metadata` only):
+
+    "c_psi"          — write-time collapse diagnostic, if present
+
+Ephemeral (`RetrievalHit` / `HMERetrieval` only):
+
+    base_score
+    collapse_salience
+    final_score
+
+Never write query-dependent scores back onto `HMEArtifact`.
+
+Three distinct outcomes — do not conflate:
+
+`NO_MATCH`
+: No artifact passed semantic relevance. `hits = []`.
+
+`LOW_INSCRIPTION_SALIENCE`
+: A relevant artifact exists, but inscription policy rejected it on the basis of
+  its originating C(ψ). Hits are retained; `rejected=True`;
+  `rejection_reason` is set.
+
+`MATCH`
+: A relevant artifact exists and was not policy-rejected.
+
+Forbidden: turning `LOW_INSCRIPTION_SALIENCE` into `NO_MATCH` or deleting the
+hits under an inscription-policy rejection.
 
 Collapse diagnostic (implementation-local, not canon):
 
@@ -142,6 +183,21 @@ Collapse diagnostic (implementation-local, not canon):
 
 Default class λ_c ≈ 1.67, κ_damp ≈ 0.15 when v27 constants are absent.
 Demo / test thresholds are local and must be labeled as such.
+
+Current realization defaults (implementation settings, not HME invariants):
+
+    write_gain_scale      = 0.25
+    write_gain_floor      = 0.05
+    write_gain_ceiling    = 1.5
+    retrieval_weight      = 0.15
+    relevance_threshold   = 0.0   (preserves prior “always return top_k”)
+    rejection_threshold   = None
+    influence_* flags     = False
+
+Salience mechanisms (write-gain, retrieval salience, inscription rejection) are
+optional DEVELOP switches. Before any claim that they improve HME behavior, run
+the full C0–C7 ablation family and report main effects plus interactions. Until
+then they remain experimental machinery with no efficacy claim.
 
 ────────────────────────────────────────
 SECTION 3b — TELEMETRY ORDER NOTE
@@ -186,10 +242,10 @@ Required behaviors when writing code:
 - Compute Ψmeta_pre fields before the decision; finalize `collapse_triggered`
   after. Use an explicit adapter to emit Ψmeta_post for candidate-kernel pairing.
 - Tests: determinism of hashes; default write glyph is Σ◯; field vs ledger roles; collapse lineage uses `Λψ→Σ◯:consolidate`; telemetry order (pre then flag).
-- Do not interpret a top-1 hit as identity without a declared threshold.
-  Reported repository audit (linked below; not rerun for this packaging change):
-  unrelated query scored ~0.733; σ=0.50 noise yielded 119/128 correct; σ=1.00
-  yielded 59/128. `NO_MATCH` policy is UNDEFINED.
+- Do not interpret a top-1 hit as identity without a declared base-relevance
+  threshold. `NO_MATCH` is now a base-relevance outcome; C(ψ) cannot create or
+  erase semantic eligibility. Reported historical audit figures below predate
+  the optional salience switches and are not evidence of efficacy.
 
 Audit record: https://github.com/donaldtuttle/HME/blob/main/evidence/hme_independent_audit_2026-08-23.json
 

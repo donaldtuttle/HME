@@ -394,6 +394,7 @@ class HMEConfig:
     use_hann_window: bool = True
     normalize_patterns: bool = True
     retrieval_distance_scale: float = 0.25
+    relevance_threshold: float = 0.0
 
     def __post_init__(self) -> None:
         if self.memory_size < 4:
@@ -408,6 +409,8 @@ class HMEConfig:
             raise ValueError("max_records must be positive")
         if self.retrieval_distance_scale <= 0.0:
             raise ValueError("retrieval_distance_scale must be positive")
+        if not np.isfinite(self.relevance_threshold) or not 0.0 <= self.relevance_threshold <= 1.0:
+            raise ValueError("relevance_threshold must be finite and in [0, 1]")
 
 
 @dataclass(slots=True)
@@ -422,6 +425,16 @@ class CollapseConfig:
     phase_lock_strength: float = 0.78
     quantization_levels: int = 12
     stable_drift_max: float = 0.08
+
+    # DEVELOP realization-only salience switches. Disabled by default.
+    influence_write_gain: bool = False
+    influence_retrieval: bool = False
+    enable_inscription_rejection: bool = False
+    write_gain_scale: float = 0.25
+    write_gain_floor: float = 0.05
+    write_gain_ceiling: float = 1.5
+    retrieval_weight: float = 0.15
+    rejection_threshold: float | None = None
 
     def __post_init__(self) -> None:
         if not np.isfinite(self.lambda_c):
@@ -438,6 +451,16 @@ class CollapseConfig:
             raise ValueError("phase_lock_strength must be in [0, 1]")
         if self.quantization_levels < 2:
             raise ValueError("quantization_levels must be at least 2")
+        if not np.isfinite(self.write_gain_scale) or self.write_gain_scale < 0.0:
+            raise ValueError("write_gain_scale must be finite and non-negative")
+        if not np.isfinite(self.write_gain_floor) or self.write_gain_floor < 0.0:
+            raise ValueError("write_gain_floor must be finite and non-negative")
+        if not np.isfinite(self.write_gain_ceiling) or self.write_gain_ceiling < self.write_gain_floor:
+            raise ValueError("write_gain_ceiling must be finite and >= write_gain_floor")
+        if not np.isfinite(self.retrieval_weight) or not 0.0 <= self.retrieval_weight <= 1.0:
+            raise ValueError("retrieval_weight must be finite and in [0, 1]")
+        if self.rejection_threshold is not None and not np.isfinite(self.rejection_threshold):
+            raise ValueError("rejection_threshold must be finite or None")
 
 
 @dataclass(slots=True)
@@ -461,13 +484,22 @@ class HMEArtifact:
 @dataclass(slots=True)
 class RetrievalHit:
     artifact_id: str
-    score: float
+    base_score: float
+    collapse_salience: float
+    final_score: float
     distance_score: float
     query_score: float
     pattern_score: float
 
+    @property
+    def score(self) -> float:
+        """Legacy alias: score is the ephemeral final retrieval score."""
+        return self.final_score
+
     def to_dict(self) -> dict[str, Any]:
-        return _jsonable(asdict(self))
+        data = _jsonable(asdict(self))
+        data["score"] = self.final_score
+        return data
 
 
 @dataclass(slots=True)
@@ -479,6 +511,9 @@ class HMERetrieval:
     decoded_vector: ComplexArray
     confidence: float
     hits: list[RetrievalHit]
+    outcome: str = "MATCH"
+    rejected: bool = False
+    rejection_reason: str | None = None
 
     def __iter__(self):
         """Legacy convenience: iterate over decoded-surface rows."""
@@ -496,6 +531,9 @@ class HMERetrieval:
             "position": self.position,
             "radius": self.radius,
             "confidence": self.confidence,
+            "outcome": self.outcome,
+            "rejected": self.rejected,
+            "rejection_reason": self.rejection_reason,
             "hits": [hit.to_dict() for hit in self.hits],
             "decoded_vector": _jsonable(self.decoded_vector),
         }
@@ -959,9 +997,26 @@ class HME:
         *,
         query: ArrayLike | str | None = None,
         top_k: int = 5,
+        relevance_threshold: float | None = None,
+        influence_retrieval: bool = False,
+        retrieval_weight: float = 0.15,
+        enable_inscription_rejection: bool = False,
+        rejection_threshold: float | None = None,
     ) -> HMERetrieval:
         if top_k < 1:
             raise ValueError("top_k must be positive")
+        threshold = (
+            self.config.relevance_threshold
+            if relevance_threshold is None
+            else float(relevance_threshold)
+        )
+        if not np.isfinite(threshold) or not 0.0 <= threshold <= 1.0:
+            raise ValueError("relevance_threshold must be finite and in [0, 1]")
+        if not np.isfinite(retrieval_weight) or not 0.0 <= retrieval_weight <= 1.0:
+            raise ValueError("retrieval_weight must be finite and in [0, 1]")
+        if rejection_threshold is not None and not np.isfinite(rejection_threshold):
+            raise ValueError("rejection_threshold must be finite or None")
+
         position = (int(position[0]), int(position[1]))
         window, _ = self._extract_window(position, resolution_scale)
         decoded_surface = np.fft.ifft2(window)
@@ -977,7 +1032,7 @@ class HME:
             )
             query_vector = _normalize(query_vector).astype(np.complex128)
 
-        hits: list[RetrievalHit] = []
+        candidates: list[RetrievalHit] = []
         field_norm = float(np.linalg.norm(self.field))
         distance_sigma = max(
             self.memory_size * self.config.retrieval_distance_scale, 1.0
@@ -1013,30 +1068,84 @@ class HME:
                 else 0.0
             )
 
-            score = 0.38 * distance_score + 0.42 * query_score + 0.20 * pattern_score
-            hits.append(
+            base_score = float(np.clip(
+                0.38 * distance_score + 0.42 * query_score + 0.20 * pattern_score,
+                0.0,
+                1.0,
+            ))
+            if base_score < threshold:
+                continue
+
+            raw_c = artifact.metadata.get("c_psi")
+            if raw_c is None:
+                collapse_salience = 0.0
+            else:
+                try:
+                    c_value = float(raw_c)
+                except (TypeError, ValueError):
+                    c_value = 0.0
+                if not np.isfinite(c_value):
+                    c_value = 0.0
+                positive_c = max(c_value, 0.0)
+                collapse_salience = positive_c / (1.0 + positive_c)
+
+            final_score = base_score
+            if influence_retrieval:
+                final_score = base_score + (
+                    retrieval_weight
+                    * collapse_salience
+                    * (1.0 - base_score)
+                )
+            final_score = float(np.clip(final_score, 0.0, 1.0))
+
+            candidates.append(
                 RetrievalHit(
                     artifact_id=artifact_id,
-                    score=float(np.clip(score, 0.0, 1.0)),
+                    base_score=base_score,
+                    collapse_salience=collapse_salience,
+                    final_score=final_score,
                     distance_score=distance_score,
                     query_score=query_score,
                     pattern_score=pattern_score,
                 )
             )
 
-        hits.sort(key=lambda hit: hit.score, reverse=True)
-        hits = hits[:top_k]
+        candidates.sort(key=lambda hit: hit.final_score, reverse=True)
+        hits = candidates[:top_k]
 
         if hits:
-            weights = np.asarray([max(hit.score, _EPS) for hit in hits])
+            weights = np.asarray([max(hit.final_score, _EPS) for hit in hits])
             payloads = np.stack([self._payloads[hit.artifact_id] for hit in hits])
             decoded_vector = np.average(payloads, axis=0, weights=weights)
-            confidence = float(hits[0].score)
+            confidence = float(hits[0].final_score)
+            outcome = "MATCH"
         else:
             decoded_vector = np.zeros(
                 self.encoding_resolution, dtype=np.complex128
             )
             confidence = 0.0
+            outcome = "NO_MATCH"
+
+        rejected = False
+        rejection_reason: str | None = None
+        if (
+            hits
+            and enable_inscription_rejection
+            and rejection_threshold is not None
+        ):
+            best_artifact = self.records[hits[0].artifact_id]
+            raw_c = best_artifact.metadata.get("c_psi")
+            try:
+                origin_c = float(raw_c) if raw_c is not None else None
+            except (TypeError, ValueError):
+                origin_c = None
+            if origin_c is not None and np.isfinite(origin_c) and origin_c < rejection_threshold:
+                rejected = True
+                outcome = "LOW_INSCRIPTION_SALIENCE"
+                rejection_reason = (
+                    f"originating c_psi {origin_c:.6g} below "
+                    f"rejection_threshold {float(rejection_threshold):.6g}"
+                )
 
         return HMERetrieval(
             position=position,
@@ -1046,6 +1155,9 @@ class HME:
             decoded_vector=decoded_vector,
             confidence=confidence,
             hits=hits,
+            outcome=outcome,
+            rejected=rejected,
+            rejection_reason=rejection_reason,
         )
 
     def merge(self, other: "HME | ArrayLike", *, weight: float = 1.0) -> None:
@@ -1189,6 +1301,19 @@ class QOSMOSHMEEngine:
         self._previous_psi_field = self.psi_field.copy()
         self.psi_field += float(gain) * incoming
 
+    def _write_gain_multiplier(self, c_psi: Any) -> float:
+        cfg = self.collapse_config
+        if not cfg.influence_write_gain or c_psi is None:
+            return 1.0
+        try:
+            value = float(c_psi)
+        except (TypeError, ValueError):
+            return 1.0
+        if not np.isfinite(value):
+            return 1.0
+        raw = 1.0 + cfg.write_gain_scale * max(value, 0.0)
+        return float(np.clip(raw, cfg.write_gain_floor, cfg.write_gain_ceiling))
+
     def encode_memory(
         self,
         data: ArrayLike | str,
@@ -1202,26 +1327,30 @@ class QOSMOSHMEEngine:
         t: int | None = None,
     ) -> HMEArtifact:
         tick = self.step_index if t is None else int(t)
+        durable_metadata = dict(metadata or {})
+        effective_recursive_factor = float(recursive_factor) * self._write_gain_multiplier(
+            durable_metadata.get("c_psi")
+        )
         if isinstance(data, str):
             artifact = self.hme.encode_symbol(
                 data,
                 position,
-                recursive_factor,
+                effective_recursive_factor,
                 glyph=glyph,
                 observer_weight=observer_weight,
                 t=tick,
-                metadata=metadata,
+                metadata=durable_metadata,
             )
         else:
             artifact = self.hme.encode(
                 data,
                 position,
-                recursive_factor,
+                effective_recursive_factor,
                 tag=tag,
                 glyph=glyph,
                 observer_weight=observer_weight,
                 t=tick,
-                metadata=metadata,
+                metadata=durable_metadata,
             )
         self.qmesh.add_memory_artifact(artifact)
         return artifact
@@ -1239,6 +1368,11 @@ class QOSMOSHMEEngine:
             resolution_scale,
             query=query,
             top_k=top_k,
+            relevance_threshold=self.hme.config.relevance_threshold,
+            influence_retrieval=self.collapse_config.influence_retrieval,
+            retrieval_weight=self.collapse_config.retrieval_weight,
+            enable_inscription_rejection=self.collapse_config.enable_inscription_rejection,
+            rejection_threshold=self.collapse_config.rejection_threshold,
         )
 
     def W(
@@ -1488,6 +1622,7 @@ class QOSMOSHMEEngine:
                 observer_weight=observer_weight,
                 metadata={
                     "committed_after_collapse": collapse_event is not None,
+                    "c_psi": float(meta_pre.c_psi),
                     **dict(metadata or {}),
                 },
                 t=self.step_index,
@@ -2148,7 +2283,7 @@ class QOSMOSCoreHME(QOSMOSHMEEngine):
                 "source_glyph": glyph,
                 "observer_id": observer_id,
                 "psi_meta": psi_meta_value,
-                "C_psi": c_psi,
+                "c_psi": float(c_psi),
                 "collapsed": collapse_event is not None,
                 "rsbt_map": rsbt_map,
                 **dict(metadata or {}),
