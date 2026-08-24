@@ -22,6 +22,22 @@ jobs:
         run: pip install -r requirements-dev.txt
       - name: Apply paired engine and skill patch
         run: python scripts/apply_cpsi_develop_patch.py
+      - name: Diagnose bridge identity
+        run: |
+          python - <<'PY'
+          from integrations.sfd_to_hme_bridge import run_bridge
+          report = run_bridge()
+          artifact = report['artifact']
+          print('artifact_id', artifact['artifact_id'])
+          print('tag', artifact['tag'])
+          print('t', artifact['t'])
+          print('glyph', artifact['glyph'])
+          print('position', artifact['position'])
+          print('payload_hash', artifact['payload_hash'])
+          print('pattern_hash', artifact['pattern_hash'])
+          print('gain', artifact['gain'])
+          print('metadata_keys', sorted(artifact['metadata']))
+          PY
       - name: Verify engine self-test and repository tests
         run: |
           python qosmos_hme_engine.py --self-test
