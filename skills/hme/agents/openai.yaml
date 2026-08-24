@@ -1,0 +1,7 @@
+interface:
+  display_name: "HME"
+  short_description: "DEVELOP memory engine; Σ◯ writes; not QOFT canon"
+  brand_color: "#3D9A8C"
+  default_prompt: "Use $hme for this HME task. Default write glyph is Σ◯. Do not treat HME as QOFT canon. Compute Ψmeta_pre fields before Λψ and finalize collapse_triggered after."
+policy:
+  allow_implicit_invocation: true

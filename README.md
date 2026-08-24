@@ -15,10 +15,23 @@ HME is a **hybrid field-plus-ledger memory realization**:
 - an artifact ledger retains identity, provenance, payload hashes, pattern hashes, glyphs, positions, and gains;
 - QMesh records memory/collapse lineage;
 - ranked retrieval combines position, query, and pattern similarity;
-- Ψmeta telemetry is emitted before the realization-local Λψ predicate;
+- Ψmeta_pre diagnostic fields are computed before the realization-local Λψ
+  predicate, then the HME tick record is finalized after the decision;
 - W(t) is a visualization and diagnostic projection, not a physical coordinate.
 
 Artifact identity retrieval is **not field-only**. The field can retain a decoded surface when the ledger is removed, while exact artifact identification depends on the ledger.
+
+## Agent skill
+
+The portable [`hme`](skills/hme/SKILL.md) Agent Skill defines the agent-facing
+encode, retrieve, replay, overlay-telemetry, and lineage contract for the
+pinned HME realization. HME remains a standalone deterministic
+field-plus-ledger memory engine; QOFT/QOSMOS mappings in the skill are
+provenance and compatibility context, not a promotion into canon.
+
+The skill is proprietary and does not relicense the engine. See
+[`docs/agent-skill.md`](docs/agent-skill.md) and
+[`LICENSE-NOTICE.md`](LICENSE-NOTICE.md).
 
 ## Quick start
 
