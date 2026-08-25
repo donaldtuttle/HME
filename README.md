@@ -20,7 +20,7 @@ HME is a deterministic, source-available research prototype for memory systems t
 | Benchmark retrieval | Seeded runs, controlled query noise, and reproducible top-k results |
 | Audit provenance | Payload hashes, pattern hashes, source metadata, and ordered lineage |
 | Compare memory architectures | Field-only, ledger-only, and hybrid behavior can be separated and tested |
-| Study optional salience mechanisms | Default-off C(ψ) write, reranking, and rejection channels with a C0–C7 factorial harness |
+| Study optional salience mechanisms | Default-off C(ψ) write, reranking, and rejection channels with a C0-C7 factorial harness |
 
 HME is a research substrate. Identity-match confidence is not yet calibrated, `NO_MATCH` policy remains open, and the default-off C(ψ) salience channels have **no efficacy claim**.
 
@@ -57,7 +57,7 @@ License                  proprietary, with limited local evaluation rights
 Maintenance              owner-maintained; external code contributions closed
 ```
 
-The current engine includes a **DEVELOP, default-off C(ψ) salience overlay**. Its write-gain, retrieval-reranking, and inscription-rejection switches remain disabled unless explicitly enabled. The C0–C7 harness measures those channels; their presence is not evidence that they improve retrieval.
+The current engine includes a **DEVELOP, default-off C(ψ) salience overlay**. Its write-gain, retrieval-reranking, and inscription-rejection switches remain disabled unless explicitly enabled. The C0-C7 harness measures those channels; their presence is not evidence that they improve retrieval.
 
 ## Quick start
 
@@ -90,34 +90,43 @@ receipt = hme.retrieve_memory((20, 22), query=[0.1, 0.4, 0.9, 0.2])
 print(artifact.artifact_id, receipt.confidence)
 ```
 
-## Verified baselines
+## Verified behavior
 
-### Current active engine
+### Stable active-engine bridge invariants
 
-The active-engine bridge receipt was reproduced identically across Python 3.10, 3.12, and 3.13 CI lanes:
+The SFD to HME bridge preserved these invariants across the observed Python 3.10, 3.12, and 3.13 CI matrix:
 
 ```text
 engine SHA-256   1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11
 signature hash   7fef693477ffaf55104f12f25be9b91b72a8ab8e4aed8d13c4c3604fa5719ce9
 trajectory hash  e90921fbd2fd990efab3b684249de68a28e7186e8fc226d2f3ca3a4038e8f5db
-artifact ID      7264c7cc7b27aceb15f1
-payload hash     cae26ced8c2e11a484d0a5abeb7da26959c93633a44b169499957b1da20e2ea8
-pattern hash     3381e092455f79f3e72816fa6e31eba39929264fa7b4986e58faa8227cab2d67
-retrieval score  0.9307851800354883
+retrieval score  0.9307851800354883 ± 1e-12
 write glyph      Σ◯
+top hit           committed artifact
 ```
 
-The earlier `d902825c52772941b345` receipt belongs to the historical v2.2 baseline engine `f81fb49e…`. It remains historical evidence rather than the active-engine pass pin.
+### Exact numeric-byte receipts
 
-The independent audit reproduced deterministic artifacts, exact linear-superposition reconstruction, and these numeric top-1 results:
+The exact artifact ID includes hashes of floating-point payload bytes and an FFT-derived pattern. Two complete byte receipts have been observed across heterogeneous runners:
+
+| Variant | Artifact ID | Payload hash | Pattern hash |
+|---|---|---|---|
+| `numeric_bytes_7264` | `7264c7cc7b27aceb15f1` | `cae26ced…e2ea8` | `3381e092…2d67` |
+| `numeric_bytes_d902` | `d902825c52772941b345` | `d363f67b…0b4b` | `f28f0fa6…54b3` |
+
+The bridge gate requires all stable invariants plus one **complete** recognized tuple. Components from different tuples are never mixed. A new tuple fails validation pending investigation.
+
+This boundary is consistent with low-order numerical or FFT-backend variation, although the exact cause has not been isolated. A portable rounded or quantized hash representation would change artifact identity and remains separate future work.
+
+The independent audit reproduced deterministic artifacts within its pinned environment, exact linear-superposition reconstruction, and these numeric top-1 results:
 
 | Gaussian query noise σ | Correct top-1 |
 |---:|---:|
-| `0.00–0.25` | `128 / 128` |
+| `0.00-0.25` | `128 / 128` |
 | `0.50` | `119 / 128` |
 | `1.00` | `59 / 128` |
 
-Full evidence is under [`evidence/`](evidence/). The current receipt is recorded in [`evidence/bridge_active_engine_validation_2026-08-24.json`](evidence/bridge_active_engine_validation_2026-08-24.json), and reproduction commands and historical pins are separated in [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
+Full evidence is under [`evidence/`](evidence/). The cross-run bridge record is [`evidence/bridge_active_engine_validation_2026-08-24.json`](evidence/bridge_active_engine_validation_2026-08-24.json), and the exact validation policy is documented in [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
 
 ## Important limitation
 
