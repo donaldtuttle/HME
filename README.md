@@ -90,17 +90,24 @@ receipt = hme.retrieve_memory((20, 22), query=[0.1, 0.4, 0.9, 0.2])
 print(artifact.artifact_id, receipt.confidence)
 ```
 
-## Verified baseline
+## Verified baselines
 
-The focused ingest reproduced the supplied SFD → HME bridge receipt:
+### Current active engine
+
+The active-engine bridge receipt was reproduced identically across Python 3.10, 3.12, and 3.13 CI lanes:
 
 ```text
+engine SHA-256   1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11
 signature hash   7fef693477ffaf55104f12f25be9b91b72a8ab8e4aed8d13c4c3604fa5719ce9
 trajectory hash  e90921fbd2fd990efab3b684249de68a28e7186e8fc226d2f3ca3a4038e8f5db
-artifact ID      d902825c52772941b345
-retrieval score  0.9307851800354882
+artifact ID      7264c7cc7b27aceb15f1
+payload hash     cae26ced8c2e11a484d0a5abeb7da26959c93633a44b169499957b1da20e2ea8
+pattern hash     3381e092455f79f3e72816fa6e31eba39929264fa7b4986e58faa8227cab2d67
+retrieval score  0.9307851800354883
 write glyph      Σ◯
 ```
+
+The earlier `d902825c52772941b345` receipt belongs to the historical v2.2 baseline engine `f81fb49e…`. It remains historical evidence rather than the active-engine pass pin.
 
 The independent audit reproduced deterministic artifacts, exact linear-superposition reconstruction, and these numeric top-1 results:
 
@@ -110,7 +117,7 @@ The independent audit reproduced deterministic artifacts, exact linear-superposi
 | `0.50` | `119 / 128` |
 | `1.00` | `59 / 128` |
 
-Full evidence is under [`evidence/`](evidence/). Provenance and scope are recorded in [`docs/HME_INGEST_MANIFEST.md`](docs/HME_INGEST_MANIFEST.md).
+Full evidence is under [`evidence/`](evidence/). The current receipt is recorded in [`evidence/bridge_active_engine_validation_2026-08-24.json`](evidence/bridge_active_engine_validation_2026-08-24.json), and reproduction commands and historical pins are separated in [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
 
 ## Important limitation
 
