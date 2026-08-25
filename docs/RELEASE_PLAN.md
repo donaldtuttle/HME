@@ -8,7 +8,8 @@ collapsed into one unlabeled tag.
 ### `v2.2.0-baseline`
 
 **Target commit:** `0c7988eb79aa1e1e91242bd505cbf10db439f636`  
-**Engine SHA-256:** `f81fb49e265d83f5206220584dfc6cabf28aeee5266aca33654182be1549c080`
+**Engine SHA-256:** `f81fb49e265d83f5206220584dfc6cabf28aeee5266aca33654182be1549c080`  
+**Historical bridge artifact:** `d902825c52772941b345`
 
 Purpose:
 
@@ -26,9 +27,10 @@ HME v2.2.0 Baseline - deterministic field-plus-ledger memory
 
 ### `v2.3.0-develop.1`
 
-**Target:** current DEVELOP head after this documentation PR  
-**Engine SHA-256 before this documentation-only change:**  
-`1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11`
+**Target:** current DEVELOP head after this PR  
+**Active engine SHA-256:**  
+`1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11`  
+**Active bridge artifact:** `7264c7cc7b27aceb15f1`
 
 Purpose:
 
@@ -36,6 +38,7 @@ Purpose:
   inscription-rejection channels;
 - keeps all three switches disabled by default;
 - includes the preregistered C0-C7 protocol and measurement harness;
+- binds the SFD bridge receipt to the active engine hash;
 - makes no efficacy or promotion claim.
 
 Suggested prerelease title:
@@ -53,12 +56,13 @@ and reviewed.
 2. Run `python qosmos_hme_engine.py --self-test`.
 3. Run `pytest -q`.
 4. Run the independent audit.
-5. Verify `MANIFEST.sha256`.
-6. Record Python, NumPy, and platform versions.
-7. Attach or link the machine-readable evidence packet.
-8. State the claim boundary and known limitations.
-9. Confirm that the release license text matches `skills/hme/LICENSE.txt`.
-10. Create the tag and GitHub Release from the same commit.
+5. Run the SFD → HME bridge and verify the engine-bound receipt.
+6. Verify `MANIFEST.sha256`.
+7. Record Python, NumPy, and platform versions.
+8. Attach or link the machine-readable evidence packet.
+9. State the claim boundary and known limitations.
+10. Confirm that the release license text matches `skills/hme/LICENSE.txt`.
+11. Create the tag and GitHub Release from the same commit.
 
 ## Version rule
 
