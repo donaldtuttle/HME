@@ -1,21 +1,45 @@
 QOSMOS Holographic Memory Engine (HME)
-PROPRIETARY RIGHTS NOTICE
+PROPRIETARY SOURCE-AVAILABLE LICENSE
 
 Copyright (c) 2026 Donald Tuttle. All rights reserved.
 
 The source code, documentation, data, images, and other materials in this
-repository are made publicly viewable for inspection and research discussion
-only.
+repository (collectively, the "Materials") are publicly viewable but remain
+proprietary.
 
-Except for the limited rights expressly granted to GitHub and GitHub users by
-GitHub's Terms of Service for operating, viewing, and forking public repository
-content through the GitHub service, no permission is granted to use, copy,
-modify, merge, publish, distribute, sublicense, sell, commercially exploit, or
-create derivative works from any portion of this repository without prior
-written permission from the copyright holder, except where applicable law
-expressly permits otherwise.
+LIMITED EVALUATION LICENSE
 
-Public availability does not place any material in the public domain and does
+Subject to the terms below, the copyright holder grants each recipient a
+limited, non-exclusive, non-transferable, non-sublicensable license to:
+
+1. download and install an unmodified copy of the Materials on systems the
+   recipient owns or controls;
+2. execute that unmodified copy solely for non-commercial evaluation,
+   testing, and reproduction or verification of published HME results; and
+3. make local or transient copies reasonably necessary for those permitted
+   activities.
+
+Every permitted copy must retain this license and all copyright, attribution,
+and proprietary notices. Original evaluation results may be published,
+provided they do not reproduce or distribute substantial portions of the
+Materials and they identify the tested version, commit, or file hash.
+
+NO OTHER RIGHTS
+
+Except for the limited evaluation license above, the limited platform rights
+arising under GitHub's Terms of Service, and rights that applicable law
+expressly provides, no permission is granted to:
+
+- modify, adapt, translate, or create derivative works;
+- publish, distribute, redistribute, sublicense, or sell the Materials;
+- use the Materials in production or for commercial purposes;
+- offer the Materials or a derivative as a hosted or managed service; or
+- remove or alter copyright, attribution, license, or proprietary notices.
+
+A public GitHub fork is an independent copy. GitHub-platform forking does not
+grant broader permission to use, modify, or redistribute the Materials.
+
+Public availability does not place any Material in the public domain and does
 not make this an open-source or free-software project.
 
 Third-party materials, if any, remain subject to their respective rights and
@@ -25,4 +49,4 @@ THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT
 HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM OR IN
-CONNECTION WITH THE MATERIALS OR THEIR USE.
+CONNECTION WITH THE MATERIALS OR THEIR PERMITTED OR UNPERMITTED USE.

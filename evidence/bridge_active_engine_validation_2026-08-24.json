@@ -1,0 +1,65 @@
+{
+  "record_id": "HME-BRIDGE-ACTIVE-2026-08-24",
+  "created_at_utc": "2026-08-25T02:17:37Z",
+  "updated_at_utc": "2026-08-25T02:39:00Z",
+  "status": "PASS_STABLE_INVARIANTS_WITH_NUMERIC_BYTE_VARIANTS",
+  "classification": "implementation verification / DEVELOP / canonical weight none",
+  "active_engine": {
+    "path": "qosmos_hme_engine.py",
+    "sha256": "1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11"
+  },
+  "stable_invariants": {
+    "signature_hash": "7fef693477ffaf55104f12f25be9b91b72a8ab8e4aed8d13c4c3604fa5719ce9",
+    "trajectory_hash": "e90921fbd2fd990efab3b684249de68a28e7186e8fc226d2f3ca3a4038e8f5db",
+    "write_glyph": "Σ◯",
+    "retrieval_score_target": 0.9307851800354883,
+    "retrieval_score_tolerance": 1e-12,
+    "top_is_artifact": true
+  },
+  "recognized_byte_receipts": {
+    "numeric_bytes_7264": {
+      "artifact_id": "7264c7cc7b27aceb15f1",
+      "payload_hash": "cae26ced8c2e11a484d0a5abeb7da26959c93633a44b169499957b1da20e2ea8",
+      "pattern_hash": "3381e092455f79f3e72816fa6e31eba39929264fa7b4986e58faa8227cab2d67",
+      "evidence": "Full receipt emitted by active-engine CI runs 32800839685 and 32802184979."
+    },
+    "numeric_bytes_d902": {
+      "artifact_id": "d902825c52772941b345",
+      "payload_hash": "d363f67bdd7ac2d963c7884cd1750211872314cac8b198fb8c43681c46d80b4b",
+      "pattern_hash": "f28f0fa635dd31ad745d096fa948791ab0e5a7bddbe3e142a414c4ed97f754b3",
+      "evidence": "Full tuple was recorded by the earlier bridge receipt; the same artifact ID reappeared under the active engine in Python 3.12 CI run 32801899956. Tuple identity follows from the artifact-ID construction under the ordinary SHA-256 collision-resistance assumption."
+    }
+  },
+  "workflow_observations": [
+    {
+      "run_id": 32800839685,
+      "result": "numeric_bytes_7264 across Python 3.10, 3.12, and 3.13 lanes"
+    },
+    {
+      "run_id": 32801899956,
+      "result": "Python 3.10 and 3.13 produced numeric_bytes_7264; Python 3.12 in westus2 produced artifact ID d902825c52772941b345"
+    },
+    {
+      "run_id": 32802184979,
+      "result": "numeric_bytes_7264 before and after pytest across Python 3.10, 3.12, and 3.13 lanes; test-order contamination was not reproduced"
+    }
+  ],
+  "finding": "The source hash, symbolic-field signature, trajectory, write glyph, top-hit relation, and retrieval score are stable at the declared tolerance. Exact SHA-256 identities of floating-point payload and FFT-derived pattern bytes are not portable across every observed runner environment.",
+  "cause_assessment": {
+    "status": "not fully isolated",
+    "most_plausible_explanation": "low-order floating-point or numerical-backend variation in the resampling, normalization, and FFT pipeline",
+    "confidence": "medium"
+  },
+  "validation_policy": [
+    "Require all stable invariants.",
+    "Require artifact_id, payload_hash, and pattern_hash to match one complete recognized tuple.",
+    "Never accept mixed components from different byte receipts.",
+    "Treat a new tuple as a failed gate pending explicit investigation and registration."
+  ],
+  "future_refinement": "A canonicalized numeric hashing scheme based on declared rounding or quantization could remove this portability boundary, but it would change artifact identity and was not introduced in this documentation and validation update.",
+  "claim_boundary": [
+    "A passing bridge check establishes implementation conformance for the pinned source and recognized numerical receipt family.",
+    "It does not establish bit-identical floating-point arrays across arbitrary hardware or numerical libraries.",
+    "It does not establish calibrated retrieval confidence, QOFT canon, consciousness, or physical memory dynamics."
+  ]
+}
