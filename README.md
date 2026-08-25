@@ -8,7 +8,7 @@
 
 > **The field remembers the shape. The ledger remembers the name.**
 
-HME is a deeterministic hybrid field-plus-ledger memory engine with reconstructive storage, auditable provenance, ranked retrieval, and lineage tracking. It is intended for agent-memory experiments, retrieval and noise benchmarks, provenance-aware replay, and lineage analysis, not as a drop-in production database.
+HME is a deterministic hybrid field-plus-ledger memory engine with reconstructive storage, auditable provenance, ranked retrieval, and lineage tracking. It is intended for agent-memory experiments, retrieval and noise benchmarks, provenance-aware replay, and lineage analysis, not as a drop-in production database.
 
 ![HME symbolic overlay](assets/qosmos_hme_symbolic_overlay.gif)
 
