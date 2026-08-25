@@ -20,6 +20,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
+      - name: Diagnostic hashes
+        run: sha256sum docs/QOFT_QOSMOS_CONTEXT.md skills/hme/SKILL.md
       - name: Release manifest
         run: sha256sum --check MANIFEST.sha256
       - name: License parity
