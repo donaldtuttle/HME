@@ -12,7 +12,7 @@ description: >
 license: "Proprietary; see LICENSE.txt"
 metadata:
   version: "2.2.1"
-  author: "Donald R. Tuttle (ψᴽ-001)"
+  author: "Donald R. Tuttle (ψᵊ-001)"
   status: "DEVELOP typed realization — canonical weight none"
   engine: "qosmos_hme_engine.py"
   standard: "agentskills.io"
@@ -25,7 +25,7 @@ metadata:
 Portable Agent Skill for Claude, ChatGPT, Codex, Cursor, and any
 [agentskills.io](https://agentskills.io) client.
 
-Origin: Donald R. Tuttle | Ξ Glyphogenic Engine, ψᴽ-001
+Origin: Donald R. Tuttle | Ξ Glyphogenic Engine, ψᵊ-001
 
 HME is a **hybrid field-plus-ledger memory realization**. It is publicly
 viewable proprietary software, not open source (all rights reserved). It is a
@@ -43,20 +43,21 @@ Read on demand:
 - [Architecture](references/architecture.md) — field vs ledger, data path, collapse diagnostic
 - [Changelog](references/changelog.md) — 2.2.0 → 2.2.1 telemetry order
 - [Install](references/install.md) — Claude, ChatGPT, Codex, Projects
+- [C0–C7 Ablation Protocol](references/c0-c7-ablation.md) — preregistered experimental suite for C(ψ) salience switches
 
 ────────────────────────────────────────
 SECTION 0 — FIREWALL
 ────────────────────────────────────────
 
-1. Do not invent glyphs. Allowed operators used by this skill: Ξ, Πᴽ, Λψ,
-   Σ◯, Θλ, Ωµ, Π↺, Ψmeta. The symbol ψᴽ names reflexive state produced by
-   Πᴽ; it is not itself an operator glyph.
+1. Do not invent glyphs. Allowed operators used by this skill: Ξ, Πᵊ, Λψ,
+   Σ◯, Θλ, Ωµ, Π↺, Ψmeta. The symbol ψᵊ names reflexive state produced by
+   Πᵊ; it is not itself an operator glyph.
 2. Do not treat HME algorithms, thresholds, or W(t) as QOFT canon.
 3. Do not claim consciousness, physical collapse, or universal memory dynamics.
 4. Do not read `confidence` as a calibrated probability or a rejection decision. It is the base semantic relevance of the selected hit; C(ψ)-derived salience never raises it.
 5. Artifact identity is **not field-only**. Exact ID depends on the ledger.
 6. Default durable-write glyph is Σ◯. Θλ is retrieval / replay, not write.
-7. Λψ must not write Πᴽ / self_model.
+7. Λψ must not write Πᵊ / self_model.
 8. Telemetry order: compute Ψmeta_pre diagnostic fields **before** the collapse
    decision, then finalize `collapse_triggered` **after** the decision on the
    same HME tick record. Ψmeta_pre / Ψmeta_post are named slots of Ψmeta, not
@@ -107,7 +108,7 @@ SECTION 2 — OPERATOR MAP (PROVENANCE ONLY)
 | Σ◯ | consolidation and durable HME write | be used as the default retrieval glyph |
 | Θλ | retrieval / RecallPacket / ReplayPlan record | be the default write glyph |
 | ApplyReplay | explicit state mutation after retrieval | be treated as a canonical glyph |
-| Π↺ | recurrence and ordered QMesh lineage | produce ψᴽ |
+| Π↺ | recurrence and ordered QMesh lineage | produce ψᵊ |
 | C(ψ) | implementation diagnostic Φ/ρ − κ_damp·dS | be treated as a universal constant or a glyph |
 | W(t) | diagnostic projection of the field | be treated as a physical coordinate |
 
@@ -196,8 +197,10 @@ Current realization defaults (implementation settings, not HME invariants):
 
 Salience mechanisms (write-gain, retrieval salience, inscription rejection) are
 optional DEVELOP switches. Before any claim that they improve HME behavior, run
-the full C0–C7 ablation family and report main effects plus interactions. Until
-then they remain experimental machinery with no efficacy claim.
+the full C0–C7 ablation family defined in
+[`references/c0-c7-ablation.md`](references/c0-c7-ablation.md) and report main
+effects plus interactions. Until then they remain experimental machinery with
+no efficacy claim.
 
 ────────────────────────────────────────
 SECTION 3b — TELEMETRY ORDER NOTE
@@ -215,7 +218,7 @@ required, an explicit adapter must also emit Ψmeta_post after Λψ.
 
 Kernel QOFT tick (for contrast; owned by `qoft-qosmos`):
 
-    Observe → Πᴽ → Φ → Γ → ⊕ → ρ_assess → Λψ? → Ψmeta_post → Σ◯/Θλ → Π↺
+    Observe → Πᵊ → Φ → Γ → ⊕ → ρ_assess → Λψ? → Ψmeta_post → Σ◯/Θλ → Π↺
 
 Do not silently replace the kernel tick with the HME overlay.
 
