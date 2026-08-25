@@ -7,7 +7,7 @@ Canonical weight: none. No efficacy claim is made by running this harness.
 
 Freeze boundary (required before any scored run):
   1. engine SHA-256  (must equal ACTIVE_ENGINE_PIN under --strict)
-  2. protocol hash
+  2. protocol hash   (must equal ACTIVE_PROTOCOL_PIN under --strict)
   3. query/artifact corpus hash
   4. answer-key hash
   5. seed + config pin
@@ -16,12 +16,9 @@ Causal structure (required):
   same artifact / same query / same position / same originating c_psi
   ONLY the three influence switches change across C0–C7.
 
-This harness:
-  - builds a synthetic frozen corpus and independent answer key
-  - pre-measures originating c_psi for every artifact (shared across conditions)
-  - runs the full 2×2×2 factorial
-  - computes primary efficacy metrics against the external answer key
-  - emits a machine-readable result bundle with main effects and interactions
+All artifacts are encoded through encode_memory() with a frozen c_psi in
+metadata. influence_write_gain controls whether that value modulates gain;
+it never triggers a fresh runtime collapse measurement.
 """
 
 from __future__ import annotations
@@ -45,6 +42,9 @@ PROTOCOL_ID = "C0-C7-HME-Cpsi-salience-v1"
 PROTOCOL_PATH = "skills/hme/references/c0-c7-ablation.md"
 ACTIVE_ENGINE_PIN = (
     "1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11"
+)
+ACTIVE_PROTOCOL_PIN = (
+    "cc06be4e8448bb38b9b8093c763fc93c7576577942038cc926aef03d0270e98c"
 )
 
 DEFAULT_SEED = 73_120_26
@@ -116,8 +116,8 @@ class FrozenCorpus:
     vectors: np.ndarray
     positions: list[tuple[int, int]]
     queries: list[np.ndarray]
-    answer_key: list[list[int]]          # external relevance labels
-    originating_c_psi: list[float]       # one measured c_psi per artifact
+    answer_key: list[list[int]]
+    originating_c_psi: list[float]
     corpus_hash: str = ""
     answer_key_hash: str = ""
     c_psi_hash: str = ""
@@ -148,8 +148,8 @@ def build_frozen_corpus(
     Build vectors/queries/answer key, then measure a real originating c_psi
     for every artifact via a reference collapse pass.
 
-    The measured c_psi values are frozen and reused by every C0–C7 condition
-    so that only the three influence switches change.
+    Measured c_psi values are frozen and reused by every C0–C7 condition so
+    that only the three influence switches change.
     """
     rng = np.random.default_rng(seed)
 
@@ -178,7 +178,7 @@ def build_frozen_corpus(
         nearest = np.argsort(dists)[:2].tolist()
         answer_key.append(nearest)
 
-    # Reference pass: force collapse on each write to obtain measured c_psi
+    # Reference pass: force collapse to obtain measured c_psi values
     CollapseConfig = engine_module.CollapseConfig
     HMEConfig = engine_module.HMEConfig
     QOSMOSHMEEngine = engine_module.QOSMOSHMEEngine
@@ -215,7 +215,6 @@ def build_frozen_corpus(
         if c_psi is None and result.collapse_event is not None:
             c_psi = float(result.collapse_event.score)
         if c_psi is None:
-            # Fallback: use the pre-collapse diagnostic from the step meta
             c_psi = float(result.meta.c_psi)
         originating_c_psi.append(float(c_psi))
 
@@ -277,44 +276,24 @@ def run_condition(
     gains: list[float] = []
     field_amps: list[float] = []
 
-    # Encode every artifact with the *same* frozen originating c_psi.
-    # W only controls whether write-gain modulation is applied.
+    # Encode every artifact through the SAME path with the SAME frozen c_psi.
+    # W only toggles whether _write_gain_multiplier() uses that value.
     for i, (vec, pos, c_psi) in enumerate(
         zip(corpus.vectors, corpus.positions, corpus.originating_c_psi)
     ):
         pre_norm = float(np.linalg.norm(engine.hme.field))
 
-        if condition["W"]:
-            # Collapse + write so the engine's own gain path can fire on
-            # a measured c_psi. The frozen value is also stored for I/R.
-            result = engine.step(
-                memory_payload=vec,
-                memory_position=pos,
-                memory_gain=0.12,
-                collapse_override=True,
-                metadata={
-                    "corpus_index": i,
-                    "frozen_c_psi": float(c_psi),
-                },
-            )
-            art = result.memory_artifact
-            # Ensure durable c_psi is present even if engine path differs
-            if art is not None and "c_psi" not in art.metadata:
-                art.metadata["c_psi"] = float(c_psi)
-        else:
-            # Direct encode with frozen c_psi attached so I can inspect it.
-            # No write-gain modulation.
-            art = engine.encode_memory(
-                vec,
-                pos,
-                recursive_factor=0.12,
-                glyph="Σ◯",
-                metadata={
-                    "corpus_index": i,
-                    "c_psi": float(c_psi),
-                },
-                t=i,
-            )
+        art = engine.encode_memory(
+            vec,
+            pos,
+            recursive_factor=0.12,
+            glyph="Σ◯",
+            metadata={
+                "corpus_index": i,
+                "c_psi": float(c_psi),   # frozen reference; never recomputed
+            },
+            t=i,
+        )
 
         assert art is not None
         artifact_ids.append(art.artifact_id)
@@ -322,7 +301,7 @@ def run_condition(
         post_norm = float(np.linalg.norm(engine.hme.field))
         field_amps.append(abs(post_norm - pre_norm))
 
-    # Retrieval pass against frozen external answer key
+    # Retrieval against frozen external answer key
     top1_hits = 0
     precisions: dict[int, list[float]] = {1: [], 3: [], 5: []}
     recalls: dict[int, list[float]] = {1: [], 3: [], 5: []}
@@ -343,7 +322,6 @@ def run_condition(
 
         outcome = getattr(receipt, "outcome", None)
         if outcome is None:
-            # Backward-compatible fallback
             if not receipt.hits:
                 outcome = "NO_MATCH"
             elif getattr(receipt, "rejected", False):
@@ -458,10 +436,6 @@ def run_condition(
 # ---------------------------------------------------------------------------
 
 def factorial_effects(results: list[dict[str, Any]]) -> dict[str, Any]:
-    """
-    Compute main effects, two-way interactions, and the three-way interaction
-    for key metrics using the standard 2³ contrast coding.
-    """
     by_id = {r["condition"]: r for r in results}
     metrics = [
         "top1_accuracy",
@@ -475,8 +449,6 @@ def factorial_effects(results: list[dict[str, Any]]) -> dict[str, Any]:
         "false_rejection_rate",
     ]
 
-    # Contrast coefficients for 2³ design (Yates order C0..C7)
-    # W R I
     coef = {
         "C0": {"W": -1, "R": -1, "I": -1},
         "C1": {"W": +1, "R": -1, "I": -1},
@@ -539,6 +511,12 @@ def run_all(args: argparse.Namespace) -> dict[str, Any]:
             )
         if protocol_sha is None:
             raise RuntimeError("--strict requires --protocol so the file can be hashed")
+        if protocol_sha != ACTIVE_PROTOCOL_PIN:
+            raise RuntimeError(
+                f"Protocol hash mismatch under --strict.\n"
+                f"  expected: {ACTIVE_PROTOCOL_PIN}\n"
+                f"  got:      {protocol_sha}"
+            )
 
     corpus = build_frozen_corpus(
         engine_module,
@@ -556,7 +534,10 @@ def run_all(args: argparse.Namespace) -> dict[str, Any]:
         ),
         "protocol_id": PROTOCOL_ID,
         "protocol_path": PROTOCOL_PATH,
-        "protocol_sha256": protocol_sha,
+        "protocol_sha256": protocol_sha or ACTIVE_PROTOCOL_PIN,
+        "protocol_pin_match": (
+            protocol_sha == ACTIVE_PROTOCOL_PIN if protocol_sha else None
+        ),
         "corpus_hash": corpus.corpus_hash,
         "answer_key_hash": corpus.answer_key_hash,
         "c_psi_hash": corpus.c_psi_hash,
@@ -588,7 +569,6 @@ def run_all(args: argparse.Namespace) -> dict[str, Any]:
 
     effects = factorial_effects(condition_results)
 
-    # Simple condition-level deltas vs C0 (supplementary)
     baseline = next(r for r in condition_results if r["condition"] == "C0")
     contrasts = {}
     for r in condition_results:
@@ -616,7 +596,7 @@ def run_all(args: argparse.Namespace) -> dict[str, Any]:
         "notes": [
             "Answer key is external (nearest generating vectors), not base_score.",
             "All conditions share the same frozen originating c_psi values.",
-            "W/R/I only control whether those values are used.",
+            "All artifacts encoded via encode_memory; W only toggles gain modulation.",
             "write_interference and noise_robustness left null pending denser corpus.",
             "No efficacy claim is made by this harness or its output.",
         ],
@@ -643,7 +623,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--strict",
         action="store_true",
-        help="Require engine hash == ACTIVE_ENGINE_PIN and protocol hash present",
+        help="Require engine and protocol hashes match ACTIVE_*_PIN",
     )
     return p
 
