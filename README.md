@@ -10,6 +10,9 @@
 
 HME is a deterministic hybrid field-plus-ledger memory engine with reconstructive storage, auditable provenance, ranked retrieval, and lineage tracking. It is intended for agent-memory experiments, retrieval and noise benchmarks, provenance-aware replay, and lineage analysis, not as a drop-in production database.
 
+> **Interactive companion:** [Launch Memory Weather v0.1.1](https://donaldtuttle.github.io/qoft-calculus/) ([source and realization contract](https://github.com/donaldtuttle/qoft-calculus/tree/main/apps/memory-weather)).  
+> Memory Weather is a separate deterministic R¹² DEVELOP typed realization and visualization companion. It does not run the Python HME engine or broaden HME's claims.
+
 ![HME symbolic overlay](assets/qosmos_hme_symbolic_overlay.gif)
 
 ## What HME is for
