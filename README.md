@@ -13,6 +13,10 @@ HME is a deterministic hybrid field-plus-ledger memory engine with reconstructiv
 > **Interactive companion:** [Launch Memory Weather v0.1.1](https://donaldtuttle.github.io/qoft-calculus/) ([source and realization contract](https://github.com/donaldtuttle/qoft-calculus/tree/main/apps/memory-weather)).  
 > Memory Weather is a separate deterministic R¹² DEVELOP typed realization and visualization companion. It does not run the Python HME engine or broaden HME's claims.
 
+> **Related QOFT surfaces (separate realizations, no shared trajectory claim):**  
+> [QOFT Lab n=2 toy](https://pine-apple-dream-topaz.grok.me/) · source [donaldtuttle/qoft-lab](https://github.com/donaldtuttle/qoft-lab)  
+> Glyphogenic Calculus engine [donaldtuttle/qoft-calculus](https://github.com/donaldtuttle/qoft-calculus)
+
 ![HME symbolic overlay](assets/qosmos_hme_symbolic_overlay.gif)
 
 ## What HME is for
@@ -32,7 +36,7 @@ HME is a research substrate. Identity-match confidence is not yet calibrated, `N
 ```text
                          ┌─ deterministic pattern ─→ complex field
 payload ─→ SHA-256 map ──┤                           reconstructive surface
-                         └─ artifact ledger ───────→ identity + provenance
+                         └─ artifact ledger ──────→ identity + provenance
                                                           │
 query + position ─→ ranked retrieval ─→ hit list + receipt│
                                                           ↓
