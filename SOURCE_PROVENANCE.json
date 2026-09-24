@@ -3,6 +3,7 @@
   "visibility": "public",
   "rights": "proprietary; copyright retained; all rights reserved",
   "assembly_date": "2026-08-23",
+  "pin_reconciled": "2026-09-24",
   "classification": "Typed Realization / DEVELOP",
   "canonical_weight": "none",
   "source_archive": {
@@ -11,8 +12,17 @@
   },
   "active_engine": {
     "path": "qosmos_hme_engine.py",
+    "sha256": "1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11",
+    "byte_preserved": false,
+    "role": "live_active_engine",
+    "note": "Hash of current main qosmos_hme_engine.py. Includes DEVELOP default-off C(ψ) overlay. Not the 2026-08-23 ingest byte image."
+  },
+  "previous_public_baseline": {
+    "path": "qosmos_hme_engine.py",
     "sha256": "f81fb49e265d83f5206220584dfc6cabf28aeee5266aca33654182be1549c080",
-    "byte_preserved": true
+    "byte_preserved": true,
+    "role": "previous_public_baseline",
+    "note": "2026-08-23 ingest / earlier public baseline. Not the live engine file on main."
   },
   "legacy_engine": {
     "path": "legacy/qosmos_hme_engine_pre_conformance.py",
