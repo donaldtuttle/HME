@@ -1,183 +1,95 @@
 # Holographic Memory Engine (HME)
 
 [![Tests](https://github.com/donaldtuttle/HME/actions/workflows/test.yml/badge.svg)](https://github.com/donaldtuttle/HME/actions/workflows/test.yml)
-![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
-![Version 2.2.0](https://img.shields.io/badge/version-2.2.0-2563EB)
+![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB)
+![Version 3.0.0](https://img.shields.io/badge/version-3.0.0-2563EB)
 ![Status: alpha](https://img.shields.io/badge/status-alpha-F59E0B)
-![License: proprietary](https://img.shields.io/badge/license-proprietary-6B7280)
 
-> **The field remembers the shape. The ledger remembers the name.**
+HME is a standalone experimental memory engine that combines **complex-valued pattern storage, an artifact ledger, and similarity-ranked retrieval**. It runs on Python and NumPy.
 
-HME is a deterministic hybrid field-plus-ledger memory engine with reconstructive storage, auditable provenance, ranked retrieval, and lineage tracking. It is intended for agent-memory experiments, retrieval and noise benchmarks, provenance-aware replay, and lineage analysis, not as a drop-in production database.
-
-> **Interactive companion:** [Launch Memory Weather v0.1.1](https://donaldtuttle.github.io/qoft-calculus/) ([source and realization contract](https://github.com/donaldtuttle/qoft-calculus/tree/main/apps/memory-weather)).  
-> Memory Weather is a separate deterministic R¹² DEVELOP typed realization and visualization companion. It does not run the Python HME engine or broaden HME's claims.
-
-> **Related QOFT surfaces (separate realizations, no shared trajectory claim):**  
-> [QOFT Lab n=2 toy](https://pine-apple-dream-topaz.grok.me/) · source [donaldtuttle/qoft-lab](https://github.com/donaldtuttle/qoft-lab)  
-> Glyphogenic Calculus engine [donaldtuttle/qoft-calculus](https://github.com/donaldtuttle/qoft-calculus)
-
-![HME symbolic overlay](assets/qosmos_hme_symbolic_overlay.gif)
-
-## What HME is for
-
-| Use HME to | What the repository provides |
-|---|---|
-| Prototype agent memory | Associative reconstruction plus exact artifact receipts |
-| Benchmark retrieval | Seeded runs, controlled query noise, and reproducible top-k results |
-| Audit provenance | Payload hashes, pattern hashes, source metadata, and ordered lineage |
-| Compare memory architectures | Field-only, ledger-only, and hybrid behavior can be separated and tested |
-| Study optional salience mechanisms | Default-off C(ψ) write, reranking, and rejection channels with a C0-C7 factorial harness |
-
-HME is a research substrate. Identity-match confidence is not yet calibrated, `NO_MATCH` policy remains open, and the default-off C(ψ) salience channels have **no efficacy claim**.
-
-## How it works
-
-```text
-                         ┌─ deterministic pattern ─→ complex field
-payload ─→ SHA-256 map ──┤                           reconstructive surface
-                         └─ artifact ledger ──────→ identity + provenance
-                                                          │
-query + position ─→ ranked retrieval ─→ hit list + receipt│
-                                                          ↓
-                                                   lineage graph
-```
-
-Four pieces do different jobs:
-
-1. **Field** - stores superposed patterns and supports reconstructive recall.
-2. **Ledger** - preserves exact artifact identity, payload hashes, positions, glyphs, gains, and provenance.
-3. **Ranker** - combines position, query, and pattern similarity.
-4. **Lineage graph** - records memory and event ancestry for replay and audit.
-
-Exact artifact identification is **not field-only**. The field can retain a decoded surface when the ledger is removed, while exact identity depends on ledger evidence.
-
-## Status at a glance
-
-```text
-Package                  qosmos-hme 2.2.0
-Python                   3.10+
-Current active engine    SHA-256 1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11
-Previous public baseline SHA-256 f81fb49e265d83f5206220584dfc6cabf28aeee5266aca33654182be1549c080
-Pre-conformance source   SHA-256 6780f974db55380fb4841d3b35c135be10eac8e0c79bc55ff7ff349138febaa6
-License                  proprietary, with limited local evaluation rights
-Maintenance              owner-maintained; external code contributions closed
-```
-
-The current engine includes a **DEVELOP, default-off C(ψ) salience overlay**. Its write-gain, retrieval-reranking, and inscription-rejection switches remain disabled unless explicitly enabled. The C0-C7 harness measures those channels; their presence is not evidence that they improve retrieval.
+Use it to investigate how overlapping stored patterns, query noise, spatial cues, and retained item records affect recall. For example, store a set of numeric sensor signatures, query with a noisy signature, and inspect both the ranked matches and the contribution of each scoring component. Field-only and ledger-only ablations help identify what actually produced the match.
 
 ## Quick start
 
-The proprietary license permits local installation and execution of **unmodified copies** for non-commercial evaluation, testing, and reproduction of published results. It does not grant modification, redistribution, hosted-service, production, or commercial-use rights.
-
 ```bash
+git clone https://github.com/donaldtuttle/HME.git
+cd HME
 python -m venv .venv
-source .venv/bin/activate       # Windows: .venv\Scripts\activate
-pip install -e ".[test,visual,sfd]"
-
-python qosmos_hme_engine.py --self-test
-pytest -q
-python tests/hme_independent_audit.py \
-  --engine ./qosmos_hme_engine.py \
-  --output outputs/hme_audit.json
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m pip install -e ".[test]"
+hme --self-test
+python -m pytest -q
 ```
-
-Minimal use:
 
 ```python
-from qosmos_hme_engine import QOSMOSCoreHME
+from hme_engine import HMEEngine
 
-hme = QOSMOSCoreHME(memory_size=64, encoding_resolution=16, seed=7)
-artifact = hme.encode_memory(
+memory = HMEEngine(memory_size=64, encoding_resolution=16)
+item = memory.encode_memory(
     [0.1, 0.4, 0.9, 0.2],
     position=(20, 22),
-    glyph="Σ◯",
+    tag="sensor-reading-001",
+    metadata={"source": "sensor-A"},
 )
-receipt = hme.retrieve_memory((20, 22), query=[0.1, 0.4, 0.9, 0.2])
-print(artifact.artifact_id, receipt.confidence)
+result = memory.retrieve_memory(
+    (20, 22), query=[0.12, 0.39, 0.88, 0.21], top_k=1,
+)
+print(result.hits[0].artifact_id == item.artifact_id)
+print(result.relevance_score)  # Ranking score, not a probability
+print(memory.lineage.to_dict())
 ```
 
-## Verified behavior
+Strings are also accepted. They map deterministically to random vectors using SHA-256; similar wording does not imply similar vectors. For semantic text retrieval, supply externally computed embeddings and evaluate the resulting system.
 
-### Stable active-engine bridge invariants
+## What runs
 
-The SFD to HME bridge preserved these invariants across the observed Python 3.10, 3.12, and 3.13 CI matrix:
-
-```text
-engine SHA-256   1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11
-signature hash   7fef693477ffaf55104f12f25be9b91b72a8ab8e4aed8d13c4c3604fa5719ce9
-trajectory hash  e90921fbd2fd990efab3b684249de68a28e7186e8fc226d2f3ca3a4038e8f5db
-retrieval score  0.9307851800354883 ± 1e-12
-write glyph      Σ◯
-top hit           committed artifact
-```
-
-### Exact numeric-byte receipts
-
-The exact artifact ID includes hashes of floating-point payload bytes and an FFT-derived pattern. Two complete byte receipts have been observed across heterogeneous runners:
-
-| Variant | Artifact ID | Payload hash | Pattern hash |
-|---|---|---|---|
-| `numeric_bytes_7264` | `7264c7cc7b27aceb15f1` | `cae26ced…e2ea8` | `3381e092…2d67` |
-| `numeric_bytes_d902` | `d902825c52772941b345` | `d363f67b…0b4b` | `f28f0fa6…54b3` |
-
-The bridge gate requires all stable invariants plus one **complete** recognized tuple. Components from different tuples are never mixed. A new tuple fails validation pending investigation.
-
-This boundary is consistent with low-order numerical or FFT-backend variation, although the exact cause has not been isolated. A portable rounded or quantized hash representation would change artifact identity and remains separate future work.
-
-The independent audit reproduced deterministic artifacts within its pinned environment, exact linear-superposition reconstruction, and these numeric top-1 results:
-
-| Gaussian query noise σ | Correct top-1 |
-|---:|---:|
-| `0.00-0.25` | `128 / 128` |
-| `0.50` | `119 / 128` |
-| `1.00` | `59 / 128` |
-
-Full evidence is under [`evidence/`](evidence/). The cross-run bridge record is [`evidence/bridge_active_engine_validation_2026-08-24.json`](evidence/bridge_active_engine_validation_2026-08-24.json), and the exact validation policy is documented in [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
-
-## Important limitation
-
-The current `confidence` value reports the selected hit's base relevance score. It is **not** a calibrated probability and is not, by itself, a rejection decision. An unrelated query received a score near `0.733` during audit. Do not interpret every top-ranked result as a valid identity match.
-
-The optional C(ψ) channels are deliberately kept outside semantic confidence:
-
-- relevance eligibility and `NO_MATCH` are decided first;
-- optional salience may rerank only eligible candidates;
-- write-time `c_psi` is provenance;
-- query-dependent scores are not written back to artifacts;
-- inscription rejection has a distinct outcome.
-
-A calibrated threshold or explicit production-grade `NO_MATCH` policy remains open.
-
-## Repository map
-
-| Path | Purpose |
+| Component | Current implementation |
 |---|---|
-| [`qosmos_hme_engine.py`](qosmos_hme_engine.py) | Active engine and command-line self-test |
-| [`tests/`](tests/) | Contract, determinism, bridge, and independent-audit tests |
-| [`evidence/`](evidence/) | Frozen baseline outputs and audit records |
-| [`experiments/c0_c7_harness.py`](experiments/c0_c7_harness.py) | DEVELOP factorial measurement harness |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Technical architecture |
-| [`docs/KNOWN_LIMITATIONS.md`](docs/KNOWN_LIMITATIONS.md) | Known failure boundaries |
-| [`docs/QOFT_QOSMOS_CONTEXT.md`](docs/QOFT_QOSMOS_CONTEXT.md) | Optional framework provenance and operator crosswalk |
-| [`docs/MANIFEST_SCOPE.md`](docs/MANIFEST_SCOPE.md) | What `MANIFEST.sha256` does and does not pin |
-| [`docs/RELEASE_PLAN.md`](docs/RELEASE_PLAN.md) | GitHub-native version/tag map |
-| [`skills/hme/SKILL.md`](skills/hme/SKILL.md) | Portable agent-facing contract |
+| Encoding | Resample a numeric item, apply an optional Hann window, normalize, and construct a 2D pattern from an FFT spectral outer product |
+| Storage | Add a weighted pattern to a bounded patch of a complex-valued grid |
+| Ledger | Retain processed item vectors, patterns, hashes, positions, operation labels, and metadata, up to a configured record limit |
+| Retrieval | Rank retained items using spatial proximity, absolute normalized inner-product similarity, and pattern correlation with the stored field |
+| Reconstruction | Inverse FFT of a field window; a separate decoded vector is a weighted average of retained item vectors |
+| Lineage | Record insertion order and artifact metadata in an in-memory graph |
+| Optional salience | Caller-supplied write weighting, eligible-candidate reranking, and low-salience rejection; disabled by default |
 
-## Agent skill
+The artifact ledger is necessary for exact identity retrieval. The graph is not cryptographically chained, and records can be evicted. See [Architecture](docs/ARCHITECTURE.md) for the algorithm and identity contract.
 
-The portable [`hme`](skills/hme/SKILL.md) Agent Skill defines the encode, retrieve, replay, telemetry, and lineage contract for the pinned HME realization. It is proprietary and does not relicense the engine. See [`docs/agent-skill.md`](docs/agent-skill.md) and [`LICENSE-NOTICE.md`](LICENSE-NOTICE.md).
+## Relationship to established work
 
-## Framework provenance
+Holographic associative memory and **Holographic Reduced Representations (HRR)** are established research areas within the broader **Vector Symbolic Architecture (VSA)** literature. They provide useful reference designs and benchmarks for HME.
 
-HME originated within the QOSMOS research stack, but it stands on its own as a deterministic memory engine. The detailed QOFT/QOSMOS operator crosswalk has been moved to [`docs/QOFT_QOSMOS_CONTEXT.md`](docs/QOFT_QOSMOS_CONTEXT.md) so the repository front door does not require prior framework vocabulary.
+HME currently uses spatial FFT-pattern superposition. Standard HRR uses circular-convolution binding and corresponding retrieval operations. HME does not yet implement that bind/unbind algebra. [Related work](docs/RELATED_WORK.md) records the distinction and primary references.
 
-Those mappings describe provenance and compatibility only. They do not promote HME into canon, validate QOFT, or broaden claims beyond this tested realization.
+## Evidence and limitations
+
+The extraction preserves the earlier memory core's numerical encoding and ranking, checked against the archived implementation under identical inputs. The `hme-v3` schema deliberately changes field names and artifact IDs. [Migration](docs/MIGRATION_V3.md) describes the boundary.
+
+The [local validation record](evidence/standalone_validation.json) reports 21 standalone tests and 11 historical tests passing. The [v3 audit](evidence/hme_audit_v3.json) reproduces the original top-1 counts: 128/128 at noise 0–0.25, 119/128 at 0.5, and 59/128 at 1.0. These are single-seed implementation checks, not comparative performance evidence.
+
+Run the retrieval and ablation audit:
+
+```bash
+python tests/hme_independent_audit.py \
+  --engine ./hme_engine.py --output outputs/hme_audit.json
+```
+
+`relevance_score` is the selected hit's base score, **not calibrated confidence**. A high score can accompany an unrelated query. `MATCH` means a candidate passed the configured relevance threshold; it does not certify that the identity is correct. The default threshold is zero.
+
+Comparative retrieval advantage, calibrated probabilities, and production persistence remain unestablished. [Evaluation plan](docs/EVALUATION_PLAN.md) specifies held-out calibration and comparisons with exact nearest-neighbor retrieval, metadata-matched controls, and HRR. [Known limitations](docs/KNOWN_LIMITATIONS.md) lists current boundaries.
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Reproducibility and source pins](docs/REPRODUCIBILITY.md)
+- [Related work](docs/RELATED_WORK.md)
+- [Evaluation plan](docs/EVALUATION_PLAN.md)
+- [Version 3 migration](docs/MIGRATION_V3.md)
+- [Portable HME agent instructions](skills/hme/SKILL.md)
+- [Historical v2.2 snapshot](archive/README.md)
 
 ## Rights and maintenance
 
-HME is **source-available proprietary software**, not open source. The [`LICENSE`](LICENSE) grants narrow local rights to install and execute unmodified copies for non-commercial evaluation, testing, and result reproduction. All other rights are reserved.
+HME is source-available proprietary software. The [license](LICENSE) permits local installation and execution of unmodified copies for non-commercial evaluation, testing, and reproduction of published results. Other rights are reserved.
 
-External code, documentation, dataset, and asset contributions are not accepted. Reproducibility reports and defect notices may be filed as GitHub issues; see [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
-Passing tests and implementation-conformance checks demonstrate only the behavior documented for this realization. They do not establish consciousness, physical collapse, or universal memory dynamics.
+The repository is owner-maintained. Reproducibility reports and defect notices are welcome through GitHub Issues; see [Contributing](CONTRIBUTING.md).

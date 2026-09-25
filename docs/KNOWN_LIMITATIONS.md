@@ -1,10 +1,12 @@
-# Known Limitations
+# Known limitations
 
-1. **Retrieval score is not calibrated confidence.** The top score is always returned when candidates exist; an unrelated query scored about `0.733` in the current audit.
-2. **No explicit rejection state.** The engine lacks a calibrated `NO_MATCH` / `UNKNOWN` policy.
-3. **Artifact identity is ledger-dependent.** Field-only reconstruction does not recover ledger identity.
-4. **Partial string queries are unreliable.** Symbol/string matching should not be treated as semantic retrieval without additional tests.
-5. **Same internal engine identity across two source hashes.** The active conformance source and preserved pre-conformance source both report `qosmos_hme_v2.2.0`; provenance must use hashes.
-6. **Fixed thresholds are realization-local.** Collapse defaults are not universal constants and require calibration under scale or distribution changes.
-7. **Optional core bindings may fall back.** Missing QOSMOS modules activate local fallback classes; the runtime should log which binding path is active when used in a larger system.
-8. **No cross-realization generalization.** Results apply to the tested source and configuration unless a typed bridge and validation support broader inference.
+- Retrieval scans retained records and depends on their cached vectors and patterns. Exact identification is not field-only.
+- Scores are heuristic and uncalibrated. The default relevance threshold admits any candidate; unrelated queries can receive substantial scores.
+- String hashing supplies repeatable vectors, not language semantics.
+- The encoder and query path apply different preprocessing, and absolute similarity cannot distinguish sign/global phase reversal.
+- Record eviction leaves field residue. Lineage can grow beyond the retained record limit and is not automatically synchronized by direct storage merge/clear calls.
+- IDs contain truncated hashes over selected fields. Records are mutable, metadata is not authenticated, and lineage is not a Merkle DAG or tamper-evident log.
+- NPZ export is not a complete reloadable checkpoint.
+- Floating-point byte hashes are environment-sensitive. Pin Python, NumPy, platform, and source when reproducing results.
+- Optional salience channels are experimental and disabled by default. No comparative efficacy or calibrated probability is claimed.
+- HRR-style binding/unbinding and production database guarantees are not implemented.

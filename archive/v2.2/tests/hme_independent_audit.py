@@ -2,10 +2,10 @@
 """
 hme_independent_audit.py
 ========================
-Independent retrieval and ablation audit for standalone HME.
+Independent audit harness for the current QOSMOS HME typed realization.
 
-This script imports
-hme_engine.py and tests the implementation as written.
+This script does not redefine HME and does not amend QOFT canon. It imports
+qosmos_hme_engine.py and tests the implementation as written.
 
 Tests
 -----
@@ -20,11 +20,11 @@ Tests
 Expected layout
 ---------------
 Option A:
-    hme_engine.py
+    qosmos_hme_engine.py
     hme_independent_audit.py
 
 Option B:
-    core/hme_engine.py
+    core/qosmos_hme_engine.py
     hme_independent_audit.py
 
 Run
@@ -32,7 +32,7 @@ Run
     python hme_independent_audit.py
 
 Or point directly to the engine file:
-    python hme_independent_audit.py --engine ./core/hme_engine.py
+    python hme_independent_audit.py --engine ./core/qosmos_hme_engine.py
 
 Save a JSON report:
     python hme_independent_audit.py --output hme_audit_report.json
@@ -45,7 +45,6 @@ from __future__ import annotations
 import argparse
 import copy
 import importlib
-import hashlib
 import importlib.util
 import json
 import platform
@@ -66,13 +65,13 @@ DEFAULT_NOISE_LEVELS = (0.0, 0.05, 0.10, 0.25, 0.50, 1.00)
 
 
 def load_engine_module(engine_path: str | None) -> ModuleType:
-    """Load hme_engine from a path or from normal Python imports."""
+    """Load qosmos_hme_engine from a path or from normal Python imports."""
     if engine_path:
         path = Path(engine_path).expanduser().resolve()
         if not path.is_file():
             raise FileNotFoundError(f"HME engine not found: {path}")
 
-        spec = importlib.util.spec_from_file_location("hme_engine_audit", path)
+        spec = importlib.util.spec_from_file_location("qosmos_hme_engine_audit", path)
         if spec is None or spec.loader is None:
             raise ImportError(f"Could not create an import spec for: {path}")
 
@@ -82,7 +81,7 @@ def load_engine_module(engine_path: str | None) -> ModuleType:
         return module
 
     errors: list[str] = []
-    for module_name in ("core.hme_engine", "hme_engine"):
+    for module_name in ("core.qosmos_hme_engine", "qosmos_hme_engine"):
         try:
             return importlib.import_module(module_name)
         except Exception as exc:  # Preserve both failure paths for diagnosis.
@@ -90,7 +89,7 @@ def load_engine_module(engine_path: str | None) -> ModuleType:
 
     joined = "\n  ".join(errors)
     raise ImportError(
-        "Could not import hme_engine. Put this script beside the engine, "
+        "Could not import qosmos_hme_engine. Put this script beside the engine, "
         "run it from the repository root, or pass --engine PATH.\n"
         f"Import attempts:\n  {joined}"
     )
@@ -104,12 +103,12 @@ def build_numeric_engine(
     memory_size: int,
     vector_dimension: int,
     position: tuple[int, int],
-    strength: float,
+    recursive_factor: float,
 ) -> tuple[Any, list[str]]:
     """Create one engine and encode every vector at the same location."""
-    engine_class = getattr(engine_module, "HMEEngine", None)
+    engine_class = getattr(engine_module, "QOSMOSHMEEngine", None)
     if engine_class is None:
-        raise AttributeError("Engine module has no HMEEngine class")
+        raise AttributeError("Engine module has no QOSMOSHMEEngine class")
 
     engine = engine_class(
         memory_size=memory_size,
@@ -122,9 +121,9 @@ def build_numeric_engine(
         artifact = engine.encode_memory(
             vector,
             position,
-            strength=strength,
+            recursive_factor=recursive_factor,
             tag=f"audit:numeric:{index:04d}",
-            operation="write",
+            glyph="Σ◯",
             metadata={"audit_index": index, "audit_kind": "numeric"},
             t=index,
         )
@@ -165,7 +164,7 @@ def top1_accuracy(
                     "index": index,
                     "expected_artifact_id": expected_id,
                     "returned_artifact_id": returned_id,
-                    "relevance_score": float(retrieval.relevance_score),
+                    "confidence": float(retrieval.confidence),
                 }
             )
 
@@ -187,7 +186,7 @@ def deterministic_checks(
     memory_size: int,
     vector_dimension: int,
     position: tuple[int, int],
-    strength: float,
+    recursive_factor: float,
 ) -> tuple[Any, list[str], dict[str, Any]]:
     """Encode the same dataset twice and compare artifacts and fields."""
     engine_a, ids_a = build_numeric_engine(
@@ -197,7 +196,7 @@ def deterministic_checks(
         memory_size=memory_size,
         vector_dimension=vector_dimension,
         position=position,
-        strength=strength,
+        recursive_factor=recursive_factor,
     )
     engine_b, ids_b = build_numeric_engine(
         engine_module,
@@ -206,7 +205,7 @@ def deterministic_checks(
         memory_size=memory_size,
         vector_dimension=vector_dimension,
         position=position,
-        strength=strength,
+        recursive_factor=recursive_factor,
     )
 
     payload_hashes_a = [
@@ -316,7 +315,7 @@ def field_vs_ledger_ablation(
         "ledger_erased_field_preserved": {
             "retained_field_norm": retained_field_norm,
             "hit_count": len(retrieval.hits),
-            "relevance_score": float(retrieval.relevance_score),
+            "confidence": float(retrieval.confidence),
             "decoded_surface_norm": float(np.linalg.norm(retrieval.decoded_surface)),
             "decoded_vector_norm": float(np.linalg.norm(retrieval.decoded_vector)),
         },
@@ -332,7 +331,7 @@ def symbol_probe(
     position: tuple[int, int],
 ) -> dict[str, Any]:
     """Show exact-symbol retrieval and the behavior of partial text cues."""
-    engine_class = getattr(engine_module, "HMEEngine")
+    engine_class = getattr(engine_module, "QOSMOSHMEEngine")
     engine = engine_class(
         memory_size=memory_size,
         encoding_resolution=vector_dimension,
@@ -345,8 +344,8 @@ def symbol_probe(
         artifact = engine.encode_memory(
             symbol,
             position,
-            strength=0.15,
-            operation="write",
+            recursive_factor=0.15,
+            glyph="Σ◯",
             metadata={"audit_index": index, "audit_kind": "symbol"},
             t=index,
         )
@@ -369,7 +368,7 @@ def symbol_probe(
                 "query": query,
                 "returned_symbol": returned_symbol,
                 "correct_exact_match": returned_symbol == query,
-                "relevance_score": float(retrieval.relevance_score),
+                "confidence": float(retrieval.confidence),
                 "score_breakdown": (
                     {
                         "distance": float(hit.distance_score),
@@ -400,7 +399,7 @@ def unrelated_query_probe(
     hit = retrieval.hits[0] if retrieval.hits else None
     return {
         "hit_count": len(retrieval.hits),
-        "relevance_score": float(retrieval.relevance_score),
+        "confidence": float(retrieval.confidence),
         "top_hit": (
             {
                 "artifact_id": hit.artifact_id,
@@ -413,7 +412,7 @@ def unrelated_query_probe(
             else None
         ),
         "interpretation": (
-            "The relevance_score is the selected hit's base relevance score; "
+            "The current confidence is the highest available combined score; "
             "this probe does not treat it as a calibrated probability."
         ),
     }
@@ -433,7 +432,7 @@ def run_audit(args: argparse.Namespace) -> dict[str, Any]:
         memory_size=args.memory_size,
         vector_dimension=args.dimension,
         position=position,
-        strength=args.gain,
+        recursive_factor=args.gain,
     )
 
     retrieval_results = []
@@ -453,15 +452,13 @@ def run_audit(args: argparse.Namespace) -> dict[str, Any]:
 
     module_path = getattr(engine_module, "__file__", None)
     report = {
-        "audit": "HME independent retrieval and ablation harness",
-        "status": "Experimental implementation audit; no comparative efficacy claim",
+        "audit": "QOSMOS HME independent retrieval and ablation harness",
+        "status": "DEVELOP typed-realization test; not a canon or physics test",
         "environment": {
             "python": platform.python_version(),
             "numpy": np.__version__,
             "engine_module": engine_module.__name__,
             "engine_path": str(module_path) if module_path else None,
-            "engine_sha256": hashlib.sha256(Path(module_path).read_bytes()).hexdigest() if module_path else None,
-            "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         },
         "configuration": {
             "seed": args.seed,
@@ -469,7 +466,7 @@ def run_audit(args: argparse.Namespace) -> dict[str, Any]:
             "vector_dimension": args.dimension,
             "memory_size": args.memory_size,
             "position": list(position),
-            "strength": args.gain,
+            "recursive_factor": args.gain,
             "noise_levels": [float(value) for value in args.noise],
         },
         "determinism": deterministic,
@@ -501,11 +498,11 @@ def run_audit(args: argparse.Namespace) -> dict[str, Any]:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Independent audit harness for hme_engine.py"
+        description="Independent audit harness for qosmos_hme_engine.py"
     )
     parser.add_argument(
         "--engine",
-        help="Path to hme_engine.py. Optional if importable normally.",
+        help="Path to qosmos_hme_engine.py. Optional if importable normally.",
     )
     parser.add_argument("--output", help="Optional JSON report path")
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
