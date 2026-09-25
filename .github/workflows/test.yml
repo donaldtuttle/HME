@@ -32,14 +32,24 @@ jobs:
       - name: Built-in self-test
         run: hme --self-test
       - name: Pytest
-        run: python -m pytest -q
+        run: python -m pytest -q --junitxml=outputs/current-tests.xml
       - name: Runtime example
-        run: python examples/runtime_demo.py
+        run: python examples/runtime_demo.py > outputs/runtime-demo.json
       - name: Retrieval audit
         run: python tests/hme_independent_audit.py --engine ./hme_engine.py --output outputs/hme_audit.json
       - name: Historical source and behavior
         working-directory: archive/v2.2
         run: |
           sha256sum --check SOURCE_PINS.sha256
-          python -m pytest -q
+          python -m pytest -q --junitxml=../../outputs/historical-tests.xml
           python integrations/sfd_to_hme_bridge.py --output outputs/sfd_hme_bridge.json
+      - name: Retain results for this commit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hme-results-${{ github.sha }}-py${{ matrix.python-version }}
+          path: |
+            outputs/*.xml
+            outputs/*.json
+            archive/v2.2/outputs/sfd_hme_bridge.json
+          if-no-files-found: warn
