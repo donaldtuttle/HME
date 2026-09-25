@@ -2,6 +2,8 @@
 
 ## 3.1.0 — restore optional field dynamics
 
+- Add a fresh current-release evidence bundle with five-seed retrieval results, per-tick runtime observations, explicit source/collector hashes, and separately labelled historical tests. Retain CI results as downloadable artifacts and correct the README version badge.
+
 - Restore state updates, diagnostic projections, thresholded phase locking, magnitude quantization, event lineage and finalized tick telemetry in `hme_runtime.py`.
 - Restore automatic field-derived `write_salience` production and connect it to the existing optional gain/ranking/rejection controls.
 - Add `AgentRuntime` with explicit history, activity, neighbor-transfer, bias and logger adapters, plus plain host/agent binding.

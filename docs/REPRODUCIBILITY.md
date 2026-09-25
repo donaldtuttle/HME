@@ -9,6 +9,7 @@ python hme_engine.py --self-test
 python -m pytest -q
 python tests/hme_independent_audit.py --engine ./hme_engine.py --output outputs/hme_audit.json
 python examples/runtime_demo.py
+python scripts/collect_current_evidence.py --output outputs/current_release_v3_1.json
 ```
 
 The tests compare the extracted core with the byte-preserved v2.2 engine under the same numeric/string inputs, boundary placements, noise queries, and all eight salience switch combinations. They compare fields, processed payloads, patterns, scores, decoded outputs, and candidate order after translating artifact IDs. Schema differences are tested separately.
@@ -18,3 +19,11 @@ Install `.[test,legacy-test,visualization]` to include raster/bridge and plottin
 Audit output records Python, NumPy, engine and harness hashes, configuration, seed, deterministic checks, linear-superposition reconstruction, noise sweeps, and field/ledger ablations. It supplies implementation evidence, not a nearest-neighbor comparison or calibrated confidence.
 
 Historical evidence remains inside its complete archive. See [archive instructions](../archive/README.md) to rerun the original tests and bridge. Do not compare a v3 artifact ID with a v2.2 golden ID. Numeric-byte hashes may vary across numerical backends even when rankings and scores agree.
+
+The [evidence index](EVIDENCE.md) maps each saved report to its tested version.
+The current-release collector reruns both test suites separately, the unchanged
+retrieval harness on five fixed seeds, and 20 short current-runtime traces. It
+requires the three engine modules to match the named Git commit and source pins;
+the collector's own hash is recorded separately. It aborts on failed or skipped
+tests. Retrieve current CI outputs from the workflow's `hme-results-*` artifact;
+those files belong to the workflow's commit and are not copied from saved reports.

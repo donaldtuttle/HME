@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/donaldtuttle/HME/actions/workflows/test.yml/badge.svg)](https://github.com/donaldtuttle/HME/actions/workflows/test.yml)
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB)
-![Version 3.0.0](https://img.shields.io/badge/version-3.0.0-2563EB)
+![Version 3.1.0](https://img.shields.io/badge/version-3.1.0-2563EB)
 ![Status: alpha](https://img.shields.io/badge/status-alpha-F59E0B)
 
 HME is a standalone experimental memory engine that combines **complex-valued pattern storage, an artifact ledger, and similarity-ranked retrieval**. It runs on Python and NumPy.
@@ -91,17 +91,37 @@ HME currently uses spatial FFT-pattern superposition. Standard HRR uses circular
 
 The extraction preserves the earlier memory core's numerical encoding and ranking, checked against the archived implementation under identical inputs. The `hme-v3` schema deliberately changes field names and artifact IDs. [Migration](docs/MIGRATION_V3.md) describes the boundary.
 
-The [local validation record](evidence/standalone_validation.json) reports 21 standalone tests and 11 historical tests passing. The [v3 audit](evidence/hme_audit_v3.json) reproduces the original top-1 counts: 128/128 at noise 0–0.25, 119/128 at 0.5, and 59/128 at 1.0. These are single-seed implementation checks, not comparative performance evidence.
+The [current v3.1 results](evidence/current_release_v3_1.json) come from a fresh
+run against source commit `935b0d0`, with exact engine/harness hashes recorded.
+All **94 active tests** passed. The **11 archived tests** also passed, separately
+labelled as v2.2 preservation checks.
 
-Those are the preserved 3.0 extraction records. The separate [3.1 restoration
-report](evidence/runtime_restoration_validation.json) records controller/diffusion
-parity checks against the frozen source, deterministic replay, event integrity,
-the signature bridge and visualization checks. Restoration does not establish
-that these mechanisms improve retrieval.
+The current memory core's retrieval sweep uses five preselected seeds, 128
+Gaussian item vectors per seed, and the same position for all items:
 
-Run the retrieval and ablation audit:
+| Query noise sigma | Correct / total | Mean top-1 accuracy |
+|---|---:|---:|
+| 0, 0.05, 0.10, 0.25 (each) | 640 / 640 | 100% |
+| 0.50 | 596 / 640 | 93.1% |
+| 1.00 | 282 / 640 | 44.1% |
+
+Raw runs and approximate intervals across seeds are included in the report.
+Twenty current-runtime runs also record per-tick salience, stored gains, events,
+state hashes and exact-query outcomes. These are functional observations; the
+enabled write gains saturate at their ceiling under this drive. They do not
+establish selective prioritization or comparative retrieval advantage.
+
+The [evidence index](docs/EVIDENCE.md) distinguishes current-release results,
+the [3.1 restoration checks](evidence/runtime_restoration_validation.json),
+the preserved [3.0 extraction validation](evidence/standalone_validation.json)
+and [3.0 retrieval audit](evidence/hme_audit_v3.json), and the v2.2 archive.
+Older results remain available under their original source pins.
+
+Reproduce the current-release bundle (install `.[test,legacy-test,visualization]`),
+or run the smaller single-seed audit:
 
 ```bash
+python scripts/collect_current_evidence.py --output outputs/current_release_v3_1.json
 python tests/hme_independent_audit.py \
   --engine ./hme_engine.py --output outputs/hme_audit.json
 ```
@@ -115,6 +135,7 @@ Comparative retrieval advantage, calibrated probabilities, and production persis
 - [Architecture](docs/ARCHITECTURE.md)
 - [Optional field runtime](docs/RUNTIME.md)
 - [Reproducibility and source pins](docs/REPRODUCIBILITY.md)
+- [Evidence by version](docs/EVIDENCE.md)
 - [Related work](docs/RELATED_WORK.md)
 - [Evaluation plan](docs/EVALUATION_PLAN.md)
 - [Version 3 migration](docs/MIGRATION_V3.md)

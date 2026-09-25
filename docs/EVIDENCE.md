@@ -1,0 +1,72 @@
+# Which engine does each result describe?
+
+| Report | Tested implementation | Meaning |
+|---|---|---|
+| [Current release](../evidence/current_release_v3_1.json) | v3.1 engine files at `935b0d0`, hash-checked against that commit | Fresh 94-test active run; five-seed memory retrieval experiment; 20 current-runtime traces; separate 11-test historical check |
+| [Runtime restoration](../evidence/runtime_restoration_validation.json) | v3.1 controllers/dynamics, pinned by source hashes | Numerical comparisons with the archived implementation, event integrity, bridge and packaging checks |
+| [Standalone validation](../evidence/standalone_validation.json) | v3.0 extraction, pinned by source hashes | Original 21-test standalone run, separate archived tests, and extraction checks |
+| [Earlier v3 retrieval audit](../evidence/hme_audit_v3.json) | `hme_engine.py` from v3.0 | Actual single-seed execution of the extracted core; not copied v2.2 measurements |
+| [Archived evidence](../archive/v2.2/evidence/) | v2.2 and its pinned historical protocols | Historical results, retained unchanged |
+
+The package and optional runtime are version 3.1.0. The memory component's
+`ENGINE_ID` still says `hme-3.0.0` because its source is byte-identical to 3.0.
+The fresh report records both identities explicitly. New runs can reproduce old
+numbers when the numerical code, inputs and environment are unchanged.
+
+## Fresh v3.1 retrieval data
+
+Five seeds were specified in the collector before execution: 7312026 through
+7312030. Each run stores 128 independent Gaussian vectors of dimension 16 at
+position (32, 32) in a 64-by-64 memory field. Query noise is additive Gaussian
+noise with the reported sigma. Scores use the current default memory policy.
+
+| Sigma | Correct per seed, out of 128 | Pooled accuracy | Approximate 95% interval for mean across seeds |
+|---|---|---:|---|
+| 0, 0.05, 0.10, 0.25 (each) | 128, 128, 128, 128, 128 | 100% | All five runs correct; no population guarantee |
+| 0.50 | 119, 117, 120, 122, 118 | 93.1% | 91.3–95.0% |
+| 1.00 | 59, 60, 49, 60, 54 | 44.1% | 39.4–48.7% |
+
+The intervals use a Student-t estimate over five per-seed accuracies, with four
+degrees of freedom. Five seeds provide limited precision; items sharing a field
+are not treated as independent experiment replicates. Zero observed seed
+variance at low noise produces a zero-width computed interval, not proof of
+perfect population accuracy. Full audit outputs retain determinism checks,
+field/ledger ablations, exact-string probes and unrelated-query probes.
+
+These results are for synthetic numeric inputs at one load and position. They
+do not demonstrate semantic retrieval, field-only identification, or superiority
+to nearest-neighbor retrieval. The scores remain uncalibrated, so no Brier/ECE
+result is presented as if they were correctness probabilities.
+
+## Fresh runtime observations
+
+Both `FieldRuntime` and `AgentRuntime` execute 16-write sequences for every seed,
+with write weighting off and on: 20 runs and 320 observed ticks. Every run records
+salience at measurement and write time, gain, event flags, event pre/post hashes,
+state/memory hashes and final exact-query identification counts.
+
+Each run produces one automatically triggered field event. Weighting changes the
+total stored gain from 1.6 to 2.4 under this input drive; all enabled writes reach
+the gain ceiling. Exact-query recall after the sequence is 16, 16, 14, 15 and 16
+out of 16 across the five seeds for each controller/weight setting. Even clean
+queries are not guaranteed to identify the originating record at this dimension
+and preprocessing. This probe confirms execution and wiring, not a retrieval
+improvement or selective prioritization effect. The conditions have different
+stored gains and are not an equal-budget efficacy comparison.
+
+## Reproduce and inspect
+
+```bash
+python -m pip install -e ".[test,legacy-test,visualization]"
+python scripts/collect_current_evidence.py --output outputs/current_release_v3_1.json
+```
+
+The collector runs the active and archived suites separately, records the tested
+commit and exact engine/harness hashes, and saves raw observations. It does not
+rewrite previous evidence. Source changes must be committed and source pins
+updated before release evidence is collected.
+
+Every CI run also retains its own JUnit reports, single-seed retrieval audit,
+runtime example output and historical bridge output as `hme-results-*` artifacts.
+CI success establishes that the checks completed; quantitative outcomes belong
+to the associated result files and source commit.
