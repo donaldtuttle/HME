@@ -3,13 +3,15 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "holographic-memory-engine"
-version = "3.0.0"
-description = "Standalone FFT-pattern associative memory with an artifact ledger and ranked retrieval"
+name = "qosmos-hme"
+version = "2.2.0"
+description = "Deterministic hybrid field-plus-ledger memory engine with reconstructive storage, auditable provenance, ranked retrieval, and lineage tracking"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
-dependencies = ["numpy>=1.24"]
+dependencies = [
+  "numpy>=1.24",
+]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: Other/Proprietary License",
@@ -21,14 +23,23 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=8"]
-legacy-test = ["pytest>=8", "Pillow>=10"]
+visual = [
+  "matplotlib>=3.7",
+  "Pillow>=10",
+]
+sfd = [
+  "Pillow>=10",
+]
+test = [
+  "pytest>=8",
+  "Pillow>=10",
+]
 
 [project.scripts]
-hme = "hme_engine:main"
+qosmos-hme = "qosmos_hme_engine:main"
 
 [tool.setuptools]
-py-modules = ["hme_engine"]
+py-modules = ["qosmos_hme_engine"]
 
 [tool.pytest.ini_options]
 addopts = "-ra"

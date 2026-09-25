@@ -1,4 +1,4 @@
-QOSMOS Holographic Memory Engine (HME)
+Holographic Memory Engine (HME)
 PROPRIETARY SOURCE-AVAILABLE LICENSE
 
 Copyright (c) 2026 Donald Tuttle. All rights reserved.

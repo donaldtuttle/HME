@@ -16,7 +16,11 @@ dist/
 outputs/
 *.jsonl
 *.npz
-hme_demo_state.json
+qosmos_hme_demo_state.json
+qosmos_hme_demo_telemetry.jsonl
+qosmos_hme_demo_events.jsonl
+/qosmos_hme_symbolic_overlay.png
+/qosmos_hme_symbolic_overlay.gif
 
 # OS metadata
 .DS_Store

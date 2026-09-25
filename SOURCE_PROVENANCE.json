@@ -1,42 +1,23 @@
 {
   "repository_target": "donaldtuttle/HME",
-  "visibility": "public",
-  "rights": "proprietary; copyright retained; all rights reserved",
-  "assembly_date": "2026-08-23",
-  "pin_reconciled": "2026-09-24",
-  "classification": "Typed Realization / DEVELOP",
-  "canonical_weight": "none",
-  "source_archive": {
-    "name": "QOFT QOSMOS HME JULY2026.zip",
-    "sha256": "6a147099bbbf4fa859a5e1378ba3929ae4cf45eb78acc89dfd9d784cec7a6776"
-  },
+  "version": "3.0.0",
+  "schema_id": "hme-v3",
+  "status": "experimental alpha",
   "active_engine": {
-    "path": "qosmos_hme_engine.py",
+    "path": "hme_engine.py",
+    "sha256": "080a20056c6c5c88e49c6307845277002ad2091a6a1d7dec66961317bc2c0167",
+    "role": "standalone_memory_engine"
+  },
+  "previous_engine": {
+    "path": "archive/v2.2/qosmos_hme_engine.py",
     "sha256": "1caff9577e8a4bdaa2b0510c79673035081a967a25f15067bfa8ce99ccca6d11",
-    "byte_preserved": false,
-    "role": "live_active_engine",
-    "note": "Hash of current main qosmos_hme_engine.py. Includes DEVELOP default-off C(ψ) overlay. Not the 2026-08-23 ingest byte image."
-  },
-  "previous_public_baseline": {
-    "path": "qosmos_hme_engine.py",
-    "sha256": "f81fb49e265d83f5206220584dfc6cabf28aeee5266aca33654182be1549c080",
-    "byte_preserved": true,
-    "role": "previous_public_baseline",
-    "note": "2026-08-23 ingest / earlier public baseline. Not the live engine file on main."
-  },
-  "legacy_engine": {
-    "path": "legacy/qosmos_hme_engine_pre_conformance.py",
-    "sha256": "6780f974db55380fb4841d3b35c135be10eac8e0c79bc55ff7ff349138febaa6",
     "byte_preserved": true
   },
-  "symbolic_field_dynamics": {
-    "path": "integrations/symbolic_field_dynamics.py",
-    "sha256": "75500eb65b8ab7184454a6aa3475eb1fa60fdd2142aa1239866523ff3f41c406",
+  "archive": {
+    "path": "archive/v2.2",
+    "source_commit": "db01a9ffb9b618db74c974fe630c143110400b2d",
+    "tracked_files": 60,
     "byte_preserved": true
   },
-  "audit_harness": {
-    "path": "tests/hme_independent_audit.py",
-    "sha256": "c6a9c13f2304fbef0de6cf1ba9ab44b664bc6eb0d1695fda2849ea41c81eb21d",
-    "repository_change": "two write-glyph literals Θλ -> Σ◯; algorithms unchanged"
-  }
+  "compatibility": "Storage and retrieval numerics preserved; public vocabulary and artifact identity schema changed."
 }
