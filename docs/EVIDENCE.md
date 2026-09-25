@@ -2,6 +2,7 @@
 
 | Report | Tested implementation | Meaning |
 |---|---|---|
+| [Candidate-specific field retrieval](../experiments/field_retrieval_v1/REPORT.md) | Pinned default encoder/writer and new experimental readout; frozen at `6d83732` | Thirty fresh seeds and five layouts; primary hybrid 50.29% versus signed NN 52.03%; controls pass, practical gain and Stage 3 gate fail |
 | [Preregistered sign ablation](../experiments/sign_ablation_v1/REPORT.md) | Default core and one-expression experimental signed variant; protocol frozen at `ca25cc3` | Thirty fresh seeds; sign change adds 9.79 points; signed HME versus NN +0.83 points; noninferiority supported, equivalence and superiority not established |
 | [Preregistered NN comparison](../experiments/nn_baseline_v1/REPORT.md) | Unchanged v3.1 memory core; protocol/evaluator frozen at `88520eb` before execution | Ten seeds; HME 47.73% versus signed-cosine NN 57.27% in the primary high-noise condition; all conditions, paired intervals, costs and raw observations published |
 | [Current release](../evidence/current_release_v3_1.json) | v3.1 engine files at `935b0d0`, hash-checked against that commit | Fresh 94-test active run; five-seed memory retrieval experiment; 20 current-runtime traces; separate 11-test historical check |
@@ -49,9 +50,35 @@ secondary symmetric-preprocessing, high-noise condition, signed HME trailed
 NN by 1.33 points (descriptive 95% interval [0.70, 2.01]).
 
 All seeds, conditions and costs are published without deviations. The six new
-correctness tests bring the current active suite to 109. This is evidence for a
+correctness tests brought the active suite to 109 at that stage. This is evidence for a
 specific experimental sign change, not for a query-dependent field readout or
 an encoder redesign. Those require separate registration and evaluation.
+
+## Candidate-specific field retrieval
+
+[HME-NN-2B](../experiments/field_retrieval_v1/REPORT.md) uses thirty fresh seeds,
+five overlap layouts and a query-dependent field patch at each candidate's
+independently assigned position. All searches scan every candidate without the
+target address. The encoder/writer is unchanged, and every arm retains the
+same provenance and address map.
+
+The registered primary hybrid scored 50.29% versus signed NN's 52.03%, a paired
+difference of -1.74 points (95% interval [-2.42, -1.09]); field-only scored 24.04%.
+The +2-point practical-gain criterion failed. At zero overlap the hybrid exactly
+reproduced signed NN and field-only reproduced absolute NN, as predicted. At
+the shared position, hybrid ranks again matched NN and field-only tied all
+identities. All cached/uncached and antipodal-ceiling checks passed.
+
+Costs were measured for compact experimental snapshots with the same ranked-output
+contract: cached hybrid used 9.34 times NN's accounted storage and 4.21 times its
+query latency at the primary layout. These ratios describe different readout
+implementations and outputs from the earlier default-API experiments, so they
+must not be presented as directly comparable speedups over those reports.
+
+All forty ordinary-data conditions, ten polarity-stress conditions, per-query
+outcomes, reconstruction diagnostics and costs are published without deviations.
+The eight new correctness tests bring the active suite to 117. The registered
+Stage 3 accuracy gate did not pass; no encoder redesign was performed.
 
 ## Fresh v3.1 retrieval data
 
