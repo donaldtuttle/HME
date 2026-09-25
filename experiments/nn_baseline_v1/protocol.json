@@ -1,0 +1,75 @@
+{
+  "protocol_id": "HME-NN-1",
+  "version": "1.0",
+  "status": "preregistered before evaluation execution",
+  "engine_source_commit": "a6766e46f092f7cfaed1fdd57761feeadb40b74a",
+  "engine_sha256": "080a20056c6c5c88e49c6307845277002ad2091a6a1d7dec66961317bc2c0167",
+  "package_version": "3.1.0",
+  "seeds": [104729, 130363, 155921, 181081, 205759, 231701, 257053, 282427, 308081, 333667],
+  "dataset": {
+    "distribution": "independent standard-normal real vectors",
+    "items_per_seed": 128,
+    "dimension": 16,
+    "memory_size": 64,
+    "position": [32, 32],
+    "write_strength": 0.1,
+    "noise_sigmas": [0.0, 0.25, 0.5, 1.0],
+    "noise_rng": "default_rng(SeedSequence([seed, 1, noise_index]))",
+    "unmatched_queries_per_seed": 16,
+    "unmatched_rng": "default_rng(SeedSequence([seed, 2]))",
+    "stored_preprocessing": "HME default: Hann window then L2 normalization",
+    "query_modes": {
+      "native": "normalize corrupted raw vector, matching the existing HME API",
+      "symmetric": "apply the same Hann window to corrupted raw vector, then normalize"
+    },
+    "split": "No fitting or tuning. All ten registered seeds are evaluation replicates; correctness fixtures use other seeds and smaller arrays."
+  },
+  "arms": ["hme", "nn_cosine", "nn_absolute", "hme_field_erased"],
+  "arm_definitions": {
+    "hme": "Unmodified HMEEngine default ranker, salience off, relevance threshold zero.",
+    "nn_cosine": "Exact signed cosine over copies of the exact processed vectors retained by HME; stable insertion-order ties.",
+    "nn_absolute": "Exact absolute cosine over the same processed vectors; stable insertion-order ties.",
+    "hme_field_erased": "Deep copy of HME with only the memory field zeroed. Records, cached vectors, patterns, metadata and lineage retained."
+  },
+  "side_information": "All records and queries use the same position. All arms retain identical artifact records and lineage. No target ID is passed to a search method. No tags, IDs or metadata are used to select a target.",
+  "budget": {
+    "persistent_bytes_cap_per_arm": 4194304,
+    "policy": "Same candidate set and same maximum persistent storage cap, not artificial padding to equal consumption. NN keeps copies of HME records and lineage for equal provenance service. Record actual consumption; do not infer an equal-byte capacity frontier.",
+    "accounting": "Recursive CPython getsizeof over each arm's reachable owned object graph, including arrays/bases, cached patterns, field, records and lineage; count object aliases once. Also report unique retained numeric array bytes. Excludes interpreter, shared code/libraries, allocator overhead and transient query workspace."
+  },
+  "primary": {
+    "condition": {"query_mode": "native", "noise_sigma": 1.0},
+    "metric": "top1_accuracy",
+    "comparison": "hme minus nn_cosine",
+    "minimum_mean_benefit": 0.02,
+    "advantage_rule": "Both arms must fit the common cap, and the lower endpoint of the paired-seed 95% bootstrap interval must exceed +0.02. Otherwise this experiment does not support the registered practical-advantage claim.",
+    "worse_rule": "An upper endpoint below zero supports lower HME accuracy in this registered condition. Other non-passing outcomes are inconclusive for the practical-advantage claim."
+  },
+  "secondary": {
+    "metrics": ["top1_accuracy", "top5_accuracy", "mean_reciprocal_rank"],
+    "conditions": "All registered noise levels and both query modes; contrasts with absolute NN and field-erased HME are descriptive mechanism checks.",
+    "unmatched_queries": "Fresh Gaussian vectors with no designated stored target, not a distribution-shift test. Report acceptance/false-acceptance fraction at default policies; no calibrated rejection claim.",
+    "field_only_check": "One fresh query per seed after records and cached vectors/patterns are removed, field retained. Report hit count and decoded surface norm; this is a structural check, not an identity-retrieval arm."
+  },
+  "statistics": {
+    "unit": "Independent dataset/noise seed; do not treat queries sharing a field as independent replicates.",
+    "bootstrap_resamples": 20000,
+    "bootstrap_seed": 8675309,
+    "interval": "Two-sided 2.5/97.5 percentile bootstrap over ten paired seed-level metrics.",
+    "multiplicity": "One confirmatory primary comparison. All other intervals are descriptive, without multiplicity adjustment; no subgroup may replace the primary.",
+    "zero_variance": "Zero-width intervals when all ten values agree describe the observed seeds and do not prove perfect population performance."
+  },
+  "latency": {
+    "condition": {"query_mode": "native", "noise_sigma": 1.0},
+    "queries_per_seed": 32,
+    "warmup_queries_per_arm": 4,
+    "repetitions": 3,
+    "top_k": 5,
+    "thread_environment": {"OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1", "VECLIB_MAXIMUM_THREADS": "1", "NUMEXPR_NUM_THREADS": "1"},
+    "measurement": "perf_counter_ns around one online search call, including query preprocessing. Rotate arm order by (query index + repetition) modulo four. Summarize per-seed median and p95; report paired HME/NN median ratios. HME's public API also computes reconstructed outputs, which NN does not supply. No intrinsic algorithmic-speed claim."
+  },
+  "stopping": "Run all ten seeds and every registered cell once. No early stopping, seed replacement, parameter tuning or outcome-driven exclusions. On a technical failure, retain an explicit failure record; any fix must be documented and committed before a complete rerun, with the original registration preserved.",
+  "prior_information": "Existing HME-only audits at other seeds informed the choice of noise levels. No nearest-neighbor outcomes on the registered seeds have been inspected before registration.",
+  "excluded_claims": ["General semantic retrieval", "Calibrated confidence or rejection", "HRR/VSA superiority", "Approximate-index tradeoffs", "Equal-byte capacity frontier", "Effectiveness of optional field controllers or salience", "Production persistence"],
+  "registration": "Push protocol, evaluator and correctness fixtures to GitHub before running registered seeds. Pass that public commit to --registration-commit. Evaluator verifies frozen protocol, evaluator, tests and engine bytes via git show and records source/data hashes. Preserve the registration commit in history."
+}

@@ -1,6 +1,10 @@
 # Evaluation plan
 
-Status: proposed work, not implemented calibration or comparative results.
+Status: the first exact nearest-neighbor comparison is specified in
+[HME-NN-1](../experiments/nn_baseline_v1/PROTOCOL.md). Its protocol, evaluator and
+correctness fixtures are published before executing the registered seeds.
+Comparative results are pending; calibration and the remaining stages below
+remain proposed work.
 
 ## Retrieval comparison
 
