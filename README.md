@@ -89,6 +89,36 @@ HME currently uses spatial FFT-pattern superposition. Standard HRR uses circular
 
 ## Evidence and limitations
 
+The first **preregistered nearest-neighbor comparison found a negative result**.
+[HME-NN-1](experiments/nn_baseline_v1/REPORT.md) froze its protocol and evaluator
+on GitHub before running ten new seeds, with 128 items, dimension 16, matched
+inputs and preprocessing, identical provenance information, and a common 4 MiB
+persistent-storage cap.
+
+At the primary high-noise condition (sigma 1.0, native query preprocessing):
+
+| Method | Mean top-1 accuracy |
+|---|---:|
+| Current HME | 47.73% |
+| Exact signed-cosine nearest neighbors | 57.27% |
+
+HME's paired difference was **-9.53 percentage points**, with a 95% seed-bootstrap
+interval of **[-10.70, -8.28]**. The registered requirement was a lower interval
+endpoint above +2 points. HME used **4.48 times** the accounted persistent storage.
+Its public retrieval API was **68.9 times** slower by the median paired latency
+ratio on this host, although HME also constructs decoded outputs that NN does not.
+Erasing the field gave the same rankings as absolute-cosine NN; the full field's
+primary-condition gain over that control was +0.70 points, with an interval
+crossing zero. No reliable field benefit was established there.
+
+**For this tested synthetic identity-retrieval task, use exact cosine NN with the
+same provenance records.** HME remains an experimental system for studying field
+storage and retrieval. This comparison does not settle other loads, dimensions,
+spatial cues, semantic data or optional runtime policies. The report includes
+all registered conditions, raw ranks, storage and timing observations, and the
+frozen reproduction command. All ten seeds completed without deviations;
+the active suite now has **103 passing tests**.
+
 The extraction preserves the earlier memory core's numerical encoding and ranking, checked against the archived implementation under identical inputs. The `hme-v3` schema deliberately changes field names and artifact IDs. [Migration](docs/MIGRATION_V3.md) describes the boundary.
 
 The [current v3.1 results](evidence/current_release_v3_1.json) come from a fresh
@@ -128,7 +158,11 @@ python tests/hme_independent_audit.py \
 
 `relevance_score` is the selected hit's base score, **not calibrated confidence**. A high score can accompany an unrelated query. `MATCH` means a candidate passed the configured relevance threshold; it does not certify that the identity is correct. The default threshold is zero.
 
-Comparative retrieval advantage, calibrated probabilities, and production persistence remain unestablished. [Evaluation plan](docs/EVALUATION_PLAN.md) specifies held-out calibration and comparisons with exact nearest-neighbor retrieval, metadata-matched controls, and HRR. [Known limitations](docs/KNOWN_LIMITATIONS.md) lists current boundaries.
+Comparative retrieval advantage was not supported by the first registered NN
+comparison. Calibrated probabilities and production persistence remain
+unestablished. The [evaluation plan](docs/EVALUATION_PLAN.md) tracks the completed
+comparison and remaining load/dimension sweeps, held-out calibration and HRR
+comparisons. [Known limitations](docs/KNOWN_LIMITATIONS.md) lists current boundaries.
 
 ## Documentation
 
