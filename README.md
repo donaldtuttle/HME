@@ -89,6 +89,16 @@ HME currently uses spatial FFT-pattern superposition. Standard HRR uses circular
 
 ## Evidence and limitations
 
+The next application-level study, [HME-CM-1](experiments/conversation_memory_v1/PROTOCOL.md),
+now has a runnable Ollama harness for project decisions, corrections, absent
+information, project separation and task resumption. It compares a rolling
+summary, full-dimensional semantic NN, projected NN and HME's experimental
+hybrid. **No real-model outcomes are available yet.** The implementation passed
+development checks; execution awaits a local reader/embedding runtime and its
+published model pins. [Local run instructions](experiments/conversation_memory_v1/RUN_LOCAL.md)
+include the required preregistration step. This is an independent synthetic QA
+study, not a LongMemEval result or an encoder redesign.
+
 The latest experiment, [HME-NN-2B](experiments/field_retrieval_v1/REPORT.md),
 gave the field a query-dependent, candidate-specific readout and still found a
 negative primary result. Thirty new seeds covered five overlap layouts, four
@@ -171,8 +181,9 @@ All thirty seeds completed without deviations. Costs were measured again:
 signed HME's median accounted storage was 834,232 bytes versus NN's 186,230;
 its median paired API latency ratio was 70.4 times, with the same decoded-output
 qualification described above. The signed variant is experimental; the default
-engine remains unchanged. That stage had **109 passing tests**; the active suite
-now has **117** after the Stage 2 correctness checks. Candidate-specific field
+engine remains unchanged. That stage had **109 passing tests**, and Stage 2 had
+**117**. The active suite now has **128** after conversation-harness development
+checks. Candidate-specific field
 retrieval is evaluated in HME-NN-2B above; its
 [design rationale](docs/FIELD_RETRIEVAL_DESIGN.md) is retained.
 

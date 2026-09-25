@@ -41,6 +41,29 @@ times the online query latency of matched-output NN at the primary layout.
 A polarity-preserving encoder is a separate future experiment and is not
 triggered automatically: the registered Stage 3 accuracy gate did not pass.
 
+## Project conversation memory: implementation ready, model execution pending
+
+[HME-CM-1](../experiments/conversation_memory_v1/PROTOCOL.md) prepares a separate
+application-level experiment: 30 scripted histories, five questions each, and
+four arms using the same reader. The arms are a rolling summary plus recent
+messages, full-dimensional semantic NN, a matched projected NN, and the existing
+candidate-specific HME hybrid. The extra full-dimensional NN arm prevents
+representation compression from creating an unfair baseline.
+
+The primary endpoint is correct short answers with the required source IDs.
+Forgotten facts, obsolete values, wrong-project values and absent-information
+failures are measured separately. Retrieval coverage and answer accuracy given
+complete retrieved evidence distinguish memory misses from reader failures.
+The protocol records reference-word budgets, actual model-token counts, raw
+requests/responses and paired history-level intervals.
+
+The hosted workspace has no reachable Ollama server or configured model access.
+Only offline contract fixtures have run. Before any held-out execution, a local
+model/encoder manifest must be generated and publicly committed along with the
+exact source. [RUN_LOCAL.md](../experiments/conversation_memory_v1/RUN_LOCAL.md)
+contains the commands. This work makes no conversation-efficacy claim and does
+not change the earlier negative results or trigger the Stage 3 encoder redesign.
+
 ## Retrieval comparison
 
 Freeze datasets, encoding, query corruption, splits, seeds, candidate counts, and primary metrics before inspecting test results. Include:

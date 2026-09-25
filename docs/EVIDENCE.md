@@ -2,6 +2,7 @@
 
 | Report | Tested implementation | Meaning |
 |---|---|---|
+| [Conversation-memory development status](../experiments/conversation_memory_v1/STATUS.md) | New Ollama harness plus existing Stage 2 experimental readout | 128 active tests pass; no real-model or held-out conversation results; runtime registration remains pending |
 | [Candidate-specific field retrieval](../experiments/field_retrieval_v1/REPORT.md) | Pinned default encoder/writer and new experimental readout; frozen at `6d83732` | Thirty fresh seeds and five layouts; primary hybrid 50.29% versus signed NN 52.03%; controls pass, practical gain and Stage 3 gate fail |
 | [Preregistered sign ablation](../experiments/sign_ablation_v1/REPORT.md) | Default core and one-expression experimental signed variant; protocol frozen at `ca25cc3` | Thirty fresh seeds; sign change adds 9.79 points; signed HME versus NN +0.83 points; noninferiority supported, equivalence and superiority not established |
 | [Preregistered NN comparison](../experiments/nn_baseline_v1/REPORT.md) | Unchanged v3.1 memory core; protocol/evaluator frozen at `88520eb` before execution | Ten seeds; HME 47.73% versus signed-cosine NN 57.27% in the primary high-noise condition; all conditions, paired intervals, costs and raw observations published |
@@ -10,6 +11,9 @@
 | [Standalone validation](../evidence/standalone_validation.json) | v3.0 extraction, pinned by source hashes | Original 21-test standalone run, separate archived tests, and extraction checks |
 | [Earlier v3 retrieval audit](../evidence/hme_audit_v3.json) | `hme_engine.py` from v3.0 | Actual single-seed execution of the extracted core; not copied v2.2 measurements |
 | [Archived evidence](../archive/v2.2/evidence/) | v2.2 and its pinned historical protocols | Historical results, retained unchanged |
+
+The conversation-memory row is implementation validation, not an accuracy report.
+It must not be used as evidence that HME prevents forgetting or unsupported answers.
 
 The package and optional runtime are version 3.1.0. The memory component's
 `ENGINE_ID` still says `hme-3.0.0` because its source is byte-identical to 3.0.
