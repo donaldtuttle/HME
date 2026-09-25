@@ -1,0 +1,20 @@
+{
+  "study": "HME-NN-3 public API cross-check",
+  "registration_commit": "7ef2789f2ce58ab67e2778a9c1fefb26f99b982d",
+  "results_commit": "5347423a276d8d123ef78844ba959d388b6aad08",
+  "seed": 26092501,
+  "sigma": 1.0,
+  "queries_per_arm": 128,
+  "hme_arms": 5,
+  "python": "3.13.5",
+  "numpy": "2.3.5",
+  "checks": {
+    "hme_default": true,
+    "hme_symmetric": true,
+    "hme_no_window": true,
+    "hme_no_window_field_erased": true,
+    "hme_no_window_signed": true,
+    "independent_scalar_raw_cosine": true
+  },
+  "note": "All 640 direct HME API predictions and 128 independent scalar raw-NN predictions exactly match published data; this is a verification, not a new efficacy study."
+}

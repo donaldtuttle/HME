@@ -27,3 +27,21 @@ requires the three engine modules to match the named Git commit and source pins;
 the collector's own hash is recorded separately. It aborts on failed or skipped
 tests. Retrieve current CI outputs from the workflow's `hme-results-*` artifact;
 those files belong to the workflow's commit and are not copied from saved reports.
+
+## Direct-checkout scripts and raw-baseline follow-up
+
+With NumPy installed, `python tests/hme_independent_audit.py` and
+`python examples/runtime_demo.py` now resolve the checkout without an editable
+installation or `PYTHONPATH`. Explicit audit `--engine PATH` remains supported.
+Isolated-interpreter tests run both scripts from unrelated working directories.
+The audit harness changed for source discovery, not its numerical calculations;
+old saved audit reports retain their original harness hashes.
+
+[HME-NN-3](../experiments/raw_vector_baseline_v1/REPORT.md) records the protocol
+commit, evaluator registration, source and dataset hashes, all 120 seed/noise
+cells and per-query predictions. Its reproduction command verifies frozen
+sources against the public evaluator registration. Use a complete Git checkout
+and a fresh output directory. Core, runtime, dynamics and archived source pins
+are unchanged. A [post-publication check](../evidence/review_crosscheck_2026_09_25.json)
+compared all queries in one registered high-noise seed with the public HME API
+and an independent scalar raw-cosine calculation in a second environment.

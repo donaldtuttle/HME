@@ -87,6 +87,42 @@ Holographic associative memory and **Holographic Reduced Representations (HRR)**
 
 HME currently uses spatial FFT-pattern superposition. Standard HRR uses circular-convolution binding and corresponding retrieval operations. HME does not yet implement that bind/unbind algebra. [Related work](docs/RELATED_WORK.md) records the distinction and primary references.
 
+## Raw-input retrieval check
+
+The [HME-NN-3 follow-up](experiments/raw_vector_baseline_v1/REPORT.md) separates
+raw cosine NN from the earlier matched-processed-vector baseline. Its protocol
+and evaluator were published before thirty fixed evaluation seeds were run.
+All 120 seed/noise cells completed, using 128 Gaussian items of dimension 16
+at one shared position.
+
+| Method | Top-1 at noise sigma 0.5 | Top-1 at noise sigma 1.0 |
+|---|---:|---:|
+| Raw signed-cosine NN | 99.43% | 74.11% |
+| Default HME | 92.14% | 42.21% |
+| HME with Hann window disabled | 99.01% | 65.65% |
+| Experimental no-window, signed HME | 99.32% | 73.93% |
+
+Disabling the window recovered 73.5% of the default-to-raw-NN high-noise gap
+(a descriptive ratio, not a causal attribution). Applying the window to queries
+too made HME worse: 28.78% at sigma 1.0. The no-window signed variant differed
+from raw NN by -0.18 percentage points (95% interval [-0.57, +0.21]); this study
+does not establish equivalence or superiority. The field-erased no-window arm
+exactly reproduced absolute-cosine rankings for every evaluated query.
+
+For numeric-vector experiments, the existing opt-out is explicit:
+
+```python
+from hme_engine import HMEConfig, HMEEngine
+memory = HMEEngine(hme_config=HMEConfig(use_hann_window=False))
+```
+
+This does not switch to signed retrieval. The signed variant is an experimental
+scoring ablation, not the production API. **The pinned storage component and its
+Hann-on default remain unchanged** to preserve earlier results and compatibility;
+a default change needs a versioned migration. For this tested identity-retrieval
+workload, raw signed-cosine NN remains the reference choice. See the
+[review response](docs/REVIEW_2026_09_25.md) for fixes and decision boundaries.
+
 ## Evidence and limitations
 
 The next application-level study, [HME-CM-1](experiments/conversation_memory_v1/PROTOCOL.md),
@@ -99,7 +135,7 @@ published model pins. [Local run instructions](experiments/conversation_memory_v
 include the required preregistration step. This is an independent synthetic QA
 study, not a LongMemEval result or an encoder redesign.
 
-The latest experiment, [HME-NN-2B](experiments/field_retrieval_v1/REPORT.md),
+The earlier field experiment, [HME-NN-2B](experiments/field_retrieval_v1/REPORT.md),
 gave the field a query-dependent, candidate-specific readout and still found a
 negative primary result. Thirty new seeds covered five overlap layouts, four
 noise levels, two preprocessing modes and a separate antipodal stress set.
@@ -129,7 +165,7 @@ workload is absent from every arm. All arms retain the same provenance records
 and fit a common 4 MiB maximum allowance. The report publishes actual bytes,
 cache construction/discard times, raw observations and all secondary results.
 
-The first **preregistered nearest-neighbor comparison found a negative result**.
+The first **preregistered matched-processed-vector comparison found a negative result**.
 [HME-NN-1](experiments/nn_baseline_v1/REPORT.md) froze its protocol and evaluator
 on GitHub before running ten new seeds, with 128 items, dimension 16, matched
 inputs and preprocessing, identical provenance information, and a common 4 MiB
@@ -182,8 +218,8 @@ signed HME's median accounted storage was 834,232 bytes versus NN's 186,230;
 its median paired API latency ratio was 70.4 times, with the same decoded-output
 qualification described above. The signed variant is experimental; the default
 engine remains unchanged. That stage had **109 passing tests**, and Stage 2 had
-**117**. The active suite now has **128** after conversation-harness development
-checks. Candidate-specific field
+**117**. The active suite had **128** after conversation-harness development
+checks and now has **138** after raw-baseline and direct-checkout regression tests. Candidate-specific field
 retrieval is evaluated in HME-NN-2B above; its
 [design rationale](docs/FIELD_RETRIEVAL_DESIGN.md) is retained.
 

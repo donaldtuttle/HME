@@ -1,8 +1,14 @@
 """NumPy-only diffusion -> field runtime -> memory retrieval example.
 
-Run after installing the project: python examples/runtime_demo.py
+Run from a source checkout: python examples/runtime_demo.py (NumPy required).
 """
 import json
+from pathlib import Path
+import sys
+
+# Direct file execution adds examples/, not the checkout root, to sys.path.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import numpy as np
 
