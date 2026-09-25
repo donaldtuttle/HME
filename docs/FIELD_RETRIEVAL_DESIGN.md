@@ -1,7 +1,9 @@
 # Candidate-specific field retrieval: requirements before registration
 
-Status: design requirements for Stage 2, **not an executed experiment or frozen
-protocol**. Stage 1 is the separate [sign ablation](../experiments/sign_ablation_v1/PROTOCOL.md).
+Status: design requirements preserved as background. The concrete Stage 2
+specification is [HME-NN-2B](../experiments/field_retrieval_v1/PROTOCOL.md), whose
+protocol and implementation are published before evaluation. Results are pending.
+Stage 1 is the separate [sign ablation](../experiments/sign_ablation_v1/PROTOCOL.md).
 The negative [HME-NN-1 result](../experiments/nn_baseline_v1/REPORT.md) remains the
 evidence for the default ranker.
 

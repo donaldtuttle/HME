@@ -27,10 +27,14 @@ the primary equivalence criterion within plus or minus one point is not met.
 The 95% interval [-0.05, 1.69] does not establish superiority. The public
 registration preceded execution; the package's default engine is unchanged.
 
-Stage 2 needs a separate registration. [Design requirements](FIELD_RETRIEVAL_DESIGN.md)
-record the addressing, overlap, identity, polarity and cost controls that must be
-settled before execution. A polarity-preserving encoder would be a further
-experiment, conditional on a justified next question rather than folded into Stage 2.
+Stage 2 is [HME-NN-2B](../experiments/field_retrieval_v1/PROTOCOL.md): thirty new
+seeds, five overlap layouts, matched signed/absolute NN, candidate-specific
+field-only and hybrid retrieval, permuted-field and shared-position controls,
+antipodal stress, and newly measured cached/uncached costs. The protocol and
+implementation are published before execution; results are pending.
+[Design requirements](FIELD_RETRIEVAL_DESIGN.md) preserve the rationale.
+A polarity-preserving encoder is a separate future experiment and is not
+triggered automatically if the registered practical accuracy claim fails.
 
 ## Retrieval comparison
 

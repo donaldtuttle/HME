@@ -1,0 +1,86 @@
+{
+  "protocol_id": "HME-NN-2B",
+  "version": "1.0",
+  "engine_source_commit": "4662023b005ea7757cb6af4726961c214634b1b7",
+  "engine_sha256": "080a20056c6c5c88e49c6307845277002ad2091a6a1d7dec66961317bc2c0167",
+  "seeds": [501001,501002,501003,501004,501005,501006,501007,501008,501009,501010,501011,501012,501013,501014,501015,501016,501017,501018,501019,501020,501021,501022,501023,501024,501025,501026,501027,501028,501029,501030],
+  "dataset": {
+    "distribution": "128 independent standard-normal real vectors from default_rng(seed)",
+    "items_per_seed": 128,
+    "dimension": 16,
+    "memory_size": 256,
+    "grid_shape": [8,16],
+    "spacings": [16,12,8,4,0],
+    "layout": "Centre the 8 by 16 grid in the fixed 256 by 256 field. A patch centre is floor((memory_size - ((axis_count-1)*spacing+dimension))/2)+dimension//2+axis_index*spacing. No patch clipping. Randomly assign items to grid centres using default_rng(SeedSequence([seed,3])).permutation(128), identical assignment across spacings.",
+    "overlap": "Horizontal/vertical adjacent-pair area fraction max(0,1-spacing/16): 0%,25%,50%,75%,100%. Diagonal fraction is its square. This is not union overlap with all neighbours. Spacing zero puts every item at one shared position.",
+    "load": "One item per position except the shared-position control, which has all 128 items at one position.",
+    "write_strength": 0.1,
+    "noise_sigmas": [0.0,0.25,0.5,1.0],
+    "noise_rng": "default_rng(SeedSequence([seed,1,noise_index]))",
+    "query_modes": ["native","symmetric"],
+    "preprocessing": "Stored vectors use unchanged HME default Hann window and L2 normalization. Native queries are normalized raw corrupted vectors; symmetric queries are Hann-windowed once then normalized. Query patterns apply the unchanged FFT outer-product formula to that processed vector, with no second Hann window.",
+    "unmatched_queries_per_seed": 16,
+    "unmatched_rng": "default_rng(SeedSequence([seed,2]))",
+    "side_information": "All arms retain identical artifact records, lineage and candidate position-to-ID maps. Each search scans every candidate. Query receives no true target position, identity, tag or metadata filter. Positions are independent of content."
+  },
+  "arms": ["nn_signed","nn_absolute","hybrid","field_only","hybrid_permuted"],
+  "readout": "A complete 16 by 16 candidate-position field patch, normalized by Frobenius norm, in the same space as the encoded query pattern. Field score is magnitude of their complex Frobenius inner product. Zero patches score zero. No inverse semantic decoder or new encoder is introduced.",
+  "hybrid": {
+    "a": 0.42,
+    "b": 0.20,
+    "formula": "a*signed_cosine(processed_query,stored_vector_i) + b*field_score_i",
+    "policy": "No fitting, clipping, salience, rejection or spatial-distance term. All arms return candidate IDs/indices and scores only. If the field score is common to all candidates, cancel its offset and positive scaling algebraically and rank by signed cosine to prevent roundoff-induced ties. Reported scores in that control are the rank-equivalent cosine scores, not the uncancelled hybrid value."
+  },
+  "permutation": "For the hybrid_permuted diagnostic, cyclically shift candidate field-score columns by an offset drawn uniformly from 1..127 using default_rng(SeedSequence([seed,4])). Stored signed vectors and candidate IDs remain aligned. This is a derangement, fixed across layouts/conditions within the seed.",
+  "primary": {
+    "condition": {"spacing":8,"query_mode":"native","noise_sigma":1.0},
+    "metric": "top1_accuracy",
+    "contrast": "hybrid minus nn_signed",
+    "minimum_mean_benefit": 0.02,
+    "decision": "Support the registered accuracy advantage only if the paired-seed 95% bootstrap interval's lower endpoint exceeds +0.02, all correctness gates pass, and every arm fits the common persistent cap. If the upper endpoint is below zero report lower hybrid accuracy. Otherwise practical advantage is not established. Costs remain a separate tradeoff, not waived by accuracy success."
+  },
+  "controls": {
+    "isolated": "At spacing 16, field-only normalized pattern correlation equals absolute cosine squared, so its target ranks must match absolute NN on the ordinary random corpus. With a=0.42,b=0.20, a*c+b*c*c is strictly increasing on [-1,1], so hybrid ranks must match signed NN. Numeric score equivalence is also tested on independent correctness fixtures.",
+    "shared_position": "At spacing zero, hybrid and hybrid_permuted target ranks and top predictions must exactly match signed NN; field-only scores all tie and stable insertion ordering yields 1/128 top-1 accuracy on the balanced 128-query set.",
+    "zero_field": "For a copy of the primary-layout hybrid with its field replaced by zeros, all primary-query ranks must match signed NN exactly.",
+    "cache": "Cached and uncached scores must agree within 1e-13 and ranks exactly on the first four primary-noise queries per layout. Correctness fixtures also check replacement invalidates stale caches.",
+    "no_interference_reference": "Compare each candidate's loaded patch with its own isolated write contribution: retain per-candidate relative reconstruction error and pattern correlation. This uses known stored items as a diagnostic only. No target-only field is treated as an unbiased retrieval competitor. Absolute NN supplies the equivalent isolated-pattern ranking reference."
+  },
+  "antipodal_stress": {
+    "distribution": "64 Gaussian vectors from default_rng(SeedSequence([seed,5])), followed by their exact negatives, giving 128 balanced targets. Fresh fields, same content-independent layouts and strengths.",
+    "noise_sigmas": [0.0,1.0],
+    "query_mode": "symmetric",
+    "queries": "For each sigma index use default_rng(SeedSequence([seed,6,index])) noise on the 64 base vectors; query the corresponding exact negations for the opposite-sign targets. Encoded queries for each pair are identical.",
+    "prediction": "Field-only top-1 identification cannot exceed 50% for these balanced indistinguishable query pairs. Verify paired field-only score rows agree and the bound holds in every layout. This is not a universal absolute-NN ceiling for the main corpus. Hybrid confusions from sign-insensitive evidence are a directional risk, not assumed to occur."
+  },
+  "secondary": {
+    "metrics": ["top1_accuracy","top5_accuracy","mean_reciprocal_rank"],
+    "contrasts": [["hybrid","nn_signed"],["field_only","nn_absolute"],["hybrid","hybrid_permuted"]],
+    "scope": "All layout/noise/preprocessing cells, antipodal stress, unmatched-query default acceptance, reconstruction diagnostics and costs are descriptive. No cell can replace the primary after outcomes."
+  },
+  "statistics": {
+    "unit": "Independent corpus/noise/layout seed; pair all arms within seed. Queries sharing a field are not independent replicates.",
+    "bootstrap_resamples": 20000,
+    "bootstrap_seed": 20260926,
+    "interval": "Two-sided 2.5/97.5 percentile bootstrap of thirty paired seed-level metrics; approximate coverage, no exact finite-sample guarantee. Secondary intervals have no multiplicity correction.",
+    "zero_variance": "Zero-width intervals describe observed seeds, not population certainty."
+  },
+  "budget": {
+    "persistent_bytes_cap_per_arm": 4194304,
+    "policy": "Every arm has the same candidate set and maximum cap. Compact search snapshots keep only arrays needed for scoring, with identical records, lineage and positions. NN retains vectors; field-only retains the field without original payload/pattern caches; hybrid retains both vectors and field. Candidate patch caches are charged when retained. The unmodified HME writer is used to construct snapshots, and its storage is reported separately as build-time source state. No default engine change. This is not equal consumed bytes or a capacity frontier.",
+    "accounting": "Frozen HME-NN-1 recursive CPython getsizeof and owned-array accounting, deduplicating aliases. Report cached/uncached variants separately. Excludes interpreter/shared code, allocator overhead, discarded build-time source engine, and temporary query workspace; not peak process RSS."
+  },
+  "latency": {
+    "condition": "native sigma 1.0 at every registered layout",
+    "queries_per_seed": 16,
+    "warmup_queries_per_variant": 3,
+    "repetitions": 3,
+    "top_k": 5,
+    "cache_cycles": 5,
+    "measurement": "perf_counter_ns around an online query, including normalization and query-pattern encoding where used. One numerical-library thread. Rotate seven variants by (query index+repetition) modulo seven: signed NN, absolute NN, cached hybrid, uncached hybrid, cached field-only, uncached field-only, cached permuted hybrid. Every API returns indices and scores, without the old decoded-output workload. Measure cache preparation and invalidation separately over five cycles; rebuilding includes allocation/extraction/normalization. Invalidation is cache discard, not a full write-throughput measurement. No source-state mutation or performance tuning after outcomes."
+  },
+  "stopping": "Run all thirty seeds and every specified condition once after public registration. No tuning, seed replacement, stopping on success, margin changes or outcome-driven exclusions. Save each seed as it completes. A technical failure must retain FAILURE.json; a correction needs a public amendment before a complete rerun, preserving the original registration and failed data.",
+  "registration": "Publish protocol, scorer, evaluator and correctness fixtures before running any registered seed. Verify exact bytes against the supplied commit, record source/data/layout/readout hashes and times, and preserve registration history.",
+  "prior_information": "HME-NN-1, HME-NN-2A and tiny structural fixtures informed this design. No Stage 2 outcomes on registered seeds have been inspected. Correctness fixtures use other seeds and smaller arrays.",
+  "stage3_gate": "Do not proceed automatically to an encoder change. If the primary practical accuracy claim fails, this experiment supplies no accuracy-advantage justification for Stage 3. A passing result motivates considering costs and a separate polarity-preserving protocol, not a production or universal-advantage claim."
+}
