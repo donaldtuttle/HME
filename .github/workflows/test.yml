@@ -28,11 +28,13 @@ jobs:
       - name: License parity
         run: cmp --silent LICENSE skills/hme/LICENSE.txt
       - name: Install
-        run: python -m pip install -e ".[test,legacy-test]"
+        run: python -m pip install -e ".[test,legacy-test,visualization]"
       - name: Built-in self-test
         run: hme --self-test
       - name: Pytest
         run: python -m pytest -q
+      - name: Runtime example
+        run: python examples/runtime_demo.py
       - name: Retrieval audit
         run: python tests/hme_independent_audit.py --engine ./hme_engine.py --output outputs/hme_audit.json
       - name: Historical source and behavior

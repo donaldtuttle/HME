@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "holographic-memory-engine"
-version = "3.0.0"
+version = "3.1.0"
 description = "Standalone FFT-pattern associative memory with an artifact ledger and ranked retrieval"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -23,12 +23,14 @@ classifiers = [
 [project.optional-dependencies]
 test = ["pytest>=8"]
 legacy-test = ["pytest>=8", "Pillow>=10"]
+dynamics = ["Pillow>=10"]
+visualization = ["matplotlib>=3.7", "Pillow>=10"]
 
 [project.scripts]
 hme = "hme_engine:main"
 
 [tool.setuptools]
-py-modules = ["hme_engine"]
+py-modules = ["hme_engine", "hme_runtime", "hme_dynamics"]
 
 [tool.pytest.ini_options]
 addopts = "-ra"

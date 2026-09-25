@@ -51,9 +51,35 @@ Strings are also accepted. They map deterministically to random vectors using SH
 | Retrieval | Rank retained items using spatial proximity, absolute normalized inner-product similarity, and pattern correlation with the stored field |
 | Reconstruction | Inverse FFT of a field window; a separate decoded vector is a weighted average of retained item vectors |
 | Lineage | Record insertion order and artifact metadata in an in-memory graph |
-| Optional salience | Caller-supplied write weighting, eligible-candidate reranking, and low-salience rejection; disabled by default |
+| Optional salience | Write weighting, eligible-candidate reranking, and low-salience rejection; disabled by default; values supplied by the caller or the optional field runtime |
+| Optional field runtime | Evolving state, phase projection, state-derived write salience, phase-lock events, telemetry, lineage and animation |
+| Optional spatial dynamics | Seeded diffusion, damping, periodic drive, ablations and spectral signatures |
 
 The artifact ledger is necessary for exact identity retrieval. The graph is not cryptographically chained, and records can be evicted. See [Architecture](docs/ARCHITECTURE.md) for the algorithm and identity contract.
+
+## Evolving fields
+
+Version 3.1 restores the numerical runtime removed during the 3.0 extraction,
+under plain names and through optional imports. Use `FieldRuntime` for field
+ticks, or `AgentRuntime` for symbol-driven ticks with explicit adapters:
+
+```python
+from hme_engine import SalienceConfig
+from hme_runtime import AgentRuntime
+
+runtime = AgentRuntime(
+    salience_config=SalienceConfig(influence_write_gain=True), seed=7,
+)
+tick = runtime.step_symbol("sensor-update", position=(20, 22))
+print(tick.meta.write_salience)  # Calculated from field state before the write
+print(tick.meta.event_triggered)
+```
+
+`hme_dynamics.FieldDynamics` restores spatial diffusion and the field-to-memory
+signature bridge. Run `python examples/runtime_demo.py` for an example using
+only NumPy. Install `.[dynamics]` for text rasterization or `.[visualization]`
+for plots and GIF export. The [runtime guide](docs/RUNTIME.md) explains update
+order, adapters, switches and the restoration boundary.
 
 ## Relationship to established work
 
@@ -66,6 +92,12 @@ HME currently uses spatial FFT-pattern superposition. Standard HRR uses circular
 The extraction preserves the earlier memory core's numerical encoding and ranking, checked against the archived implementation under identical inputs. The `hme-v3` schema deliberately changes field names and artifact IDs. [Migration](docs/MIGRATION_V3.md) describes the boundary.
 
 The [local validation record](evidence/standalone_validation.json) reports 21 standalone tests and 11 historical tests passing. The [v3 audit](evidence/hme_audit_v3.json) reproduces the original top-1 counts: 128/128 at noise 0–0.25, 119/128 at 0.5, and 59/128 at 1.0. These are single-seed implementation checks, not comparative performance evidence.
+
+Those are the preserved 3.0 extraction records. The separate [3.1 restoration
+report](evidence/runtime_restoration_validation.json) records controller/diffusion
+parity checks against the frozen source, deterministic replay, event integrity,
+the signature bridge and visualization checks. Restoration does not establish
+that these mechanisms improve retrieval.
 
 Run the retrieval and ablation audit:
 
@@ -81,6 +113,7 @@ Comparative retrieval advantage, calibrated probabilities, and production persis
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Optional field runtime](docs/RUNTIME.md)
 - [Reproducibility and source pins](docs/REPRODUCIBILITY.md)
 - [Related work](docs/RELATED_WORK.md)
 - [Evaluation plan](docs/EVALUATION_PLAN.md)

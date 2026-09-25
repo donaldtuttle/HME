@@ -15,7 +15,7 @@ For a numeric payload, the storage core:
 
 Strings first map to seeded Gaussian vectors. The seed comes from the first eight bytes of their SHA-256 digest. The engine's `seed` identifies a run; it does not change this deterministic string map. Numeric payloads are not hashed positional encodings, and placement does not bind a position vector to an item vector.
 
-Optional write salience multiplies the strength using a bounded gain. Its value is supplied as `metadata["write_salience"]`; HME does not derive it from an observer or field equation.
+Optional write salience multiplies the strength using a bounded gain. Its value is supplied as `metadata["write_salience"]`. The memory core does not derive this value; the optional `FieldRuntime` and `AgentRuntime` calculate it from field state before each tick's memory write. See [Runtime](RUNTIME.md).
 
 ## Retrieval
 
