@@ -2,6 +2,7 @@
 
 | Report | Tested implementation | Meaning |
 |---|---|---|
+| [Preregistered sign ablation](../experiments/sign_ablation_v1/REPORT.md) | Default core and one-expression experimental signed variant; protocol frozen at `ca25cc3` | Thirty fresh seeds; sign change adds 9.79 points; signed HME versus NN +0.83 points; noninferiority supported, equivalence and superiority not established |
 | [Preregistered NN comparison](../experiments/nn_baseline_v1/REPORT.md) | Unchanged v3.1 memory core; protocol/evaluator frozen at `88520eb` before execution | Ten seeds; HME 47.73% versus signed-cosine NN 57.27% in the primary high-noise condition; all conditions, paired intervals, costs and raw observations published |
 | [Current release](../evidence/current_release_v3_1.json) | v3.1 engine files at `935b0d0`, hash-checked against that commit | Fresh 94-test active run; five-seed memory retrieval experiment; 20 current-runtime traces; separate 11-test historical check |
 | [Runtime restoration](../evidence/runtime_restoration_validation.json) | v3.1 controllers/dynamics, pinned by source hashes | Numerical comparisons with the archived implementation, event integrity, bridge and packaging checks |
@@ -16,8 +17,8 @@ numbers when the numerical code, inputs and environment are unchanged.
 
 ## Preregistered baseline comparison
 
-[HME-NN-1](../experiments/nn_baseline_v1/REPORT.md) is the current comparative
-evidence. It uses new seeds rather than relabelling the earlier HME-only sweep.
+[HME-NN-1](../experiments/nn_baseline_v1/REPORT.md) is the first default-engine
+comparison. It uses new seeds rather than relabelling the earlier HME-only sweep.
 The primary accuracy difference is -9.53 percentage points, with a paired-seed
 95% bootstrap interval of [-10.70, -8.28]. The frozen +2-point practical-advantage
 criterion was not met. Actual accounted storage and measured online API latency
@@ -29,8 +30,28 @@ control was +0.70 points, interval [-1.02, +2.34]; it does not establish a relia
 benefit. The comparison covers synthetic vectors at one load, dimension and
 shared position. All ten seeds and all registered conditions are available in
 the report; no protocol deviations occurred. The nine added correctness tests
-bring the active suite to 103. Earlier test counts below describe their original
+brought the active suite to 103 at that stage. Earlier test counts below describe their original
 runs and remain unchanged.
+
+## Preregistered sign ablation
+
+[HME-NN-2A](../experiments/sign_ablation_v1/REPORT.md) follows with thirty new
+seeds and a one-point equivalence margin fixed before execution. It changes
+only absolute to signed item/query similarity, retaining the original field
+bias and all other scoring behavior. The default package engine is unchanged.
+
+Primary top-1 accuracies were current HME 44.01%, signed HME 53.80% and signed
+NN 52.97%. The sign change added 9.79 points (95% interval [8.85, 10.73]).
+Signed HME minus NN was +0.83 points: the 90% interval [0.08, 1.56] supports
+noninferiority within one point, but extends outside the equivalence band.
+The 95% interval [-0.05, 1.69] does not establish superiority. Under the
+secondary symmetric-preprocessing, high-noise condition, signed HME trailed
+NN by 1.33 points (descriptive 95% interval [0.70, 2.01]).
+
+All seeds, conditions and costs are published without deviations. The six new
+correctness tests bring the current active suite to 109. This is evidence for a
+specific experimental sign change, not for a query-dependent field readout or
+an encoder redesign. Those require separate registration and evaluation.
 
 ## Fresh v3.1 retrieval data
 

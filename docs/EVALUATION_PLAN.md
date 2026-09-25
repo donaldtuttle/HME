@@ -15,6 +15,23 @@ load/dimension/spatial-cue sweeps, an equal-consumed-byte capacity frontier,
 semantic datasets, HRR/VSA, calibrated rejection and the calibration plan below.
 Any new efficacy claim needs a new frozen protocol; this result must remain visible.
 
+## Sign ablation and candidate-specific field retrieval
+
+Stage 1 is [HME-NN-2A](../experiments/sign_ablation_v1/PROTOCOL.md): thirty new
+seeds, current HME, a one-expression signed-similarity variant retaining the
+field bias, and signed NN. [All results](../experiments/sign_ablation_v1/REPORT.md)
+are now published without deviations. The sign change added 9.79 percentage
+points in the primary condition. Signed HME minus NN was +0.83 points, with a
+90% interval [0.08, 1.56]: noninferiority within one point is supported, while
+the primary equivalence criterion within plus or minus one point is not met.
+The 95% interval [-0.05, 1.69] does not establish superiority. The public
+registration preceded execution; the package's default engine is unchanged.
+
+Stage 2 needs a separate registration. [Design requirements](FIELD_RETRIEVAL_DESIGN.md)
+record the addressing, overlap, identity, polarity and cost controls that must be
+settled before execution. A polarity-preserving encoder would be a further
+experiment, conditional on a justified next question rather than folded into Stage 2.
+
 ## Retrieval comparison
 
 Freeze datasets, encoding, query corruption, splits, seeds, candidate counts, and primary metrics before inspecting test results. Include:

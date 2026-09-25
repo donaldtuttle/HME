@@ -116,8 +116,34 @@ same provenance records.** HME remains an experimental system for studying field
 storage and retrieval. This comparison does not settle other loads, dimensions,
 spatial cues, semantic data or optional runtime policies. The report includes
 all registered conditions, raw ranks, storage and timing observations, and the
-frozen reproduction command. All ten seeds completed without deviations;
-the active suite now has **103 passing tests**.
+frozen reproduction command. All ten seeds completed without deviations.
+
+The subsequent [HME-NN-2A sign ablation](experiments/sign_ablation_v1/REPORT.md)
+preregistered thirty fresh seeds and a **plus or minus one percentage point
+equivalence margin**. Changing only the query-similarity sign, while retaining
+the field bias, produced the following primary high-noise accuracies:
+
+| Arm | Mean top-1 accuracy |
+|---|---:|
+| Current HME (absolute similarity) | 44.01% |
+| Experimental HME (signed similarity) | 53.80% |
+| Exact signed-cosine NN | 52.97% |
+
+The sign change improved HME by **9.79 points** (95% interval [8.85, 10.73]).
+Signed HME minus NN was **+0.83 points**, with a 90% interval [0.08, 1.56] and a
+95% interval [-0.05, 1.69]. **Noninferiority within one point is supported;
+equivalence within plus or minus one point is not established**, because the
+90% interval extends above +1. The 95% interval also does not establish superiority.
+The secondary symmetric-preprocessing, high-noise condition still favored NN
+by 1.33 points (descriptive 95% interval [0.70, 2.01]).
+
+All thirty seeds completed without deviations. Costs were measured again:
+signed HME's median accounted storage was 834,232 bytes versus NN's 186,230;
+its median paired API latency ratio was 70.4 times, with the same decoded-output
+qualification described above. The signed variant is experimental; the default
+engine remains unchanged. The active suite now has **109 passing tests**.
+Candidate-specific field retrieval has a separate
+[design checklist](docs/FIELD_RETRIEVAL_DESIGN.md) and has not been evaluated yet.
 
 The extraction preserves the earlier memory core's numerical encoding and ranking, checked against the archived implementation under identical inputs. The `hme-v3` schema deliberately changes field names and artifact IDs. [Migration](docs/MIGRATION_V3.md) describes the boundary.
 
