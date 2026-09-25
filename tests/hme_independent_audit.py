@@ -17,25 +17,17 @@ Tests
 6. Exact and partial string-query behavior.
 7. Confidence returned for an unrelated numerical query.
 
-Expected layout
----------------
-Option A:
-    hme_engine.py
-    hme_independent_audit.py
+Run from a source checkout (no editable installation is required):
+    python tests/hme_independent_audit.py
 
-Option B:
-    core/hme_engine.py
-    hme_independent_audit.py
+The default engine is resolved relative to this script, not the working
+directory. A standalone copy may also sit beside hme_engine.py.
 
-Run
----
-    python hme_independent_audit.py
-
-Or point directly to the engine file:
-    python hme_independent_audit.py --engine ./core/hme_engine.py
+Or point directly to an engine file:
+    python tests/hme_independent_audit.py --engine /path/to/hme_engine.py
 
 Save a JSON report:
-    python hme_independent_audit.py --output hme_audit_report.json
+    python tests/hme_independent_audit.py --output outputs/hme_audit.json
 
 Required dependency: numpy
 """
@@ -66,7 +58,14 @@ DEFAULT_NOISE_LEVELS = (0.0, 0.05, 0.10, 0.25, 0.50, 1.00)
 
 
 def load_engine_module(engine_path: str | None) -> ModuleType:
-    """Load hme_engine from a path or from normal Python imports."""
+    """Prefer explicit/local source paths; fall back to installed imports."""
+    if engine_path is None:
+        script_dir = Path(__file__).resolve().parent
+        for candidate in (script_dir / "hme_engine.py",
+                          script_dir.parent / "hme_engine.py"):
+            if candidate.is_file():
+                engine_path = str(candidate)
+                break
     if engine_path:
         path = Path(engine_path).expanduser().resolve()
         if not path.is_file():
@@ -90,8 +89,9 @@ def load_engine_module(engine_path: str | None) -> ModuleType:
 
     joined = "\n  ".join(errors)
     raise ImportError(
-        "Could not import hme_engine. Put this script beside the engine, "
-        "run it from the repository root, or pass --engine PATH.\n"
+        "Could not find hme_engine beside this script or in its parent. "
+        "Pass --engine /path/to/hme_engine.py or install the project with "
+        "python -m pip install -e /path/to/HME.\n"
         f"Import attempts:\n  {joined}"
     )
 
@@ -505,7 +505,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--engine",
-        help="Path to hme_engine.py. Optional if importable normally.",
+        help="Path to hme_engine.py; defaults to this checkout, then installed imports.",
     )
     parser.add_argument("--output", help="Optional JSON report path")
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
