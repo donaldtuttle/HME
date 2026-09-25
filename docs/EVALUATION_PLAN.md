@@ -19,10 +19,13 @@ Any new efficacy claim needs a new frozen protocol; this result must remain visi
 
 Stage 1 is [HME-NN-2A](../experiments/sign_ablation_v1/PROTOCOL.md): thirty new
 seeds, current HME, a one-expression signed-similarity variant retaining the
-field bias, and signed NN. Its primary question is equivalence within plus or
-minus one percentage point, with noninferiority reported separately. The
-protocol, implementation and correctness fixtures are published before execution;
-results are pending. The package's default engine is unchanged.
+field bias, and signed NN. [All results](../experiments/sign_ablation_v1/REPORT.md)
+are now published without deviations. The sign change added 9.79 percentage
+points in the primary condition. Signed HME minus NN was +0.83 points, with a
+90% interval [0.08, 1.56]: noninferiority within one point is supported, while
+the primary equivalence criterion within plus or minus one point is not met.
+The 95% interval [-0.05, 1.69] does not establish superiority. The public
+registration preceded execution; the package's default engine is unchanged.
 
 Stage 2 needs a separate registration. [Design requirements](FIELD_RETRIEVAL_DESIGN.md)
 record the addressing, overlap, identity, polarity and cost controls that must be
