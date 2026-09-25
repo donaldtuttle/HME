@@ -10,3 +10,6 @@
 - Floating-point byte hashes are environment-sensitive. Pin Python, NumPy, platform, and source when reproducing results.
 - Optional salience channels are experimental and disabled by default. No comparative efficacy or calibrated probability is claimed.
 - HRR-style binding/unbinding and production database guarantees are not implemented.
+- The optional runtime restores state-derived salience and field events, not semantic context conditioning or prediction-error learning. History/activity/bias diagnostics do not change retrieval queries.
+- Runtime metrics describe pre-event state; event flags and returned projections describe the completed tick. Telemetry/frame history grows in memory and exports are not restart checkpoints.
+- The diffusion simulator's threshold score is diagnostic; it does not apply phase-lock events or automatically control memory writes. Raster inputs depend on the selected font.

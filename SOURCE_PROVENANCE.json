@@ -1,6 +1,6 @@
 {
   "repository_target": "donaldtuttle/HME",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "schema_id": "hme-v3",
   "status": "experimental alpha",
   "active_engine": {
@@ -19,5 +19,22 @@
     "tracked_files": 60,
     "byte_preserved": true
   },
-  "compatibility": "Storage and retrieval numerics preserved; public vocabulary and artifact identity schema changed."
+  "compatibility": "Memory core bytes and hme-v3 schema unchanged from 3.0. Optional controllers and diffusion restore archived numerical behavior through plain APIs; runtime serialization and adapter names are versioned separately.",
+  "active_runtime": {
+    "path": "hme_runtime.py",
+    "sha256": "0c29135d9a9e5cf3a917a1fe66a1988c6945fb63c850bf072b81784ec292bf79",
+    "role": "optional_field_and_agent_controllers",
+    "schema_id": "hme-runtime-v1"
+  },
+  "active_dynamics": {
+    "path": "hme_dynamics.py",
+    "sha256": "ae51fac01d41c7a9a4ce6ee4fb298550cbfefd247acfd6ab9f396eb20fa4d868",
+    "role": "optional_spatial_diffusion_and_signature_bridge",
+    "schema_id": "hme-dynamics-v1"
+  },
+  "previous_dynamics": {
+    "path": "archive/v2.2/integrations/symbolic_field_dynamics.py",
+    "sha256": "75500eb65b8ab7184454a6aa3475eb1fa60fdd2142aa1239866523ff3f41c406",
+    "byte_preserved": true
+  }
 }
