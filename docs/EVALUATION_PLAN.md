@@ -1,6 +1,19 @@
 # Evaluation plan
 
-Status: proposed work, not implemented calibration or comparative results.
+Status: the first exact nearest-neighbor comparison is complete.
+[HME-NN-1 results](../experiments/nn_baseline_v1/REPORT.md) report all ten
+preregistered seeds without deviations. The current HME ranker scored 47.73%
+versus signed-cosine NN's 57.27% on the primary condition, a paired difference of
+-9.53 percentage points (95% interval [-10.70, -8.28]). The registered practical
+advantage claim failed. The protocol and evaluator were published before execution.
+
+Completed scope: four query-noise levels, two preprocessing modes, exact signed
+and absolute NN, an erased-field/ledger-retained control, a field-only structural
+check, top-1/top-5/MRR, unmatched-query acceptance, actual persistent storage
+under a common maximum budget, and online API latency. Remaining work includes
+load/dimension/spatial-cue sweeps, an equal-consumed-byte capacity frontier,
+semantic datasets, HRR/VSA, calibrated rejection and the calibration plan below.
+Any new efficacy claim needs a new frozen protocol; this result must remain visible.
 
 ## Retrieval comparison
 

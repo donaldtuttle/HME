@@ -2,6 +2,7 @@
 
 | Report | Tested implementation | Meaning |
 |---|---|---|
+| [Preregistered NN comparison](../experiments/nn_baseline_v1/REPORT.md) | Unchanged v3.1 memory core; protocol/evaluator frozen at `88520eb` before execution | Ten seeds; HME 47.73% versus signed-cosine NN 57.27% in the primary high-noise condition; all conditions, paired intervals, costs and raw observations published |
 | [Current release](../evidence/current_release_v3_1.json) | v3.1 engine files at `935b0d0`, hash-checked against that commit | Fresh 94-test active run; five-seed memory retrieval experiment; 20 current-runtime traces; separate 11-test historical check |
 | [Runtime restoration](../evidence/runtime_restoration_validation.json) | v3.1 controllers/dynamics, pinned by source hashes | Numerical comparisons with the archived implementation, event integrity, bridge and packaging checks |
 | [Standalone validation](../evidence/standalone_validation.json) | v3.0 extraction, pinned by source hashes | Original 21-test standalone run, separate archived tests, and extraction checks |
@@ -12,6 +13,24 @@ The package and optional runtime are version 3.1.0. The memory component's
 `ENGINE_ID` still says `hme-3.0.0` because its source is byte-identical to 3.0.
 The fresh report records both identities explicitly. New runs can reproduce old
 numbers when the numerical code, inputs and environment are unchanged.
+
+## Preregistered baseline comparison
+
+[HME-NN-1](../experiments/nn_baseline_v1/REPORT.md) is the current comparative
+evidence. It uses new seeds rather than relabelling the earlier HME-only sweep.
+The primary accuracy difference is -9.53 percentage points, with a paired-seed
+95% bootstrap interval of [-10.70, -8.28]. The frozen +2-point practical-advantage
+criterion was not met. Actual accounted storage and measured online API latency
+also favored exact NN at this task size. The baseline retains the same artifact
+records and lineage, so retaining provenance is not exclusive to the HME arm.
+
+The field's primary top-1 contribution relative to an absolute-cosine/field-erased
+control was +0.70 points, interval [-1.02, +2.34]; it does not establish a reliable
+benefit. The comparison covers synthetic vectors at one load, dimension and
+shared position. All ten seeds and all registered conditions are available in
+the report; no protocol deviations occurred. The nine added correctness tests
+bring the active suite to 103. Earlier test counts below describe their original
+runs and remain unchanged.
 
 ## Fresh v3.1 retrieval data
 
