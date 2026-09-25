@@ -2,7 +2,11 @@
 
 Status: design requirements preserved as background. The concrete Stage 2
 specification is [HME-NN-2B](../experiments/field_retrieval_v1/PROTOCOL.md), whose
-protocol and implementation are published before evaluation. Results are pending.
+protocol and implementation were published before evaluation. The
+[completed results](../experiments/field_retrieval_v1/REPORT.md) cover all thirty
+seeds without deviations: hybrid minus signed NN was -1.74 percentage points
+(95% interval [-2.42, -1.09]) in the primary condition. Every structural control
+passed, but the practical accuracy criterion and Stage 3 gate did not.
 Stage 1 is the separate [sign ablation](../experiments/sign_ablation_v1/PROTOCOL.md).
 The negative [HME-NN-1 result](../experiments/nn_baseline_v1/REPORT.md) remains the
 evidence for the default ranker.

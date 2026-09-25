@@ -89,6 +89,36 @@ HME currently uses spatial FFT-pattern superposition. Standard HRR uses circular
 
 ## Evidence and limitations
 
+The latest experiment, [HME-NN-2B](experiments/field_retrieval_v1/REPORT.md),
+gave the field a query-dependent, candidate-specific readout and still found a
+negative primary result. Thirty new seeds covered five overlap layouts, four
+noise levels, two preprocessing modes and a separate antipodal stress set.
+The protocol and implementation were published before evaluation.
+
+At the registered primary condition (128 items, dimension 16, 50% adjacent-patch
+overlap, native queries and noise sigma 1.0):
+
+| Experimental retrieval arm | Mean top-1 accuracy |
+|---|---:|
+| Signed cosine NN | 52.03% |
+| Signed cosine plus candidate-specific field readout | 50.29% |
+| Field readout plus position-to-ID map | 24.04% |
+
+Hybrid minus signed NN was **-1.74 percentage points**, with a paired 95% interval
+of **[-2.42, -1.09]**. The registered requirement was a lower endpoint above +2
+points. Isolated-patch and shared-position controls reproduced their predicted
+NN rankings; all polarity and cache controls passed. Every registered seed and
+condition completed without deviations. The accuracy gate for proceeding
+automatically to a separate encoder redesign was not met.
+
+At this task size, the cached hybrid retained **9.34 times** NN's accounted
+storage and took **4.21 times** its query time. The uncached hybrid took 29.35
+times NN's query time. These are newly measured, compact experimental search
+snapshots returning indices and scores; the older public API's decoded-output
+workload is absent from every arm. All arms retain the same provenance records
+and fit a common 4 MiB maximum allowance. The report publishes actual bytes,
+cache construction/discard times, raw observations and all secondary results.
+
 The first **preregistered nearest-neighbor comparison found a negative result**.
 [HME-NN-1](experiments/nn_baseline_v1/REPORT.md) froze its protocol and evaluator
 on GitHub before running ten new seeds, with 128 items, dimension 16, matched
@@ -141,9 +171,10 @@ All thirty seeds completed without deviations. Costs were measured again:
 signed HME's median accounted storage was 834,232 bytes versus NN's 186,230;
 its median paired API latency ratio was 70.4 times, with the same decoded-output
 qualification described above. The signed variant is experimental; the default
-engine remains unchanged. The active suite now has **109 passing tests**.
-Candidate-specific field retrieval has a separate
-[design checklist](docs/FIELD_RETRIEVAL_DESIGN.md) and has not been evaluated yet.
+engine remains unchanged. That stage had **109 passing tests**; the active suite
+now has **117** after the Stage 2 correctness checks. Candidate-specific field
+retrieval is evaluated in HME-NN-2B above; its
+[design rationale](docs/FIELD_RETRIEVAL_DESIGN.md) is retained.
 
 The extraction preserves the earlier memory core's numerical encoding and ranking, checked against the archived implementation under identical inputs. The `hme-v3` schema deliberately changes field names and artifact IDs. [Migration](docs/MIGRATION_V3.md) describes the boundary.
 
@@ -185,7 +216,9 @@ python tests/hme_independent_audit.py \
 `relevance_score` is the selected hit's base score, **not calibrated confidence**. A high score can accompany an unrelated query. `MATCH` means a candidate passed the configured relevance threshold; it does not certify that the identity is correct. The default threshold is zero.
 
 Comparative retrieval advantage was not supported by the first registered NN
-comparison. Calibrated probabilities and production persistence remain
+comparison or the candidate-specific field experiment. The sign ablation
+supported primary-condition noninferiority, with equivalence and superiority
+unresolved. Calibrated probabilities and production persistence remain
 unestablished. The [evaluation plan](docs/EVALUATION_PLAN.md) tracks the completed
 comparison and remaining load/dimension sweeps, held-out calibration and HRR
 comparisons. [Known limitations](docs/KNOWN_LIMITATIONS.md) lists current boundaries.
