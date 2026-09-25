@@ -2,6 +2,11 @@
 
 ## 3.1.0 — restore optional field dynamics
 
+- Publish HME-NN-3: thirty preregistered seeds separating raw-input NN, processed-vector NN, Hann/query preprocessing, sign and field ablations. Retain all prior reports and unchanged pinned engine/default bytes.
+- Fix direct-checkout execution of the independent audit and runtime example without an editable install; add isolated-interpreter regression tests. NumPy remains required.
+- Document the explicit no-window numeric configuration and the negative symmetric-taper result. The active suite now has 138 tests; the archived suite remains 11 tests.
+- Add guarded v3.1.0 release publication after version, integrity, self-test and active/historical test gates. Existing tags and releases are not replaced.
+
 - Add a fresh current-release evidence bundle with five-seed retrieval results, per-tick runtime observations, explicit source/collector hashes, and separately labelled historical tests. Retain CI results as downloadable artifacts and correct the README version badge.
 
 - Restore state updates, diagnostic projections, thresholded phase locking, magnitude quantization, event lineage and finalized tick telemetry in `hme_runtime.py`.

@@ -2,6 +2,8 @@
 
 | Report | Tested implementation | Meaning |
 |---|---|---|
+| [Raw-vector and Hann ablation](../experiments/raw_vector_baseline_v1/REPORT.md) | Unchanged pinned core; evaluator frozen at `7ef2789` after protocol `8a3f942` | Thirty seeds; default HME 42.21%, no-window HME 65.65%, experimental no-window signed HME 73.93%, raw signed NN 74.11% at sigma 1; all cells and raw predictions published |
+| [Public-API cross-check](../evidence/review_crosscheck_2026_09_25.json) | Registered HME-NN-3 first seed, verified after publication in a separate Python/NumPy environment | All 640 direct HME predictions and 128 scalar raw-cosine predictions match the published first-seed high-noise data; verification, not a new efficacy study |
 | [Conversation-memory development status](../experiments/conversation_memory_v1/STATUS.md) | New Ollama harness plus existing Stage 2 experimental readout | 128 active tests pass; no real-model or held-out conversation results; runtime registration remains pending |
 | [Candidate-specific field retrieval](../experiments/field_retrieval_v1/REPORT.md) | Pinned default encoder/writer and new experimental readout; frozen at `6d83732` | Thirty fresh seeds and five layouts; primary hybrid 50.29% versus signed NN 52.03%; controls pass, practical gain and Stage 3 gate fail |
 | [Preregistered sign ablation](../experiments/sign_ablation_v1/REPORT.md) | Default core and one-expression experimental signed variant; protocol frozen at `ca25cc3` | Thirty fresh seeds; sign change adds 9.79 points; signed HME versus NN +0.83 points; noninferiority supported, equivalence and superiority not established |
@@ -19,6 +21,20 @@ The package and optional runtime are version 3.1.0. The memory component's
 `ENGINE_ID` still says `hme-3.0.0` because its source is byte-identical to 3.0.
 The fresh report records both identities explicitly. New runs can reproduce old
 numbers when the numerical code, inputs and environment are unchanged.
+
+## Raw inputs versus matched processed inputs
+
+HME-NN-1 and HME-NN-2A compared methods using the same Hann-processed stored
+vectors. Their results answer that registered question, not how HME compares
+with raw-input NN. [HME-NN-3](../experiments/raw_vector_baseline_v1/REPORT.md)
+adds the missing raw-input baseline without rewriting those reports. At sigma
+1.0, default HME minus raw signed NN is -31.90 percentage points (95% interval
+[-33.26, -30.44]). Turning Hann off improves HME by 23.44 points; tapering queries
+too worsens it by 13.44 points. These decomposition contrasts are descriptive.
+The no-window signed variant is close to raw NN, but the study does not register
+an equivalence claim or demonstrate a field advantage. No speed or storage
+claim is made. Ten regression tests bring the active suite to 138; earlier
+counts in this index describe their original runs and remain unchanged.
 
 ## Preregistered baseline comparison
 
