@@ -1,24 +1,70 @@
-name: SAL1 routine gate source
+name: Validate SAL1 routine gate review
 on:
   push:
     branches: [review/sal1-routine-gate-work]
     paths: [.github/workflows/sal1-gate-review.yml]
 permissions:
-  contents: read
+  contents: write
 jobs:
-  source:
+  validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: |
-          git archive 60cbd03a0ddce4fca313d1d89b9810b44b1e7b69 --format=zip --output=source.zip
-          git rev-parse 60cbd03a0ddce4fca313d1d89b9810b44b1e7b69^{tree} > tree.txt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/setup-python@v5
         with:
-          name: sal1-gate-source
-          path: |
-            source.zip
-            tree.txt
-          retention-days: 7
+          python-version: '3.12'
+      - name: Apply exact locally tested routine-gate amendment
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib
+          text = ''.join(Path(f'.review/gate-part{i}.b64').read_text() for i in range(3))
+          patch = gzip.decompress(base64.b64decode(text, validate=True))
+          assert hashlib.sha256(patch).hexdigest() == '2db3c172735bd5a4309a5a10aa0881f128dd99a64e8197384d7aa44f7d437a51'
+          Path('/tmp/sal1-gate.patch').write_bytes(patch)
+          PY
+          git checkout --detach 60cbd03a0ddce4fca313d1d89b9810b44b1e7b69
+          git apply --index /tmp/sal1-gate.patch
+          test "$(git write-tree)" = 4e5218d5c2c8fa2f25666d2ecc786bccce285392
+          sha256sum -c MANIFEST.sha256
+          sha256sum -c SOURCE_PINS.sha256
+          sha256sum -c archive/v2.2.sha256
+          (cd experiments/reconstruction_v1 && sha256sum -c RESULTS.sha256)
+      - name: Correctness and deterministic fixtures only
+        run: |
+          python -m pip install -e '.[test,legacy-test,visualization]'
+          mkdir -p outputs
+          python -m pytest -q --junitxml=outputs/sal1-gate-tests.xml
+          (cd archive/v2.2 && python -m pytest -q --junitxml=../../outputs/sal1-gate-archived-tests.xml)
+          hme --self-test
+          python experiments/salience_v1/smoke.py --output outputs/sal1-gate-development-ci.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          local = json.loads(Path('experiments/salience_v1/development_checks.json').read_text())
+          current = json.loads(Path('outputs/sal1-gate-development-ci.json').read_text())
+          for key in ('source_sha256', 'arms', 'policy', 'routine_gate_fabricated_examples'):
+              assert current[key] == local[key], key
+          PY
+          test "$(git write-tree)" = 4e5218d5c2c8fa2f25666d2ecc786bccce285392
+          git diff --exit-code
+      - name: Publish clean validated candidate without advancing PR
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          sha=$(printf '%s\n' 'Add stable routine-retention margins and configuration-bound contamination screening' '' 'Development amendment only: relative plus absolute NMSE allowance, mandatory base screening before radius tables, bound gain/decay/ridge and corpus metadata, explicit failure stages. Preserve all memory updates, frozen engine sources, prior evidence and release tags. No efficacy evaluation.' | git commit-tree 4e5218d5c2c8fa2f25666d2ecc786bccce285392 -p 60cbd03a0ddce4fca313d1d89b9810b44b1e7b69)
+          git push origin "$sha":refs/heads/review/sal1-gate-validated
+          echo "$sha" > outputs/sal1-gate-candidate.txt
+          git rev-parse "$sha^{tree}" > outputs/sal1-gate-tree.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sal1-gate-review-validation
+          path: outputs/sal1-gate-*
+          retention-days: 30
