@@ -61,7 +61,7 @@ jobs:
           (cd archive/v2.2 && python -m pytest -q --junitxml=../../outputs/consolidation-historical.xml)
           hme --self-test
           python scripts/check_consolidation.py --output evidence/consolidation_step0.json
-          python -m pip wheel --no-deps --no-build-isolation . -w outputs/wheels
+          python -m pip wheel --no-deps . -w outputs/wheels
           python - <<'PY'
           from pathlib import Path
           from zipfile import ZipFile
