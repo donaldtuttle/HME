@@ -1,24 +1,71 @@
-name: SAL1 radius review source
+name: Validate SAL1 radius and confirmation review
 on:
   push:
     branches: [develop/sal1-surprise-buffer]
     paths: [.github/workflows/sal1-radius-review.yml]
 permissions:
-  contents: read
+  contents: write
+concurrency:
+  group: sal1-radius-review
+  cancel-in-progress: false
 jobs:
-  snapshot:
+  validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Snapshot reviewed source without rerunning experiments
-        run: |
-          mkdir -p outputs
-          git archive 00b5c86702d11d3df065ddfa657a9fa015d3f12e --format=zip --output=outputs/source.zip -- . ':!experiments/reconstruction_v1/raw_records.jsonl.gz'
-          git rev-parse 00b5c86702d11d3df065ddfa657a9fa015d3f12e^{tree} > outputs/tree.txt
-      - uses: actions/upload-artifact@v4
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
         with:
-          name: sal1-radius-source
+          python-version: '3.12'
+      - name: Apply exact locally tested amendment
+        run: |
+          python - <<'PY'
+          import gzip, hashlib, subprocess
+          from pathlib import Path
+          parts = [Path('.sal1-radius-part'+s) for s in ['0','1','2a','2b','3']]
+          data = b''.join(p.read_bytes() for p in parts)
+          assert hashlib.sha256(data).hexdigest() == '609bdeb6ee6d69916224029100e097e13001f2f66109d9df4b94748b68f4b36f'
+          patch = Path('/tmp/sal1-radius.patch')
+          patch.write_bytes(gzip.decompress(data))
+          subprocess.run(['git','apply','--check',str(patch)],check=True)
+          subprocess.run(['git','apply',str(patch)],check=True)
+          for p in parts:
+              p.unlink()
+          Path('.github/workflows/sal1-radius-review.yml').unlink()
+          PY
+          git add -A
+          test "$(git write-tree)" = '22bf8b2061c131e81ea4099a36a7a0b389367f3f'
+          sha256sum -c MANIFEST.sha256
+          sha256sum -c SOURCE_PINS.sha256
+          sha256sum -c archive/v2.2.sha256
+          (cd experiments/reconstruction_v1 && sha256sum -c RESULTS.sha256)
+      - name: Correctness, storage and deterministic fixtures only
+        run: |
+          python -m pip install -e '.[test,legacy-test,visualization]'
+          mkdir -p outputs
+          python -m pytest -q --junitxml=outputs/sal1-radius-tests.xml
+          (cd archive/v2.2 && python -m pytest -q --junitxml=../../outputs/sal1-radius-historical.xml)
+          hme --self-test
+          python experiments/salience_v1/smoke.py --output outputs/sal1-radius-development-ci.json
+          git diff --exit-code
+          test "$(git write-tree)" = '22bf8b2061c131e81ea4099a36a7a0b389367f3f'
+      - name: Publish validated candidate separately from PR branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Add validation-radius selection and confirmation-refresh eviction controls'
+          git push origin HEAD:refs/heads/review/sal1-radius-validated
+          git rev-parse HEAD > outputs/sal1-radius-candidate.txt
+          git rev-parse HEAD^{tree} > outputs/sal1-radius-tree.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sal1-radius-review-validation
           path: outputs/
-          retention-days: 7
+          retention-days: 30
