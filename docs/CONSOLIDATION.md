@@ -30,11 +30,17 @@ restored = ConsolidatingMemory.load('memory.hme')
 ```
 
 Before consolidation, the adapter privately owns an ordinary HMEEngine.
-`consolidate()` transfers its existing field allocation without modifying bytes,
-clears its records, payloads, patterns and lineage, and drops the engine reference.
-Afterward the adapter's only retained state is the complex field and a 48-byte
-fixed-width control array. There is no saved engine, codec or per-write list.
-The arrays are owned, with no views retaining a larger hidden allocation.
+`consolidate()` copies the active d-by-d patch into an owning contiguous array,
+clears its records, payloads, patterns and lineage, and releases the old engine
+and full grid. The active complex pattern bytes remain unchanged, including FFT
+roundoff residues. Only the zero exterior is omitted. Afterward the adapter owns
+the complex patch and a 48-byte fixed-width control array, with no saved engine,
+codec, per-write list, or array view keeping the larger allocation alive.
+`patch_copy()` returns a caller-owned active patch. For compatibility,
+`field_copy()` materializes an independent full-grid inspection copy with a zero
+exterior. That requested allocation is temporary/caller-owned, not retained memory.
+Post-consolidation write, moment, reconstruction, save and load paths operate on
+the patch without reconstituting the old grid.
 
 This is a new managed stream, not an automatic conversion of arbitrary existing
 HMEEngine histories. Importing an old field whose gains, decay, clipping, merges
@@ -43,8 +49,13 @@ adapter would require a separate explicit provenance contract.
 
 All writes are numeric and co-located at one central, unclipped patch. They use
 the unchanged core's resampling, optional Hann window, unit normalization and
-FFT pattern code. The adapter's Hann default stays True; numeric study examples
-opt out explicitly. Zero/degenerate processed vectors, nonfinite data, invalid
+FFT pattern code. The NEW adapter defaults to `use_hann_window=False`; the pinned
+v3.1 core still defaults to True and is untouched. Hann can be explicitly enabled
+for encoding/moment experiments, but `reconstruct()` raises in that mode. Tapering
+zeros the endpoints and changes the stored coordinate scales, so neither silently
+windowing a raw query nor inverse-windowing can recover the discarded endpoints.
+Existing Hann-on checkpoints remain Hann-on; loading does not invent lost data.
+Zero/degenerate processed vectors, nonfinite data, invalid
 gains and accumulator overflow are rejected before mutation. Positive and zero
 gains are allowed; negative weights are not. This intentionally narrows the
 unrestricted core API to a PSD-compatible moment stream.
@@ -69,27 +80,46 @@ uint64 count exhaustion and floating overflow are errors, not unbounded storage.
 
 `reconstruct()` implements the experimental moment-based ridge completion used
 in the numerical research direction. It ignores hidden query entries, preserves
-visible values, and neither reads nor restores records. It does not identify
+visible values, and neither reads nor restores records. With Hann disabled,
+`moment()` describes unit-normalized, possibly resampled training vectors. The
+reader takes a dimension-length partial vector on those coordinate axes; it does
+not undo resampling or infer an original norm from stored records. It does not identify
 which original item produced a query. `retrieve()` explicitly raises after
 consolidation rather than inventing an identity match. The remaining second
 moment is invariant under a whole-vector sign reversal, regardless of gain.
 
 ## Byte accounting
 
-Default 64-by-64 complex128 field, independent of observation count:
+Default dimension 16, with a 64-by-64 grid only during the recording phase:
 
 | Retained/serialized component | Bytes |
 |---|---:|
-| Field data | 65,536 |
+| Active 16-by-16 complex128 patch | 4,096 |
 | Fixed-width control array | 48 |
-| Total retained array data | 65,584 |
-| Complete uncompressed checkpoint | 65,624 |
+| Total retained array data after consolidation | 4,144 |
+| Complete uncompressed v2 checkpoint | 4,184 |
+| Packed real symmetric moment, numerical reference only | 1,088 |
+| Dense real 16-by-16 moment, numerical reference only | 2,048 |
 
-The checkpoint adds an 8-byte format marker and a 32-byte SHA-256 digest. It
-contains the field, dimensions, preprocessing/decay flags, weight state and count,
-not raw vectors or lineage. Loading resumes in consolidated mode. The digest
-detects damage, does not repair it and is not an authenticity signature. Checkpoint
-sizes are measured on disk; compression and changing ZIP metadata are not involved.
+The checkpoint adds an 8-byte `HMEFC002` marker and a 32-byte SHA-256 digest.
+It contains the exact active FFT-layout patch, source-grid dimensions,
+preprocessing/decay flags, weight state and counter. No raw vectors or lineage
+are present. Checkpoint byte counts are measured on disk, not compressed sizes.
+The packed-real figure is a comparison representation for real moments, NOT the
+implemented checkpoint or a universal information-theoretic lower bound. Complex
+Hermitian moments have d^2 real degrees of freedom; additional structure such as
+a known trace or low rank can change parameter counts. Packing a real symmetric
+moment need not preserve the complex FFT roundoff bytes that this patch retains.
+
+Loading always resumes in consolidated mode and explicitly enforces
+`dimension <= memory_size` before payload reshape. The earlier loader already
+inherited this bound through `HMEConfig`; the direct check and correctly hashed
+malformed-header regression now make it explicit. Length, schema, digest and
+finiteness checks remain. Legacy `HMEFC001` full-grid checkpoints are read only
+if their exterior is zero, cropped to an owning patch, and upgraded in memory
+to v2. Nonzero exterior values are rejected rather than silently discarded.
+Re-saving writes v2. No old release tag or pinned file is rewritten.
+The digest detects damage; it does not repair it or authenticate an author.
 
 `instance_owned_bytes` additionally traverses instance-reachable Python objects,
 counting aliases once. Its exact value depends on the Python/NumPy build. It
@@ -100,12 +130,18 @@ releases owned references; it is not secure deletion of RAM or caller files.
 The managed recording phase is not bounded: provenance can grow until explicitly
 consolidated. Only consolidated mode has the fixed retained-state contract.
 
-The ideal packed real symmetric C at d=16 has 136 float64 entries (1,088 bytes),
-so it is smaller than nine 16-float64 raw vectors. That break-even does NOT apply
-to this full complex grid. Its 65,584 retained array bytes first beat raw float64
-vector data at N=513 for d=16, before comparing object or index overhead. A dense
-real C uses 2,048 data bytes; a compact complex d-by-d patch uses 4,096. These are
-separate possible representations, not invisible savings already implemented.
+For d=16, packed real symmetric matrix DATA (1,088 bytes) is smaller than nine
+raw float64 vectors. That is a hypothetical packed-matrix reference, not a storage
+claim about this adapter. Its actual 4,144 retained array bytes first become
+smaller than raw 16-float64 vector data at N=33; the 4,184-byte checkpoint also
+crosses at N=33. Object/index/RNG/control overhead for competing memories must
+be charged consistently in REC-3. The original 65,584-byte retained full-grid
+implementation crossed at N=513 and is superseded, not hidden in a view.
+
+REC-3 must freeze the actually implemented representation and budget before
+running seeds: complex patch and packed-real direct moments are different arms,
+with actual metadata, allocator/object exclusions and checkpoint bytes reported
+separately. An array-only parameter count is not an equal-byte comparison.
 
 ## Development verification
 
@@ -114,10 +150,25 @@ python -m pytest tests/test_consolidation.py -q
 python scripts/check_consolidation.py --output outputs/consolidation-step0.json
 ```
 
-Fixtures check exact pinned-engine field parity across transition and subsequent
-writes, real/complex payloads, gains/decay, no surviving engine/payload/pattern/
-lineage references, constant retained bytes, explicit identity unavailability,
-weighted direct-moment parity, checkpoint continuation/integrity, hidden-coordinate
-isolation and a sign-reversal limitation. Fixtures are deterministic development
+Fixtures check exact active-patch and reconstructed full-grid parity across
+transition and subsequent writes, real/complex payloads, gains/decay, and no
+surviving engine/full-grid/payload/pattern/lineage references. They check constant
+retained bytes, explicit identity unavailability, weighted direct-moment parity,
+compact and legacy checkpoint continuation/integrity, hidden-coordinate isolation,
+and the sign-reversal limitation. A fixed 300-write rank-3/dimension-16 regression
+hides coordinates 0, 5 and 15 and verifies default Hann-off reconstruction before
+consolidation, after it, and after save/load. Explicit Hann-on reconstruction
+raises in every mode. This is a development regression, not the reviewer's
+unprovided seed or a preregistered accuracy comparison. Fixtures are deterministic development
 checks, not preregistered performance outcomes. Original reports and source pins
 remain unchanged. This adapter is not yet a default release behavior.
+
+## Review history
+
+The original full-grid development evidence is retained byte-for-byte as
+`evidence/consolidation_step0_full_grid.json` (source `b45a986`).
+`evidence/consolidation_step0.json` is regenerated for the compact adapter with
+its current source hashes and runtime. The amendment changes this unreleased
+adapter's default, retained layout and checkpoint version, not any frozen
+REC-1/NN evaluator or the pinned engine. SAL-1, HOLO-1, REC-3 and CONT-1 remain
+designs without preregistered efficacy outcomes.

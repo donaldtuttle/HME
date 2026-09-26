@@ -1,12 +1,12 @@
 {
   "kind": "deterministic-development-invariants-not-efficacy",
-  "python": "3.12.14",
-  "numpy": "2.5.3",
+  "python": "3.13.5",
+  "numpy": "2.3.5",
   "source_sha256": {
     "hme_engine.py": "080a20056c6c5c88e49c6307845277002ad2091a6a1d7dec66961317bc2c0167",
-    "hme_consolidation.py": "2d445533aef1e7afa51113db4f2f9945a8c80cf4f743b851aec60c881bfd1a6d",
-    "tests/test_consolidation.py": "5ae156d3270907bb8164a6a9092d117784bcdef14b9e72afefc15ef60922f5b5",
-    "scripts/check_consolidation.py": "40ac11396086ca54eb95a3012bb3f275269121bc09a579d3a370e489c0221e95"
+    "hme_consolidation.py": "6daa108f59208c88c7b59e119cb66273cc8faa229a816a5f1e624776912340f0",
+    "tests/test_consolidation.py": "5a491a7fd291b92923c6db9f4451d001f9b207dae9e07894ff658ac6dac80223",
+    "scripts/check_consolidation.py": "4c88083d18b51e7a79564b20af227db2287c62d107134ddddc965905c61df800"
   },
   "before_128_writes": {
     "consolidated": false,
@@ -19,40 +19,57 @@
     "patterns": 128,
     "lineage_nodes": 128,
     "lineage_edges": 127,
-    "consolidated_checkpoint_bytes": 65624
+    "active_patch_bytes": 4096,
+    "packed_real_symmetric_reference_bytes": 1088,
+    "dense_real_moment_reference_bytes": 2048,
+    "legacy_grid_data_bytes": 65536,
+    "consolidated_checkpoint_bytes": 4184
   },
   "after_consolidation": {
     "consolidated": true,
-    "field_bytes": 65536,
+    "field_bytes": 4096,
     "control_bytes": 48,
-    "retained_array_bytes": 65584,
-    "instance_owned_bytes": 65896,
+    "retained_array_bytes": 4144,
+    "instance_owned_bytes": 4456,
     "records": 0,
     "payloads": 0,
     "patterns": 0,
     "lineage_nodes": 0,
     "lineage_edges": 0,
-    "consolidated_checkpoint_bytes": 65624
+    "active_patch_bytes": 4096,
+    "packed_real_symmetric_reference_bytes": 1088,
+    "dense_real_moment_reference_bytes": 2048,
+    "legacy_grid_data_bytes": 65536,
+    "consolidated_checkpoint_bytes": 4184
   },
   "after_1000_additional_writes": {
     "consolidated": true,
-    "field_bytes": 65536,
+    "field_bytes": 4096,
     "control_bytes": 48,
-    "retained_array_bytes": 65584,
-    "instance_owned_bytes": 65896,
+    "retained_array_bytes": 4144,
+    "instance_owned_bytes": 4456,
     "records": 0,
     "payloads": 0,
     "patterns": 0,
     "lineage_nodes": 0,
     "lineage_edges": 0,
-    "consolidated_checkpoint_bytes": 65624
+    "active_patch_bytes": 4096,
+    "packed_real_symmetric_reference_bytes": 1088,
+    "dense_real_moment_reference_bytes": 2048,
+    "legacy_grid_data_bytes": 65536,
+    "consolidated_checkpoint_bytes": 4184
   },
   "checks": {
     "field_bytes_preserved": true,
     "retained_bytes_constant": true,
     "checkpoint_exact": true,
+    "full_grid_released": true,
+    "active_patch_bytes_preserved": true,
+    "owning_patch": true,
+    "default_hann_off": true,
     "no_records_or_caches": true
   },
-  "checkpoint_bytes_measured_on_disk": 65624,
+  "checkpoint_bytes_measured_on_disk": 4184,
+  "checkpoint_format": "HMEFC002",
   "scope": "Owned state only; not RSS, peak workspace, secure erase, or semantic retention."
 }

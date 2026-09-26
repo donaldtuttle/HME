@@ -1,7 +1,7 @@
 """Opt-in, DEVELOP consolidation around the unchanged v3.1 FFT encoder.
 
 A single aligned site supports weighted moments, not individual-item recovery.
-After consolidate(), retained instance state is one field and one fixed-width
+After consolidate(), retained instance state is one owned active patch and one fixed-width
 control array. There is no retained engine, codec, payload cache, or lineage.
 This module does not change hme_engine.py or enable consolidation by default.
 """
@@ -18,7 +18,9 @@ from numpy.typing import ArrayLike, NDArray
 
 from hme_engine import HME, HMEConfig, HMEEngine
 
-_MAGIC = b"HMEFC001"
+_MAGIC = b"HMEFC002"
+_LEGACY_MAGIC = b"HMEFC001"
+_VERSION = 2
 _CONTROL = np.dtype([
     ("version", "<u4"), ("memory_size", "<u4"), ("dimension", "<u4"),
     ("hann", "u1"), ("reserved", "u1", (3,)), ("decay", "<f8"),
@@ -87,7 +89,7 @@ class ConsolidatingMemory:
     __slots__ = ("_engine", "_field", "_control")
 
     def __init__(self, *, memory_size: int = 64, dimension: int = 16,
-                 use_hann_window: bool = True, decay: float = 0.0) -> None:
+                 use_hann_window: bool = False, decay: float = 0.0) -> None:
         for name, value in (("memory_size", memory_size), ("dimension", dimension)):
             if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
                 raise TypeError(f"{name} must be an integer")
@@ -98,7 +100,7 @@ class ConsolidatingMemory:
         cfg = HMEConfig(memory_size=int(memory_size), encoding_resolution=int(dimension),
                         use_hann_window=bool(use_hann_window), field_decay=float(decay))
         self._control = np.zeros(1, dtype=_CONTROL)
-        self._control[0] = (1, cfg.memory_size, cfg.encoding_resolution,
+        self._control[0] = (_VERSION, cfg.memory_size, cfg.encoding_resolution,
                             int(cfg.use_hann_window), (0, 0, 0), cfg.field_decay,
                             0.0, 0.0, 0)
         self._engine: HMEEngine | None = HMEEngine(hme_config=cfg)
@@ -176,24 +178,42 @@ class ConsolidatingMemory:
         self._control["writes"][0] = self.write_count + 1
 
     def consolidate(self) -> dict[str, int | bool]:
-        """Drop owned records/caches/lineage without altering field bytes.
+        """Retain only an owning copy of the active patch; release the full grid.
 
-        Idempotent and irreversible. New writes remain field-only. The field
-        allocation is transferred in place, not copied into a hidden snapshot.
+        Idempotent and irreversible. Active complex pattern bytes are preserved,
+        including floating-point residues. New writes remain patch-only. No view
+        or hidden snapshot may keep the old grid allocation alive.
         """
         if self._engine is not None:
+            patch = self._field[self._slices()].copy(order="C")
             engine = self._engine
             for name in ("records", "_payloads", "_patterns"):
                 getattr(engine.hme, name).clear()
             engine.lineage.nodes.clear()
             engine.lineage.edges.clear()
             engine.lineage._last_memory_node = None
+            self._field = patch
             self._engine = None
         return self.storage_report()
 
+    def patch_copy(self) -> NDArray[np.complex128]:
+        """Return an independent copy of the active FFT-layout patch."""
+        return self._field[self._slices()].copy()
+
     def field_copy(self) -> NDArray[np.complex128]:
-        """Return an independent caller-owned inspection copy."""
-        return self._field.copy()
+        """Materialize a caller-owned full-grid inspection copy.
+
+        In consolidated mode the zero exterior is rebuilt only for this result.
+        This potentially large temporary/caller allocation is not retained state.
+        Use patch_copy() for inspection without allocating the old grid shape.
+        """
+        if not self.consolidated:
+            return self._field.copy()
+        side = int(self._control["memory_size"][0])
+        start = side // 2 - self.dimension // 2
+        out = np.zeros((side, side), dtype=np.complex128)
+        out[start:start+self.dimension, start:start+self.dimension] = self._field
+        return out
 
     def moment(self) -> NDArray[np.complex128]:
         """Read the gain/decay-normalized uncentered second moment.
@@ -213,7 +233,12 @@ class ConsolidatingMemory:
 
         Hidden entries are ignored, visible values are copied unchanged. This
         is moment-based numerical completion, not record or text recovery.
+        Hann-windowed storage is refused: endpoint information was discarded and
+        visible values are not in the tapered, renormalized training coordinates.
         """
+        if bool(self._control["hann"][0]):
+            raise ValueError("reconstruction requires use_hann_window=False; "
+                             "Hann-tapered endpoints cannot be recovered")
         y = np.asarray(observed, dtype=np.complex128)
         m = np.asarray(mask)
         if y.shape != (self.dimension,) or m.shape != y.shape or m.dtype != np.bool_:
@@ -263,8 +288,12 @@ class ConsolidatingMemory:
             "instance_owned_bytes": _owned_bytes(self), "records": records,
             "payloads": payloads, "patterns": patterns, "lineage_nodes": nodes,
             "lineage_edges": edges,
+            "active_patch_bytes": self.dimension * self.dimension * 16,
+            "packed_real_symmetric_reference_bytes": self.dimension * (self.dimension + 1) // 2 * 8,
+            "dense_real_moment_reference_bytes": self.dimension * self.dimension * 8,
+            "legacy_grid_data_bytes": int(self._control["memory_size"][0]) ** 2 * 16,
             "consolidated_checkpoint_bytes": len(_MAGIC) + self._control.nbytes
-                                             + self._field.nbytes + _DIGEST_BYTES,
+                                             + self.dimension ** 2 * 16 + _DIGEST_BYTES,
         }
 
     def save(self, path: str | Path) -> Path:
@@ -284,32 +313,57 @@ class ConsolidatingMemory:
 
     @classmethod
     def load(cls, path: str | Path) -> "ConsolidatingMemory":
-        """Load a consolidated checkpoint with validated length/schema/digest."""
+        """Load compact v2, or validate and losslessly crop a legacy v1 grid.
+
+        Configuration bounds are checked before reading or reshaping the body.
+        Legacy files must have a zero exterior; hidden nonzero cells are rejected,
+        never silently discarded. Every successful load owns a d-by-d patch.
+        """
         path = Path(path)
         with path.open("rb") as f:
             header = f.read(len(_MAGIC) + _CONTROL.itemsize)
-            if len(header) != len(_MAGIC) + _CONTROL.itemsize or not header.startswith(_MAGIC):
+            if len(header) != len(_MAGIC) + _CONTROL.itemsize:
+                raise ValueError("invalid consolidation checkpoint header")
+            magic = header[:len(_MAGIC)]
+            if magic not in (_MAGIC, _LEGACY_MAGIC):
                 raise ValueError("invalid consolidation checkpoint header")
             control = np.frombuffer(header[len(_MAGIC):], dtype=_CONTROL).copy()
             c = control[0]
-            if int(c["version"]) != 1 or int(c["hann"]) not in (0, 1) or np.any(c["reserved"]):
+            version = 1 if magic == _LEGACY_MAGIC else _VERSION
+            if int(c["version"]) != version or int(c["hann"]) not in (0, 1) or np.any(c["reserved"]):
                 raise ValueError("unsupported control schema")
-            HMEConfig(memory_size=int(c["memory_size"]), encoding_resolution=int(c["dimension"]),
+            side, dimension = int(c["memory_size"]), int(c["dimension"])
+            if dimension > side:
+                raise ValueError("checkpoint dimension cannot exceed memory_size")
+            HMEConfig(memory_size=side, encoding_resolution=dimension,
                       field_decay=float(c["decay"]))
             if (not np.isfinite(c["mass"]) or c["mass"] < 0 or
                     not np.isfinite(c["squared_mass"]) or c["squared_mass"] < 0):
                 raise ValueError("invalid checkpoint weight state")
-            side = int(c["memory_size"])
-            expected = len(header) + side * side * 16 + _DIGEST_BYTES
-            if path.stat().st_size != expected:
+            stored_side = side if version == 1 else dimension
+            body_size = stored_side * stored_side * 16
+            f.seek(0, 2)
+            if f.tell() != len(header) + body_size + _DIGEST_BYTES:
                 raise ValueError("checkpoint length does not match schema")
-            rest = f.read()
+            f.seek(len(header))
+            rest = f.read(body_size + _DIGEST_BYTES)
+        if len(rest) != body_size + _DIGEST_BYTES:
+            raise ValueError("checkpoint truncated during read")
         payload, digest = header + rest[:-_DIGEST_BYTES], rest[-_DIGEST_BYTES:]
         if hashlib.sha256(payload).digest() != digest:
             raise ValueError("checkpoint integrity failure")
-        field = np.frombuffer(rest[:-_DIGEST_BYTES], dtype="<c16").reshape(side, side).copy()
+        field = np.frombuffer(rest[:-_DIGEST_BYTES], dtype="<c16").reshape(stored_side, stored_side)
         if not np.all(np.isfinite(field)):
             raise ValueError("nonfinite checkpoint field")
+        if version == 1:
+            start = side // 2 - dimension // 2
+            end = start + dimension
+            if (np.any(field[:start, :]) or np.any(field[end:, :]) or
+                    np.any(field[start:end, :start]) or np.any(field[start:end, end:])):
+                raise ValueError("legacy checkpoint has nonzero cells outside the active patch")
+            field = field[start:end, start:end]
+        patch = field.copy(order="C")
+        control["version"][0] = _VERSION
         result = cls.__new__(cls)
-        result._engine, result._field, result._control = None, field, control
+        result._engine, result._field, result._control = None, patch, control
         return result

@@ -121,8 +121,14 @@ Compare at the same declared real-byte caps and actual used bytes:
 Match information, stream order, weights, context, embedding space, evaluation
 queries and tuning budgets. A fixed embedding model can be common infrastructure,
 but per-arm state cannot be hidden in it. Report byte-quality curves, complete query
-and update latency, peak workspace and build/fitting cost. The packed-real-matrix
-break-even N>(d+1)/2 does not describe the current allocated HME complex grid.
+and update latency, peak workspace and build/fitting cost. Freeze whether each arm stores the implemented complex patch or packed-real
+moments. At d=16 the compact adapter retains 4,096 patch bytes plus 48 control
+bytes (4,184 bytes serialized), versus 1,088 bytes for packed-real moment DATA.
+The latter is a reference representation, not an information-theoretic floor or
+an implemented HME checkpoint. Include all baseline metadata: a 64-KiB reservoir
+holds fewer than 512 dimension-16 float64 records once RNG/count state is charged.
+The adapter defaults to Hann off; Hann-on reconstruction is explicitly refused.
+No unreported null grid allocation, caller backup or retained field view is allowed.
 
 ## CONT-1: preserved consequences, not record IDs
 

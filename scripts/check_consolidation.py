@@ -8,6 +8,8 @@ import platform
 from pathlib import Path
 import sys
 import tempfile
+import gc
+import weakref
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -21,13 +23,20 @@ def main() -> None:
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError('use a fresh output path')
-    memory = ConsolidatingMemory(dimension=16, use_hann_window=False)
+    memory = ConsolidatingMemory(dimension=16)
     for i in range(128):
         memory.write(np.arange(16.) + i % 11)
     field = memory.field_copy()
     before = memory.storage_report()
+    grid_ref = weakref.ref(memory._field)
+    patch_bytes = memory.patch_copy().tobytes()
     memory.consolidate()
+    gc.collect()
+    assert grid_ref() is None
+    assert memory._field.base is None and memory._field.flags.owndata
+    assert memory.patch_copy().tobytes() == patch_bytes
     after = memory.storage_report()
+    assert after['retained_array_bytes'] == 4144
     np.testing.assert_array_equal(field, memory.field_copy())
     for i in range(1000):
         memory.write(np.arange(16.) + i % 11)
@@ -48,10 +57,14 @@ def main() -> None:
         'before_128_writes': before, 'after_consolidation': after,
         'after_1000_additional_writes': later,
         'checks': {'field_bytes_preserved': True, 'retained_bytes_constant': True,
-                   'checkpoint_exact': True, 'no_records_or_caches': all(
+                   'checkpoint_exact': True, 'full_grid_released': True,
+                   'active_patch_bytes_preserved': True, 'owning_patch': True,
+                   'default_hann_off': not memory._config().use_hann_window,
+                   'no_records_or_caches': all(
                        later[key] == 0 for key in ('records','payloads','patterns',
                                                    'lineage_nodes','lineage_edges'))},
         'checkpoint_bytes_measured_on_disk': on_disk,
+        'checkpoint_format': 'HMEFC002',
         'scope': 'Owned state only; not RSS, peak workspace, secure erase, or semantic retention.',
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)

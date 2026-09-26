@@ -278,8 +278,10 @@ comparisons. [Known limitations](docs/KNOWN_LIMITATIONS.md) lists current bounda
 ## Field-only consolidation (DEVELOP)
 
 The opt-in [consolidation adapter](docs/CONSOLIDATION.md) can discard its owned
-records, payload/pattern caches and lineage while retaining the unchanged field.
-Later writes remain field-only. Fixed-width weight metadata supports weighted
+records, payload/pattern caches and lineage while preserving the active FFT patch.
+Consolidation releases the unused full grid; later writes remain patch-only.
+The adapter defaults to Hann off and refuses reconstruction when Hann is on.
+Fixed-width weight metadata supports weighted
 numerical reconstruction and a complete field-only checkpoint. This is Step-0
 invariant validation, not a salience, damage-tolerance or semantic-memory result.
 The [study plan](experiments/consolidation_plan/README.md) separates those questions.
