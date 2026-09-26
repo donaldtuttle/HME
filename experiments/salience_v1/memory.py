@@ -16,7 +16,9 @@ from hme_consolidation import ConsolidatingMemory, _owned_bytes
 _MAX_CLOCK = np.iinfo(np.uint64).max
 _POLICY = np.dtype([("threshold", "<f8"), ("radius", "<f8"),
                     ("clock", "<u8"), ("admissions", "<u8"),
-                    ("always_admit", "u1")])
+                    ("flags", "u1")])
+_ALWAYS_ADMIT = 1
+_REFRESH_ON_CONFIRMATION = 2
 
 
 def _config(cue_dim: int, outcome_dim: int, decay: float, ridge: float) -> np.ndarray:
@@ -185,15 +187,21 @@ class SurpriseMemory:
 
     If the base already predicts eligible feedback adequately, remove the matched
     exception. If the hybrid is adequate but the base is not, KEEP the exception
-    without refreshing its age or admission count. Otherwise revise the match or
+    without a new admission. FIFO does not refresh its age; the confirmation
+    ablation refreshes eviction age on eligible trusted feedback. Otherwise revise or
     admit a new entry, evicting the oldest accepted entry when full. Admit-all is
     an explicit ablation using the same matching and anchor rules. Nearby distinct
     scopes can still collide: this is not semantic scope inference or a truth test.
+
+    Slots are compacted in acceptance order, independently of eviction timestamps.
+    This preserves newest-accepted recall ties when confirmation updates an age.
+    The mode bit shares the existing policy byte; neither arm adds retained arrays.
+    predict() never refreshes: an unlabelled recall cannot establish correctness.
     """
     __slots__ = ("base", "_cues", "_targets", "_ages", "_valid", "_policy")
 
     def __init__(self, base, *, capacity=4, threshold=0.1, radius=0.1,
-                 always_admit=False, byte_budget=None):
+                 always_admit=False, byte_budget=None, refresh_on_confirmation=False):
         if isinstance(capacity, (bool, np.bool_)) or not isinstance(capacity, (int, np.integer)):
             raise TypeError("capacity must be an integer")
         if capacity < 0:
@@ -204,13 +212,16 @@ class SurpriseMemory:
             raise ValueError("radius and its square must be finite and nonnegative")
         if not isinstance(always_admit, (bool, np.bool_)):
             raise TypeError("always_admit must be boolean")
+        if not isinstance(refresh_on_confirmation, (bool, np.bool_)):
+            raise TypeError("refresh_on_confirmation must be boolean")
         self.base = base
         self._cues = np.zeros((capacity, base.cue_dim))
         self._targets = np.zeros((capacity, base.outcome_dim))
         self._ages = np.zeros(capacity, dtype=np.uint64)
         self._valid = np.zeros(capacity, dtype=np.bool_)
         self._policy = np.zeros(1, dtype=_POLICY)
-        self._policy[0] = (threshold, radius, 0, 0, always_admit)
+        flags = int(always_admit) * _ALWAYS_ADMIT | int(refresh_on_confirmation) * _REFRESH_ON_CONFIRMATION
+        self._policy[0] = (threshold, radius, 0, 0, flags)
         if byte_budget is not None:
             if isinstance(byte_budget, bool) or not isinstance(byte_budget, (int, np.integer)):
                 raise TypeError("byte_budget must be an integer")
@@ -227,7 +238,15 @@ class SurpriseMemory:
         if nearest > float(self._policy["radius"][0]) ** 2:
             return None
         ties = candidates[dist == nearest]
-        return int(ties[np.argmax(self._ages[ties])])
+        # Valid slots are ordered oldest to newest acceptance, not confirmation.
+        return int(ties[-1])
+
+    def _discard_entry(self, index: int) -> None:
+        """Remove a logical entry, preserving acceptance order without extra state."""
+        size = int(self._valid.sum())
+        for array in (self._cues, self._targets, self._ages, self._valid):
+            array[index:size-1] = array[index+1:size].copy()
+            array[size-1] = 0
 
     def predict(self, cue: ArrayLike) -> np.ndarray:
         x = _vector(cue, self.base.cue_dim)
@@ -260,7 +279,8 @@ class SurpriseMemory:
         if not math.isfinite(base_loss) or not math.isfinite(hybrid_loss):
             raise FloatingPointError("nonfinite surprise score")
         threshold = float(self._policy["threshold"][0])
-        always = bool(self._policy["always_admit"][0])
+        flags = int(self._policy["flags"][0])
+        always = bool(flags & _ALWAYS_ADMIT)
         enabled = bool(eligible and self._valid.size)
         # The base check is for safe retirement, NOT admission surprise.
         remove = enabled and match is not None and not always and base_loss <= threshold
@@ -270,24 +290,31 @@ class SurpriseMemory:
         # No buffer mutation if the base rejects its numerical update.
         self.base.update(x, y, gain=g)
         self._policy["clock"][0] = clock + 1
-        admitted = removed = revised = False
+        admitted = removed = revised = refreshed = False
         if remove:
-            self._cues[match].fill(0); self._targets[match].fill(0)
-            self._ages[match], self._valid[match] = 0, False
+            self._discard_entry(match)
             removed = True
         elif admit:
-            available = np.flatnonzero(~self._valid)
-            i = (match if match is not None else int(available[0]) if available.size
-                 else int(np.argmin(self._ages)))
-            if match is None:
-                self._cues[i] = x
-            # A revision keeps the existing cue anchor; no transitive radius drift.
-            self._targets[i] = y
+            # Preserve the first cue anchor while moving a revision to newest
+            # acceptance order. Confirmation alone never reorders these slots.
+            anchor = self._cues[match].copy() if match is not None else x
+            if match is not None:
+                self._discard_entry(match)
+            elif self._valid.all():
+                self._discard_entry(int(np.argmin(self._ages)))
+            i = int(self._valid.sum())
+            self._cues[i], self._targets[i] = anchor, y
             self._ages[i], self._valid[i] = clock + 1, True
             self._policy["admissions"][0] += 1
             admitted, revised = True, match is not None
+        elif (enabled and match is not None and
+              flags & _REFRESH_ON_CONFIRMATION and hybrid_loss <= threshold):
+            # Reached only when retirement and admission are both unnecessary.
+            # Supplied trusted eligible feedback confirms a still-needed entry.
+            self._ages[match] = clock + 1
+            refreshed = True
         return {"ignored": False, "admitted": admitted, "removed": removed,
-                "revised": revised, "pre_update_base_nmse": base_loss,
+                "revised": revised, "refreshed": refreshed, "pre_update_base_nmse": base_loss,
                 "pre_update_hybrid_nmse": hybrid_loss}
 
     def storage_report(self) -> dict:

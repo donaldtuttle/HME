@@ -3,7 +3,7 @@
 **Status: DEVELOPMENT PROTOTYPE AND DRAFT, not a preregistration.**
 No evaluation seeds have been frozen or run. The policy-review constants in
 [POLICY_CONSTANTS.json](POLICY_CONSTANTS.json) now fix admission, matching, capacities,
-threshold, radius, and required cue-noise levels. Those constants plus development
+threshold, candidate radii, explicit radius profiles, eviction arms, and required cue-noise levels. Those constants plus development
 fixtures are NOT a complete performance preregistration. The owner's one-seed pilot is
 motivation only; its source/seed was not supplied and its table was not reproduced
 here. Correctness tests and the deterministic smoke demonstration below are not
@@ -84,14 +84,15 @@ Three interchangeable backends are implemented:
    matches, the hybrid uses the base. The threshold is 0.1 NMSE, strictly exceeded.
    The base loss remains available for diagnostics and safe exception retirement,
    not for admitting repeats already handled correctly by the hybrid.
-3. Revision, removal and recall use the SAME nearest cue within radius 0.1 in
+3. Revision, removal and recall use the SAME nearest cue within the selected radius in
    absolute Euclidean units (boundary included); exact distance ties choose the
    newest accepted entry. With eligible feedback, remove a matched exception if
    the PRE-UPDATE BASE is already adequate (base NMSE <=0.1). Otherwise retain it
    unchanged when the hybrid is adequate, even if the base still gets it wrong.
-   Unsurprising repeats do not refresh ages or admission counts. For surprising
+   Unsurprising repeats never increase admissions. FIFO does not refresh ages;
+   the confirmation-refresh ablation updates eviction age as specified below. For surprising
    feedback, replace the matched target in place; without a match allocate a new
-   slot and evict the oldest accepted entry when full. A revision keeps its first
+   slot and evict the oldest entry by the chosen eviction clock when full. A revision keeps its first
    accepted cue anchor fixed, so small changes cannot walk a matching region.
 4. Every trusted observation still updates the base, including admitted corrections
    and unsurprising repeats. No buffer state changes if the base rejects its update.
@@ -99,7 +100,7 @@ Three interchangeable backends are implemented:
    `always_admit` control reuses the same matching/anchor policy but always admits
    eligible feedback, and does not apply the base-adequacy retirement rule.
 5. At recall, return the matched stored outcome, or the base outside all matching
-   radii. Only cues and accepted ages affect routing, never hidden test outcomes.
+   radii. Only cues and acceptance order affect routing, never hidden test outcomes.
    Nearby distinct contexts can still collide inside one radius. No geometric
    radius establishes semantic identity; conflicting nearby scopes and boundary
    crossings are mandatory controls. Larger cue noise can exceed the radius and
@@ -149,12 +150,130 @@ old/new labels cannot justify a truth-retention claim.
 
 Test inputs must be generated without exposing hidden targets, component identity
 or true scope boundaries to any reader. Hold out entire source examples/episodes
-before constructing nearby queries. Radius and admission threshold are fixed by
-this review. Validation may select
+before constructing nearby queries. Admission threshold remains fixed; radius
+uses the validation-only rule below. Validation may select
 ridge, gain and decay under a subsequently frozen equal-budget selection rule;
 changing a fixed policy constant requires a new public version before evaluation.
 No test-set selection of the
 most favorable gain, decay, checkpoint or exception count.
+
+## Radius review: validation selection plus declared geometric stress
+
+This supersedes the universal fixed-radius reading of policy v2. That exact JSON
+is preserved as `POLICY_CONSTANTS_v2.json`. Policy v3 chooses (a) plus (c): tune
+radius using validation streams for the efficacy comparison, and keep an explicit
+fixed-radius high-noise stress arm. No radii have yet been selected from real
+validation streams, and no SAL-1 evaluation has run.
+
+### Quantified limitation of the old fixed radius
+
+If an anchor and a later cue are independent observations of one true cue, each
+with independent N(0,sigma^2 I_d) noise, their difference has covariance 2 sigma^2 I:
+
+```text
+||difference|| / (sqrt(2)*sigma) ~ chi_d
+P(match at radius r) = F_chi2_d(r^2/(2*sigma^2))
+d=8, r=0.1:
+  sigma=0.01 -> 0.9999999591324105
+  sigma=0.05 -> 0.01898815687615381
+```
+
+These are analytic pairwise probabilities, not measured SAL-1 outcomes. A clean
+anchor gives a different variance; conditioning on one fixed noisy anchor gives
+a noncentral law. Admission selection and multiple stored anchors change total
+hit rates. The 1.9% figure is not the recall rate of an adaptive six-entry store
+and does not determine total task error because the base can also predict.
+The owner's 20-trial table is a separate development report, not independently
+rerun here. Expected fragmentation/misses at fixed r=0.1, sigma=0.05 are a declared
+stress failure mechanism, not a surprise violation of the revised admission rule.
+
+### Separate radius profiles and validation-only selection
+
+- **Primary candidate:** sigma=0.01 with a validation-selected radius. This is a
+  proposed primary cell, still subject to the complete pre-evaluation registration.
+- **Secondary candidates:** sigma=0, 1e-6 and 0.05 with validation-selected radii.
+- **Declared stress:** sigma=0.05 with fixed radius 0.1. Report the expected geometric
+  limitation even if it fails. Never substitute its result for the tuned cell.
+- `fixed_development` keeps r=0.1 for existing correctness fixtures, NOT a default
+  efficacy arm. `fixed_stress` rejects a noise designation other than 0.05.
+
+Use the literal candidate radii `[0.05,0.1,0.15,0.2,0.25,0.3,0.4]`, in absolute
+raw-cue units, with the same stream/feedback information for every candidate.
+For each declared backend, budget profile, and known noise regime, reduce the
+FIFO validation results by independent stream: Ec is correction NMSE, Er is
+still-valid routine NMSE, and J=(Ec+Er)/2. First require mean Er <= 1.01 times
+the mean error of a common no-correction routine reference. Among feasible radii
+choose minimum mean J; exact ties choose the smallest radius. The reference must
+be identical across radii for each stream. Log all candidate losses, false matches,
+duplicate admissions, evictions and technical failures, not just the winner.
+This feasibility rule is a validation selection rule, not a statistical PASS gate.
+
+`radius_selection.select_validation_radius()` implements that deterministic table
+reduction. It requires every candidate to contain the same complete stream IDs,
+rejects evaluation/test-labelled input, invalid or duplicate rows, and returns an
+explicit infeasible record when nothing passes. Construction refuses an infeasible
+record; no silent widening, fallback or dropped candidate is allowed. The harness
+must retain technical failure logs even when selection aborts. The reducer does
+not generate data or authenticate a claimed split label: the future frozen corpus,
+source hashes and validation/evaluation provenance must establish independence.
+
+The selection record retains candidate tables, stream IDs, noise/backend/profile
+binding and the policy hash. `build_fixed_memory(radius_profile='validation_selected',
+...)` requires this checked record, recomputes its choice, and uses literal capacity
+with the existing byte cap. No table/stream is retained by the memory instance;
+only the selected radius lives in its already-counted policy array. The full audit
+record is experimental provenance, not a hidden deployed record store.
+
+**Selection isolation:** select using FIFO and reuse exactly that radius for the
+confirmation-refresh pair. Do not retune the radius between eviction arms in the
+primary ablation. Hold all other settings, cap, stream, and queries fixed. For the
+non-binding field/direct diagnostic, both use the SAME direct-moment validation
+selection at matched k=4. Equal-byte arms may select separately under equal budgets;
+that comparison includes capacity/policy interactions, not a new FFT effect.
+
+Noise level is allowed setup information shared by all arms, not a quantity supplied
+only to HME. A future deployment without known noise needs its own estimation rule.
+Gain/decay/ridge selection must be nested on validation data with matched search
+budgets and fixed before evaluation. Stream IDs, population cue scaling, resulting
+radius table, gain/decay procedure, exact runtime and decision settings remain
+pending. Publish the complete protocol first; run validation and push the selected
+configuration table before generating the held-out evaluation seeds.
+
+## Eviction ablation: confirmation, not query popularity
+
+The FIFO control evicts by last acceptance/revision time. Its name is shorthand
+for the existing oldest-accepted policy: a real revision already refreshes it.
+The new `refresh_on_confirmation=True` arm uses least-recently-confirmed eviction,
+where a new admission/revision initially counts as a confirmation.
+
+Refresh an existing age only when supplied feedback is trusted and eligible,
+the matched PRE-UPDATE HYBRID is adequate (NMSE <=0.1), and the PRE-UPDATE BASE
+is inadequate. Base adequacy still retires the entry first; surprising feedback
+still revises it. Confirmation alone changes neither anchor, outcome, admissions,
+threshold nor radius. Every trusted observation continues to update the base.
+Read-only `predict()` calls NEVER refresh an entry, because no new observed outcome
+has confirmed correctness. A user repeatedly querying an erroneous exception
+cannot make it immortal through query count. Supplied trusted-but-wrong feedback
+can still confirm a wrong entry; surprise is not truth.
+
+The same uint64 ages are reused; a mode bit shares the existing one-byte policy
+flags field. Retained array/object counts and literal capacities remain the same.
+To isolate eviction from recall ties, valid slots are stored in acceptance order.
+Confirmations update age without reordering; admissions/revisions move a logical
+entry to the newest acceptance position. Thus equal-distance recall/revision ties
+still choose newest ACCEPTED, not most recently confirmed. Compaction can move
+private array slots, but does not duplicate an entry or move its cue anchor.
+Compaction work and temporary copies are costs to measure, not free performance.
+No persisted hybrid format is changed because one has not been implemented.
+
+Required capacity-pressure controls: recurrent confirmations of useful exceptions;
+stale exceptions that should expire; repeated erroneous supplied feedback;
+nearby conflicting scopes; more necessary exceptions than capacity; confirmations
+near/outside the radius; and streams where frequency is not importance. Measure
+correction score AND routine error, plus false overrides, duplicate admissions,
+confirmations, evictions, occupancy, and update/query costs. The hybrid may win or
+lose; confirmation refresh is an ablation, not guaranteed improvement. At matched
+statistic and policy the existing field/direct equality expectation is unchanged.
 
 ## Baselines and two distinct fairness comparisons
 
@@ -204,8 +323,10 @@ For the 8 KiB (8,192 byte) instance-owned cap and cue/outcome dimensions 8/8:
 | Direct moment | 37 | 4 |
 | RLS | 43 | 4 |
 
-All use threshold NMSE 0.1 and recall/revision radius 0.1. These are explicit
-constants in `POLICY_CONSTANTS.json`, not estimates recalculated for each runtime.
+All use threshold NMSE 0.1. The fixed development/stress radius remains 0.1;
+selected-radius arms use one validation-selected constant per declared noise level.
+Capacities and the radius-selection rule are explicit in `POLICY_CONSTANTS.json`,
+not estimates recalculated for each runtime.
 `configuration.build_fixed_memory()` instantiates these literal capacities and
 asserts the byte cap before use. A changed runtime that exceeds the cap must abort;
 it must not silently shrink capacity, change thresholds, or enlarge the budget.
@@ -280,6 +401,7 @@ systems. That is motivation, not evidence that this numerical prototype models a
 human memory system, establishes semantic continuity, or is product-ready.
 
 Method sources:
+- Chi / chi-square CDF conventions: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.chi2.html
 - Python object-size contract: https://docs.python.org/3/library/sys.html#sys.getsizeof
 - McClelland, McNaughton, O'Reilly (1995), complementary learning systems:
   https://pubmed.ncbi.nlm.nih.gov/7624455/
@@ -292,15 +414,22 @@ Method sources:
 ## Run development checks
 
 ```bash
-python -m pytest tests/test_salience_memory.py -q
+python -m pytest tests/test_salience_memory.py tests/test_salience_radius_review.py -q
 python experiments/salience_v1/smoke.py --output outputs/sal1-development.json
 ```
 
 The smoke uses fixed basis-vector fixtures, no random evaluation seed. It exercises
 one scoped reversal, six tiny-noise sightings without duplicate admission, 1,000
 subsequent off-scope writes, fixed-capacity byte assertions and classical controls.
-The pre-review base-only smoke record is preserved in
-`development_checks_base_only.json`; the regenerated `development_checks.json`
+The prior records are preserved as `development_checks_base_only.json` and
+`development_checks_fixed_radius_v2.json`; the regenerated `development_checks.json`
 records the new policy and source hashes. Neither is performance evidence. An exact
 stored-cue buffer hit in that demonstration is an implementation
 check, not evidence of generalization or a registered correction-retention result.
+
+The radius/eviction review adds deterministic selection-table fixtures, exact
+Gaussian pair-coverage calculations, confirmation-versus-FIFO eviction checks,
+trusted/eligible/read-only safeguards, unchanged newest-accepted ties, and byte
+parity. Fabricated score tables test reducer logic only, not selected SAL-1 radii
+or evidence that validation tuning improves performance. No performance seeds
+were reserved or run by this amendment.
