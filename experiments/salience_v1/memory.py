@@ -45,6 +45,12 @@ def _vector(value: ArrayLike, size: int) -> np.ndarray:
 
 
 def _sample(base, cue: ArrayLike, outcome: ArrayLike, gain: float):
+    """Gain weights a unit joint row, not the unnormalized observation.
+
+    For raw z=[cue,outcome], the second-moment contribution is
+    (gain / ||z||^2) zz^T. Larger targets change that effective raw-space weight.
+    The observed outcome is used at learning time only, never to normalize a query.
+    """
     cue = _vector(cue, base.cue_dim)
     outcome = _vector(outcome, base.outcome_dim)
     if np.linalg.norm(cue) <= 0:
@@ -172,15 +178,17 @@ class ForgettingRLS(_Dimensions):
 class SurpriseMemory:
     """Bounded numeric exception store, shared unchanged by all three bases.
 
-    Eligible trusted feedback is checked against the *pre-update base* estimate.
-    Above-threshold errors admit an explicit cue/outcome pair. Retrieval selects
-    the closest stored cue within an absolute Euclidean radius; exact distance
-    ties select the most recently updated entry. Outside that radius use the base.
+    Admission uses the pre-update HYBRID prediction, including any routed
+    exception. Revision/removal uses the same nearest-within-radius match as
+    recall, with newest-entry ties. An existing anchor stays fixed on revision
+    to avoid chains of small cue changes walking it into a different region.
 
-    Revisions of an exact cue replace, rather than duplicate, its exception. If
-    the base already predicts the new feedback adequately, remove its stale exact
-    exception. Full buffers evict the oldest accepted entry. Reads do not refresh
-    ages. This policy is not a semantic scope detector or a truth estimator.
+    If the base already predicts eligible feedback adequately, remove the matched
+    exception. If the hybrid is adequate but the base is not, KEEP the exception
+    without refreshing its age or admission count. Otherwise revise the match or
+    admit a new entry, evicting the oldest accepted entry when full. Admit-all is
+    an explicit ablation using the same matching and anchor rules. Nearby distinct
+    scopes can still collide: this is not semantic scope inference or a truth test.
     """
     __slots__ = ("base", "_cues", "_targets", "_ages", "_valid", "_policy")
 
@@ -242,33 +250,45 @@ class SurpriseMemory:
         clock = int(self._policy["clock"][0])
         if clock == _MAX_CLOCK:
             raise OverflowError("fixed-width event clock exhausted")
-        prediction = self.base.predict(x)
+        match = self._match(x)
+        base_prediction = self.base.predict(x)
+        hybrid_prediction = self._targets[match] if match is not None else base_prediction
         with np.errstate(over="raise", invalid="raise"):
-            loss = float(np.sum((prediction - y) ** 2) / max(float(y @ y), 1e-12))
-        if not math.isfinite(loss):
+            denominator = max(float(y @ y), 1e-12)
+            base_loss = float(np.sum((base_prediction - y) ** 2) / denominator)
+            hybrid_loss = float(np.sum((hybrid_prediction - y) ** 2) / denominator)
+        if not math.isfinite(base_loss) or not math.isfinite(hybrid_loss):
             raise FloatingPointError("nonfinite surprise score")
-        should_admit = bool(self._policy["always_admit"][0]) or loss > float(self._policy["threshold"][0])
+        threshold = float(self._policy["threshold"][0])
+        always = bool(self._policy["always_admit"][0])
+        enabled = bool(eligible and self._valid.size)
+        # The base check is for safe retirement, NOT admission surprise.
+        remove = enabled and match is not None and not always and base_loss <= threshold
+        admit = enabled and not remove and (always or hybrid_loss > threshold)
+        if admit and int(self._policy["admissions"][0]) == _MAX_CLOCK:
+            raise OverflowError("fixed-width admission counter exhausted")
         # No buffer mutation if the base rejects its numerical update.
         self.base.update(x, y, gain=g)
         self._policy["clock"][0] = clock + 1
-        admitted = removed = False
-        if eligible and self._valid.size:
-            exact = np.flatnonzero(self._valid & np.all(self._cues == x, axis=1))
-            if should_admit:
-                available = np.flatnonzero(~self._valid)
-                i = (int(exact[0]) if exact.size else int(available[0]) if available.size
-                     else int(np.argmin(self._ages)))
-                self._cues[i], self._targets[i] = x, y
-                self._ages[i], self._valid[i] = clock + 1, True
-                self._policy["admissions"][0] += 1
-                admitted = True
-            elif exact.size:
-                i = int(exact[0])
-                self._cues[i].fill(0); self._targets[i].fill(0)
-                self._ages[i], self._valid[i] = 0, False
-                removed = True
+        admitted = removed = revised = False
+        if remove:
+            self._cues[match].fill(0); self._targets[match].fill(0)
+            self._ages[match], self._valid[match] = 0, False
+            removed = True
+        elif admit:
+            available = np.flatnonzero(~self._valid)
+            i = (match if match is not None else int(available[0]) if available.size
+                 else int(np.argmin(self._ages)))
+            if match is None:
+                self._cues[i] = x
+            # A revision keeps the existing cue anchor; no transitive radius drift.
+            self._targets[i] = y
+            self._ages[i], self._valid[i] = clock + 1, True
+            self._policy["admissions"][0] += 1
+            admitted, revised = True, match is not None
         return {"ignored": False, "admitted": admitted, "removed": removed,
-                "pre_update_base_nmse": loss}
+                "revised": revised, "pre_update_base_nmse": base_loss,
+                "pre_update_hybrid_nmse": hybrid_loss}
 
     def storage_report(self) -> dict:
         arrays = (*self.base.retained_arrays(), self._cues, self._targets,
@@ -280,7 +300,9 @@ class SurpriseMemory:
 
 
 def fit_budget(factory: Callable, byte_budget: int, **policy) -> SurpriseMemory:
-    """Use the largest whole buffer capacity under the same owned-byte ceiling.
+    """Development sizing helper only; never choose capacity during evaluation.
+
+    Use the largest whole buffer capacity under the same owned-byte ceiling.
 
     Measured bytes depend on runtime. This is not exact equal consumption: unused
     remainders are reported, not padded. Code, temporary workspace and RSS are

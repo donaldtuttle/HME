@@ -192,3 +192,188 @@ def test_invalid_policy(kwargs):
 def test_invalid_base_configuration(base, kwargs):
     with pytest.raises((ValueError, TypeError)):
         base(**kwargs)
+
+
+@pytest.mark.parametrize('base', BASES)
+def test_six_noisy_correction_repeats_use_one_slot_not_six(base):
+    m = SurpriseMemory(base(8, 8), capacity=8, radius=.1)
+    e = np.eye(8)
+    for i in range(200):
+        m.observe(e[i % 3], e[i % 3], eligible=False)
+    first = m.observe(e[0], -e[0])
+    assert first['admitted']
+    state = [a.tobytes() for a in (m._cues, m._targets, m._ages, m._valid)]
+    before = m.storage_report()
+    for i in range(1, 6):
+        event = m.observe(e[0] + i*1e-6*e[4], -e[0])
+        assert event['pre_update_hybrid_nmse'] == 0
+        assert event['pre_update_base_nmse'] > .1
+        assert not event['admitted'] and not event['removed']
+    after = m.storage_report()
+    assert after['occupied'] == after['admissions'] == 1
+    assert after['instance_owned_bytes'] == before['instance_owned_bytes']
+    assert state == [a.tobytes() for a in (m._cues, m._targets, m._ages, m._valid)]
+
+
+@pytest.mark.parametrize('base', BASES)
+def test_noisy_repeats_do_not_evict_other_correction(base):
+    m = SurpriseMemory(base(2, 1), capacity=2, radius=.1)
+    m.observe([1, 0], [1], gain=0)
+    m.observe([0, 1], [2], gain=0)
+    for i in range(1, 7):
+        m.observe([1, i*1e-6], [1], gain=0)
+    assert m.storage_report()['occupied'] == 2
+    assert m.storage_report()['admissions'] == 2
+    np.testing.assert_array_equal(m.predict([0, 1]), [2])
+
+
+@pytest.mark.parametrize('base', BASES)
+def test_noisy_real_revision_reuses_slot_and_keeps_anchor(base):
+    m = SurpriseMemory(base(2, 1), capacity=3, radius=.1)
+    m.observe([1, 0], [1], gain=0)
+    event = m.observe([1, .05], [-1], gain=0)
+    assert event['admitted'] and event['revised']
+    assert m.storage_report()['occupied'] == 1
+    np.testing.assert_array_equal(m._cues[0], [1, 0])
+    np.testing.assert_array_equal(m.predict([1, .05]), [-1])
+    # .11 is near the revised observation, but outside the ORIGINAL anchor radius.
+    m.observe([1, .11], [2], gain=0)
+    assert m.storage_report()['occupied'] == 2
+
+
+@pytest.mark.parametrize('base', BASES)
+def test_radius_matched_stale_exception_removed_if_base_is_adequate(base):
+    m = SurpriseMemory(base(2, 1), capacity=2, radius=.1)
+    for _ in range(20):
+        m.observe([1, 0], [1], eligible=False)
+    m.observe([1, 0], [-1], gain=0)
+    q = [1, 1e-6]
+    y = m.base.predict(q)
+    event = m.observe(q, y, gain=0)
+    assert event['pre_update_base_nmse'] == 0
+    assert event['removed'] and not event['admitted']
+    assert m.storage_report()['occupied'] == 0
+
+
+def test_revision_tie_uses_same_newest_match_as_recall():
+    m = SurpriseMemory(DirectMoment(2, 1), capacity=2, radius=1, always_admit=True)
+    m.observe([1, 1], [1], gain=0); m.observe([1, -1], [2], gain=0)
+    m.observe([1, 0], [3], gain=0)
+    np.testing.assert_array_equal(m._targets[:, 0], [1, 3])
+    np.testing.assert_array_equal(m._cues, [[1, 1], [1, -1]])
+
+
+def test_radius_boundary_is_inclusive_and_next_float_is_outside():
+    m = SurpriseMemory(DirectMoment(2, 1), radius=.125, capacity=2)
+    m.observe([1, 0], [1], gain=0)
+    assert not m.observe([1, .125], [1], gain=0)['admitted']
+    assert m.observe([1, np.nextafter(.125, np.inf)], [1], gain=0)['admitted']
+
+
+def test_radius_zero_retains_exact_scope_not_fuzzy_matching():
+    m = SurpriseMemory(DirectMoment(2, 1), radius=0, capacity=2)
+    m.observe([1, 0], [1], gain=0)
+    m.observe([1, 1e-6], [1], gain=0)
+    assert m.storage_report()['occupied'] == 2
+
+
+@pytest.mark.parametrize('trusted,eligible', [(False, True), (True, False)])
+def test_ineligible_or_untrusted_noisy_feedback_does_not_revise_buffer(trusted, eligible):
+    m = SurpriseMemory(DirectMoment(2, 1), capacity=2)
+    m.observe([1, 0], [1], gain=0)
+    before = [a.tobytes() for a in (m._cues, m._targets, m._ages, m._valid)]
+    m.observe([1, 1e-6], [-1], gain=0, trusted=trusted, eligible=eligible)
+    assert before == [a.tobytes() for a in (m._cues, m._targets, m._ages, m._valid)]
+
+
+def test_admit_all_noisy_repeats_reuse_anchor_but_refresh_acceptance_age():
+    m = SurpriseMemory(DirectMoment(2, 1), capacity=2, always_admit=True)
+    m.observe([1, 0], [1], gain=0)
+    m.observe([1, 1e-6], [1], gain=0)
+    assert m.storage_report()['occupied'] == 1
+    assert m.storage_report()['admissions'] == 2
+    assert m._ages[0] == 2
+    np.testing.assert_array_equal(m._cues[0], [1, 0])
+
+
+def test_larger_automatic_buffer_is_not_universal_loss_dominance():
+    # Both stored anchors are correct in their own scopes. A nearby *different*
+    # scope should fall back to zero, but retaining the first entry misroutes it.
+    small = SurpriseMemory(DirectMoment(2, 1), capacity=1, radius=.1)
+    large = SurpriseMemory(DirectMoment(2, 1), capacity=2, radius=.1)
+    for m in (small, large):
+        m.observe([1, 0], [1], gain=0)
+        m.observe([0, 1], [2], gain=0)
+    np.testing.assert_array_equal(small.predict([1, .05]), [0])
+    np.testing.assert_array_equal(large.predict([1, .05]), [1])
+
+
+def test_admission_counter_overflow_fails_before_base_update():
+    m = SurpriseMemory(DirectMoment(2, 1))
+    m._policy['admissions'][0] = np.iinfo(np.uint64).max
+    with pytest.raises(OverflowError):
+        m.observe([1, 0], [1])
+    np.testing.assert_array_equal(m.base._sum, np.zeros((3, 3)))
+    assert m._policy['clock'][0] == 0
+
+
+@pytest.mark.parametrize('backend,capacity', [('field', 20), ('direct_moment', 37), ('rls', 43)])
+def test_fixed_capacities_are_constants_not_runtime_estimates(monkeypatch, backend, capacity):
+    from experiments.salience_v1.configuration import build_fixed_memory
+    import experiments.salience_v1.memory as module
+    def forbidden(*a, **k):
+        raise AssertionError('fit_budget must not choose evaluation capacity')
+    monkeypatch.setattr(module, 'fit_budget', forbidden)
+    m = build_fixed_memory(backend)
+    assert m.storage_report()['capacity'] == capacity
+    assert m.storage_report()['instance_owned_bytes'] <= 8192
+    assert m._policy['radius'][0] == m._policy['threshold'][0] == .1
+
+
+def test_fixed_capacity_budget_failure_aborts_without_resizing(monkeypatch):
+    from experiments.salience_v1.configuration import build_fixed_memory
+    monkeypatch.setattr('experiments.salience_v1.memory._owned_bytes', lambda _: 8193)
+    with pytest.raises(ValueError, match='exceed'):
+        build_fixed_memory('field')
+
+
+@pytest.mark.parametrize('backend', ['field', 'direct_moment', 'rls'])
+def test_nonbinding_profile_is_same_k_not_same_consumption(backend):
+    from experiments.salience_v1.configuration import build_fixed_memory
+    assert build_fixed_memory(backend, comparison='matched_nonbinding').storage_report()['capacity'] == 4
+
+
+def test_fixed_profile_rejects_unknown_comparisons_and_backends():
+    from experiments.salience_v1.configuration import build_fixed_memory
+    with pytest.raises(ValueError): build_fixed_memory('other')
+    with pytest.raises(ValueError): build_fixed_memory('field', comparison='resized')
+
+
+@pytest.mark.parametrize('decay', [0., .01])
+def test_field_direct_nonbinding_policy_actions_and_predictions_match(decay):
+    models = [SurpriseMemory(cls(3, 2, decay=decay), capacity=4, radius=.1)
+              for cls in (FieldPredictor, DirectMoment)]
+    events = [([1, 0, 0], [1, 0]), ([0, 1, 0], [0, 1]),
+              ([1, 1e-6, 0], [1, 0]), ([1, 2e-6, 0], [-1, 0])]
+    for cue, target in events:
+        a, b = [m.observe(cue, target) for m in models]
+        for key in ('admitted', 'removed', 'revised'):
+            assert a[key] == b[key]
+        np.testing.assert_allclose(models[0].predict([.2, .4, .3]),
+                                   models[1].predict([.2, .4, .3]), atol=1e-12)
+        for attr in ('_cues', '_targets', '_ages', '_valid'):
+            np.testing.assert_array_equal(getattr(models[0], attr), getattr(models[1], attr))
+    assert models[0].storage_report()['occupied'] < 4
+
+
+def test_raw_weight_semantics_of_joint_normalization():
+    cue = np.array([1., .5]); target = np.array([2.]); gain = 3.
+    raw = np.concatenate((cue, target))
+    m = DirectMoment(2, 1); m.update(cue, target, gain=gain)
+    np.testing.assert_allclose(m._sum, gain/(raw@raw)*np.outer(raw, raw))
+    large = np.concatenate((cue, 3*target))
+    raw_weight_ratio = (raw@raw)/(large@large)
+    assert 0 < raw_weight_ratio < 1
+    scaled = DirectMoment(2, 1); scaled.update(cue, 3*target, gain=gain)
+    np.testing.assert_allclose(scaled._sum, gain/(large@large)*np.outer(large, large))
+    assert m._cfg[4] == scaled._cfg[4] == gain
