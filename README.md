@@ -81,6 +81,17 @@ only NumPy. Install `.[dynamics]` for text rasterization or `.[visualization]`
 for plots and GIF export. The [runtime guide](docs/RUNTIME.md) explains update
 order, adapters, switches and the restoration boundary.
 
+## Interactive browser demo
+
+[HME Plate](demos/hme-plate/README.md) provides a local browser instrument for
+the released field-plus-ledger model. Place writes and queries, inspect score
+components, and erase the field or ledger independently. It runs entirely in
+the browser, with a relative static build suitable for a repository subpath.
+The port has numerical and DOM regression checks; rendered desktop/mobile
+verification remains pending. It does not visualize consolidation or SAL-1,
+and its probe is separate from published experiments. See the
+[verification record](demos/hme-plate/verification.md).
+
 ## Relationship to established work
 
 Holographic associative memory and **Holographic Reduced Representations (HRR)** are established research areas within the broader **Vector Symbolic Architecture (VSA)** literature. They provide useful reference designs and benchmarks for HME.
