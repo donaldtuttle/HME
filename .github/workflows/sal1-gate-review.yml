@@ -1,0 +1,24 @@
+name: SAL1 routine gate source
+on:
+  push:
+    branches: [review/sal1-routine-gate-work]
+    paths: [.github/workflows/sal1-gate-review.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          git archive 60cbd03a0ddce4fca313d1d89b9810b44b1e7b69 --format=zip --output=source.zip
+          git rev-parse 60cbd03a0ddce4fca313d1d89b9810b44b1e7b69^{tree} > tree.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sal1-gate-source
+          path: |
+            source.zip
+            tree.txt
+          retention-days: 7
