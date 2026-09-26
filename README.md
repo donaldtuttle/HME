@@ -275,6 +275,15 @@ unestablished. The [evaluation plan](docs/EVALUATION_PLAN.md) tracks the complet
 comparison and remaining load/dimension sweeps, held-out calibration and HRR
 comparisons. [Known limitations](docs/KNOWN_LIMITATIONS.md) lists current boundaries.
 
+## Field-only consolidation (DEVELOP)
+
+The opt-in [consolidation adapter](docs/CONSOLIDATION.md) can discard its owned
+records, payload/pattern caches and lineage while retaining the unchanged field.
+Later writes remain field-only. Fixed-width weight metadata supports weighted
+numerical reconstruction and a complete field-only checkpoint. This is Step-0
+invariant validation, not a salience, damage-tolerance or semantic-memory result.
+The [study plan](experiments/consolidation_plan/README.md) separates those questions.
+
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)

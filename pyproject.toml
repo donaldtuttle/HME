@@ -30,7 +30,7 @@ visualization = ["matplotlib>=3.7", "Pillow>=10"]
 hme = "hme_engine:main"
 
 [tool.setuptools]
-py-modules = ["hme_engine", "hme_runtime", "hme_dynamics"]
+py-modules = ["hme_engine", "hme_runtime", "hme_dynamics", "hme_consolidation"]
 
 [tool.pytest.ini_options]
 addopts = "-ra"
