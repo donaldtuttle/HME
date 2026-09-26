@@ -201,15 +201,15 @@ Use the literal candidate radii `[0.05,0.1,0.15,0.2,0.25,0.3,0.4]`, in absolute
 raw-cue units, with the same stream/feedback information for every candidate.
 For each declared backend, budget profile, and known noise regime, reduce the
 FIFO validation results by independent stream: Ec is correction NMSE, Er is
-still-valid routine NMSE, and J=(Ec+Er)/2. First require mean Er <= 1.01 times
-the mean error of a common no-correction routine reference. Among feasible radii
+still-valid routine NMSE, and J=(Ec+Er)/2. After the upstream base-contamination screen passes, require
+mean Er <= 1.01 times the mean no-correction reference error + 0.001 NMSE. Among feasible radii
 choose minimum mean J; exact ties choose the smallest radius. The reference must
 be identical across radii for each stream. Log all candidate losses, false matches,
 duplicate admissions, evictions and technical failures, not just the winner.
 This feasibility rule is a validation selection rule, not a statistical PASS gate.
 
 `radius_selection.select_validation_radius()` implements that deterministic table
-reduction. It requires every candidate to contain the same complete stream IDs,
+reduction. It requires a checked base-screen record and every candidate to contain the same complete stream IDs,
 rejects evaluation/test-labelled input, invalid or duplicate rows, and returns an
 explicit infeasible record when nothing passes. Construction refuses an infeasible
 record; no silent widening, fallback or dropped candidate is allowed. The harness
@@ -221,7 +221,10 @@ The selection record retains candidate tables, stream IDs, noise/backend/profile
 binding and the policy hash. `build_fixed_memory(radius_profile='validation_selected',
 ...)` requires this checked record, recomputes its choice, and uses literal capacity
 with the existing byte cap. No table/stream is retained by the memory instance;
-only the selected radius lives in its already-counted policy array. The full audit
+the selected radius lives in its already-counted policy array, while the screened
+decay/ridge settings populate existing base configuration fields. The future stream
+runner must also honor the recorded gain and corpus conditions; a reducer cannot
+prove that a caller actually generated or weighted the rows that it claims. The full audit
 record is experimental provenance, not a hidden deployed record store.
 
 **Selection isolation:** select using FIFO and reuse exactly that radius for the
@@ -233,11 +236,114 @@ that comparison includes capacity/policy interactions, not a new FFT effect.
 
 Noise level is allowed setup information shared by all arms, not a quantity supplied
 only to HME. A future deployment without known noise needs its own estimation rule.
-Gain/decay/ridge selection must be nested on validation data with matched search
-budgets and fixed before evaluation. Stream IDs, population cue scaling, resulting
+Select gain/decay/ridge on validation data before the radius stage, using the
+base-preservation screen below and matched search budgets. Do not retune upstream
+settings after inspecting radius results or any evaluation data. Stream IDs, population cue scaling, resulting
 radius table, gain/decay procedure, exact runtime and decision settings remain
 pending. Publish the complete protocol first; run validation and push the selected
 configuration table before generating the held-out evaluation seeds.
+
+## Routine-retention review: practical margin and staged selection
+
+The former pure relative margin rejected tiny absolute changes when the reference
+was near zero. The new draft policy uses one helper for base screening and radius
+feasibility, and declares the same margin for final paired-seed inference:
+
+```text
+allowed increase = 0.01 * E_reference + 0.001 NMSE
+excess = E_routine - (E_reference + allowed increase)
+feasible validation point estimate iff excess <= 0
+final noninferiority gate: upper paired-seed confidence bound on mean excess <= 0
+```
+
+For fabricated values E_reference=0.0002 and E_routine=0.0003, the former limit was
+0.000202; the new limit is 0.001202. At E_reference=0 the limit is exactly 0.001.
+The reference is never clamped, raised or divided into a ratio. The absolute term
+is a prospective practical-effect choice suggested by the reviewer, not a claim
+that all 0.001 NMSE changes are harmless in all applications. Confirm its meaning
+for the frozen outcome scale and task before evaluation. Retain negative margins,
+raw reference errors, absolute changes and all failures. Existing performance
+results are not rescored or used to choose this margin. The reviewer's 10-seed
+pilot table was not reproduced here; these numerical examples are unit fixtures.
+
+### Upstream settings, then base screen, then radius
+
+Declare the complete finite gain/decay/ridge grid, selection objective, tie rule,
+validation streams and equal tuning budgets before the formal search. For each
+upstream candidate, score its base alone on still-valid routine queries against
+the SAME independently specified no-correction reference. Reference training,
+regularization, counts and time/decay schedule must not be weakened or selected to
+make candidates pass. In particular, preserve a matched time horizon when removing
+corrections from a counterfactual stream; declare the neutral or replacement events.
+
+`base_contamination_precheck()` reduces one complete supplied validation table,
+binds the candidate gain/decay/ridge, corpus ID, observation-noise scale, stream IDs,
+and feedback counts, and reports `eligible` or `base_contamination`. Missing,
+duplicate, nonfinite, mis-grouped or modified records are rejected. This is a
+record-consistency check, NOT cryptographic proof of real data provenance.
+
+If the base setting fails, record that finding and SKIP its radius search. The
+selector returns `status=base_contamination`, `radius=None`, `scores=[]` without
+iterating its radius-table argument. A harness can supply a lazy table to avoid
+running radius streams at all. The stop applies to this candidate/configuration,
+not to every other registered cell or the entire study. All failed candidates
+remain in the report. If all upstream candidates fail, report that regime as
+base-contamination-infeasible; do not search until a desired answer appears.
+
+The final upstream selection rule and grid remain pending because there is no
+frozen corpus or gain/decay evaluator. The chosen ordering is sequential, not a
+hidden joint search: freeze the winning eligible upstream setting before radius
+selection; retain all candidate results. Within the radius stage minimize the
+balanced joint error subject to the SAME routine margin. If no radius then passes,
+return `status=infeasible` with the complete radius table. This differs from a
+base-contamination rejection. Constructor checks rederive both records, instantiate
+screened decay/ridge instead of development defaults, and enforce fixed capacities.
+The experiment runner must apply the recorded per-observation gain; that runner
+has not been implemented by this review.
+
+The screen is a deliberate requirement to preserve a usable shared base, not a
+proof that every hybrid radius must fail when the base fails. Exceptions can also
+repair routine predictions inside their regions. A deterministic counterexample
+is in the tests. The radius-independent claim applies to the base update state
+under the same feedback and gains, not necessarily to total hybrid routine error.
+This distinction must remain visible in the report and interpretation of any stop.
+
+### Observation noise and correction density
+
+A nonzero observation-noise model is planned for the primary application-like
+corpus, with its law, scale, injection point and clean-versus-noisy scoring targets
+frozen from the task design. It is not the same variable as cue-repeat noise. Keep
+a clean control. Do not increase noise, redraw streams, exclude seeds, or require
+a measured minimum reference NMSE just to satisfy a relative threshold. The
+absolute allowance makes a zero or very small reference well-defined.
+
+Every candidate record includes `observation_noise_std` in the frozen corpus's
+units, `routine_writes`, `correction_writes`, and `conflicting_corrections`. The
+reported conflict fraction is conflicting correction FEEDBACK EVENTS divided by
+all routine plus correction events. Six repeated sightings count six times for
+base-contamination exposure, not as one unique correction. Also freeze and report
+unique corrected contexts, novelty-versus-conflict mix, trust/eligibility counts,
+and event timing. Later obsolete conflicts are distinct from unrelated routines.
+Concrete primary/secondary noise magnitudes, densities and schedules are pending
+the full corpus contract; the fabricated tables here do not establish them.
+
+### Quarantine remains a future arm
+
+No memory-update policy changed in this amendment. Every trusted observation,
+including admitted exceptions, still updates each backend at the supplied gain.
+Reducing or withholding the base gain for admitted feedback would be a separate
+quarantine arm, equally implemented for field/direct/RLS with bounded buffer and
+loss-on-eviction checks. Surprise is not proof of contradiction or truth, so this
+also needs trusted-but-wrong feedback controls. No quarantine outcome is claimed.
+
+### Scope of this amendment
+
+The shared margin, mandatory base-screen reducer, record binding, constructor use
+of screened settings, and deterministic regressions are implemented. No validation
+stream search, primary selection, evaluation seeds or efficacy test has run. All
+memory arrays, capacities, admission/retirement and confirmation policies are
+unchanged. `POLICY_CONSTANTS_v3.json` and `development_checks_radius_v3.json` preserve
+the preceding policy/evidence; current development output has updated source hashes.
 
 ## Eviction ablation: confirmation, not query popularity
 
@@ -366,11 +472,14 @@ numerically overwhelm a rare correction's metric. These are proposed, not final
 registered decision rules:
 
 1. Lower one-sided/paired-seed confidence bound for mean correction score >= 0.90.
-2. Upper bound for `Er_hybrid - 1.01*Er_field_reference` <= 0. This is a **relative
-   one-percent error allowance**, not a one-percentage-point score allowance.
-   Compute the difference, not a ratio dividing by a possibly near-zero reference.
-   Also compare against an unweighted no-correction-stream reference, to prevent
-   a badly damaged gain-heavy field from making the routine guardrail easy.
+2. Upper paired-seed confidence bound for
+   `Er_hybrid - 1.01*Er_field_reference - 0.001` <= 0, and the same bound against
+   the fixed unweighted no-correction routine reference. This combines a one-percent
+   relative error allowance with a **0.001 NMSE absolute practical allowance**.
+   It is not numerical roundoff tolerance, a floor on the reference, or a pure 1%
+   relative guarantee. The shared `routine_gate()` exposes this signed excess for
+   inference; validation uses its point-estimate counterpart, not a statistical PASS.
+   Do not bootstrap the ratio or compare separate unpaired confidence intervals.
 3. Positive paired lower confidence bound for `J_bare_RLS - J_hybrid`, with the
    minimum practical improvement fixed before evaluation. RLS settings are chosen
    on validation only, never by comparing test scores and selecting a weak run.

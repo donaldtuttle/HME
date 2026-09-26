@@ -11,6 +11,7 @@ import json
 import math
 
 from experiments.salience_v1.configuration import policy_constants
+from experiments.salience_v1.routine_gate import routine_gate, checked_base_precheck
 
 
 def _digest(value) -> str:
@@ -20,9 +21,11 @@ def _digest(value) -> str:
 
 def select_validation_radius(rows, *, backend: str, noise_std: float,
                              comparison: str = "budget", split: str = "validation",
-                             eviction: str = "fifo") -> dict:
+                             eviction: str = "fifo", base_precheck: dict | None = None) -> dict:
     """Minimize stream-balanced joint error among routine-feasible radii.
 
+    Requires a checked upstream base screen. A rejected screen returns a distinct
+    result without consuming rows, so the future harness can supply a lazy search.
     Ties use the smaller radius. An infeasible table returns radius=None with all
     candidate scores retained; constructors reject it. This procedure is fixed in
     the draft, not a claim that a complete SAL-1 protocol has been registered.
@@ -36,6 +39,15 @@ def select_validation_radius(rows, *, backend: str, noise_std: float,
         raise ValueError("matched field/direct arms must share the direct-moment selection")
     if isinstance(noise_std, bool) or noise_std not in p["required_cue_noise"]["standard_deviations"]:
         raise ValueError("noise level is not in the declared design")
+    precheck = checked_base_precheck(base_precheck, backend=backend, noise_std=noise_std,
+                                     comparison=comparison)
+    common = {"schema": "sal1-radius-selection-v2", "split": split, "eviction": eviction,
+              "backend": backend, "comparison": comparison, "noise_std": float(noise_std),
+              "policy_sha256": _digest(p), "base_precheck": precheck}
+    if precheck["status"] == "base_contamination":
+        # Do not touch/consume a lazy radius table when the upstream setting fails.
+        return {**common, "status": "base_contamination", "radius": None, "scores": [],
+                "validation_stream_ids": precheck["validation_stream_ids"], "rows": []}
     candidates = p["radius_selection"]["candidate_radii"]
     grouped = {r: {} for r in candidates}
     rows = list(rows)
@@ -62,23 +74,26 @@ def select_validation_radius(rows, *, backend: str, noise_std: float,
     stream_ids = sorted(grouped[candidates[0]])
     if not stream_ids or any(set(g) != set(stream_ids) for g in grouped.values()):
         raise ValueError("all candidate radii require the same complete validation streams")
+    if stream_ids != precheck["validation_stream_ids"]:
+        raise ValueError("radius streams must match the base screen exactly")
+    references = {v["stream_id"]: v["routine_reference_error"] for v in precheck["rows"]}
     for stream in stream_ids:
         if len({grouped[r][stream]["routine_reference_error"] for r in candidates}) != 1:
             raise ValueError("routine reference must not change with radius")
+        if grouped[candidates[0]][stream]["routine_reference_error"] != references[stream]:
+            raise ValueError("radius reference must match the base screen")
     table = []
-    multiplier = p["radius_selection"]["routine_feasibility_multiplier"]
     for r in candidates:
         records = [grouped[r][s] for s in stream_ids]
-        ec, er, ref = [math.fsum(v[k] for v in records) / len(records) for k in
+        ec, er, ref = [math.fsum(v[k] / len(records) for v in records) for k in
                        ("correction_error", "routine_error", "routine_reference_error")]
         table.append({"radius": r, "correction_error": ec, "routine_error": er,
-                      "routine_reference_error": ref, "joint_error": (ec+er)/2,
-                      "feasible": er <= multiplier*ref})
+                      "routine_reference_error": ref, "joint_error": ec/2+er/2,
+                      "routine_gate": routine_gate(er, ref),
+                      "feasible": routine_gate(er, ref)["feasible"]})
     feasible = [v for v in table if v["feasible"]]
     winner = min(feasible, key=lambda v: (v["joint_error"], v["radius"])) if feasible else None
-    return {"schema": "sal1-radius-selection-v1", "split": split, "eviction": eviction,
-            "backend": backend, "comparison": comparison, "noise_std": float(noise_std),
-            "policy_sha256": _digest(p), "status": "selected" if winner else "infeasible",
+    return {**common, "status": "selected" if winner else "infeasible",
             "radius": winner["radius"] if winner else None, "scores": table,
             "validation_stream_ids": stream_ids,
             "rows": sorted(cleaned, key=lambda v: (v["radius"], v["stream_id"]))}
@@ -93,9 +108,12 @@ def checked_radius(selection: dict, *, backend: str, noise_std: float,
     """
     source = "direct_moment" if comparison == "matched_nonbinding" and backend == "field" else backend
     rebuilt = select_validation_radius(selection["rows"], backend=source,
-                                        noise_std=noise_std, comparison=comparison)
+                                        noise_std=noise_std, comparison=comparison,
+                                        base_precheck=selection.get("base_precheck"))
     if selection != rebuilt:
         raise ValueError("selection does not match policy, noise, backend or validation table")
+    if rebuilt["status"] == "base_contamination":
+        raise ValueError("base contamination screen failed; radius search skipped")
     if rebuilt["status"] != "selected":
         raise ValueError("no feasible validation radius; no fallback permitted")
     return float(rebuilt["radius"])

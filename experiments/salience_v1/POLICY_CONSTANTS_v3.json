@@ -1,5 +1,5 @@
 {
-  "schema": "sal1-policy-v4",
+  "schema": "sal1-policy-v3",
   "status": "FIXED_DEVELOPMENT_POLICY_NOT_COMPLETE_PREREGISTRATION",
   "cue_dimension": 8,
   "outcome_dimension": 8,
@@ -48,12 +48,7 @@
     "primary_cell_confirmation",
     "sample_size",
     "confidence_and_failure_rules",
-    "exact_runtime_pin",
-    "corpus_observation_noise_law_scale_and_scoring_targets",
-    "correction_density_counts_repeats_and_timing",
-    "upstream_gain_decay_ridge_grid_and_selection_rule",
-    "routine_practical_margin_confirmation_with_corpus",
-    "base_precheck_stop_rule_and_failed_cell_reporting"
+    "exact_runtime_pin"
   ],
   "eviction_arms": [
     "fifo",
@@ -80,14 +75,13 @@
     ],
     "tuning_split": "validation",
     "score": "mean_per_stream_balanced_joint_error",
+    "routine_feasibility_multiplier": 1.01,
     "tie_break": "smallest_radius",
     "no_feasible_candidate": "report_infeasible_and_abort_no_fallback",
     "eviction_pairing": "select_with_fifo_then_reuse_for_confirmation_refresh",
     "field_direct_pairing": "share_direct_moment_selection_for_matched_nonbinding_control",
     "record_all_candidates_and_failures": true,
-    "radius_frozen_before_evaluation": true,
-    "routine_feasibility_gate": "routine_retention_gate",
-    "requires_base_precheck": true
+    "radius_frozen_before_evaluation": true
   },
   "noise_designations": {
     "primary_candidate": {
@@ -114,32 +108,5 @@
       "radius_profile": "fixed_stress",
       "expectation": "low_same_context_pair_coverage_not_a_formal_automatic_fail"
     }
-  },
-  "routine_retention_gate": {
-    "relative_allowance": 0.01,
-    "absolute_allowance_nmse": 0.001,
-    "form": "Er <= Eref + 0.01*Eref + 0.001",
-    "scope": "base_screen_radius_feasibility_and_final_paired_gate",
-    "interpretation": "practical_error_allowance_not_numerical_roundoff_tolerance",
-    "reference_clamping": false
-  },
-  "selection_order": {
-    "order": "upstream_gain_decay_ridge_then_base_screen_then_radius",
-    "base_rejection": "record_base_contamination_skip_radius_for_this_configuration",
-    "radius_rejection": "record_radius_infeasible_for_screened_configuration",
-    "stop_scope": "configuration_only_retain_all_failed_cells",
-    "base_screen_is_conservative_design_constraint": true,
-    "upstream_grid_and_winner_rule": "PENDING_COMPLETE_REGISTRATION",
-    "gain_applies_to": "correction_feedback_normalized_joint_rows_routine_gain_one"
-  },
-  "corpus_requirements": {
-    "primary_observation_noise": "nonzero_model_to_be_frozen_from_task_not_from_achieved_reference_error",
-    "clean_control_required": true,
-    "observation_noise_is_distinct_from_cue_noise": true,
-    "measured_reference_minimum": null,
-    "reject_or_redraw_for_low_reference": false,
-    "correction_density": "conflicting_correction_feedback_writes/(routine_writes+all_correction_feedback_writes)",
-    "counts_include_repeat_sightings": true,
-    "freeze_noise_scale_target_law_trust_counts_and_schedule": true
   }
 }

@@ -31,6 +31,8 @@ def build_fixed_memory(backend: str, *, comparison: str = "budget",
     Fixed backend settings here are for development, not validation-selected
     gain/decay settings for the as-yet unimplemented performance evaluator.
     The default fixed_development radius is NOT a primary efficacy configuration.
+    Selected profiles use the screened decay/ridge, not development defaults.
+    The future stream runner must also use the bound observation gain and corpus.
     Selected profiles require a checked validation table. The isolated eviction
     ablation reuses that same FIFO-selected radius; it is never retuned here.
     """
@@ -40,7 +42,7 @@ def build_fixed_memory(backend: str, *, comparison: str = "budget",
     if comparison not in ("budget", "matched_nonbinding"):
         raise ValueError("unknown comparison")
     p = policy_constants()
-    if p["schema"] != "sal1-policy-v3":
+    if p["schema"] != "sal1-policy-v4":
         raise ValueError("unsupported fixed policy schema")
     if eviction not in p["eviction_arms"]:
         raise ValueError("unknown eviction arm")
@@ -60,7 +62,8 @@ def build_fixed_memory(backend: str, *, comparison: str = "budget",
         raise ValueError("unknown radius profile")
     capacity = (p["capacities"][backend] if comparison == "budget"
                 else p["nonbinding_matched_capacity"])
-    settings = p["development_backend_settings"]
+    settings = (selection["base_precheck"]["configuration"]
+                if radius_profile == "validation_selected" else p["development_backend_settings"])
     base = factories[backend](p["cue_dimension"], p["outcome_dimension"],
                               decay=settings["decay"], ridge=settings["ridge"])
     return SurpriseMemory(base, capacity=capacity, threshold=p["threshold_nmse"],

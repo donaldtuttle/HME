@@ -31,8 +31,13 @@ def main():
                  'experiments/salience_v1/configuration.py',
                  'experiments/salience_v1/POLICY_CONSTANTS.json',
                  'experiments/salience_v1/radius_selection.py',
-                 'tests/test_salience_radius_review.py']:
+                 'tests/test_salience_radius_review.py',
+                 'experiments/salience_v1/routine_gate.py',
+                 'tests/test_salience_routine_gate.py']:
         report['source_sha256'][path] = hashlib.sha256((ROOT/path).read_bytes()).hexdigest()
+    from experiments.salience_v1.routine_gate import routine_gate
+    report['routine_gate_fabricated_examples'] = [routine_gate(e, r) for e,r in
+        [(.0003,.0002), (.0001,0), (.02,.0002)]]
     basis = np.eye(8)
     for name in ('field', 'direct_moment', 'rls'):
         memory = build_fixed_memory(name)

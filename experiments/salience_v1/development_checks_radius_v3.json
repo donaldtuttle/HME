@@ -70,18 +70,16 @@
     "hme_engine.py": "080a20056c6c5c88e49c6307845277002ad2091a6a1d7dec66961317bc2c0167",
     "hme_consolidation.py": "6daa108f59208c88c7b59e119cb66273cc8faa229a816a5f1e624776912340f0",
     "experiments/salience_v1/memory.py": "54d5c38de7ce1ba4cf770591d0cdc9b5aa9e624b35e1cde871946b2d41bc69a5",
-    "experiments/salience_v1/smoke.py": "7d57861efac01824f523697869ce5cc2b27b772dd82f68506fcb5b96903f829c",
+    "experiments/salience_v1/smoke.py": "1ba3a59de61d7c1da91e4ca0fecff4d5b833a2c0f5cf5802a0061d91f05ccc60",
     "tests/test_salience_memory.py": "c6f2c3ac328385cd28a995540cd648e4b21d71299c86559df3df652f24a9dea4",
-    "experiments/salience_v1/PROTOCOL_DRAFT.md": "0de7db9301d987ff411504c6d4e901dd78f8c3c62d8d03b8c0ccaa7d0d24f903",
-    "experiments/salience_v1/configuration.py": "c1c8065796dd19e8bb2ad85d4abf28caf7378667ff54718c86a075184ca68eed",
-    "experiments/salience_v1/POLICY_CONSTANTS.json": "905099fa047be101df4bf56fb83c38d06e3966ddce08c1c69eb1a39501248526",
-    "experiments/salience_v1/radius_selection.py": "142b4c63e254e836463ced5f6484ae5a7f06693ceb4eade34f81e5119dbd30ea",
-    "tests/test_salience_radius_review.py": "66c7f8fbe5aaa5d4099de55cbff58476609d2176831a939d92e2936650ee599c",
-    "experiments/salience_v1/routine_gate.py": "5ced352b7cf98aca1be959e5c2cc13cd2dd627523721b645c44d5ee900e33950",
-    "tests/test_salience_routine_gate.py": "d7315e60dd099f82c6fa8ac7588213137d94dfbb603b6bd0b530fff19f16720f"
+    "experiments/salience_v1/PROTOCOL_DRAFT.md": "596bf3306e5cac970639875e9546559286b7ee031f159f3ace521ae5efd1de9f",
+    "experiments/salience_v1/configuration.py": "e5aad8625d2e7c62cf1c373ad72f1c7a5ead6a9c56da079fb6ca95850ef2c7e8",
+    "experiments/salience_v1/POLICY_CONSTANTS.json": "e4dbd0556785bceebaf52f575760a126a1dbb041ebbab368be64f108f4a5348e",
+    "experiments/salience_v1/radius_selection.py": "aec057c64ccf467b9b230676fca96b8ba9d40e8e023a1d1879bf71ea396b2171",
+    "tests/test_salience_radius_review.py": "ceb1b7ce59f1141e464dd2678ffe9fa830f9ae6a81f3eadbd571a6f55e08e6bb"
   },
   "policy": {
-    "schema": "sal1-policy-v4",
+    "schema": "sal1-policy-v3",
     "status": "FIXED_DEVELOPMENT_POLICY_NOT_COMPLETE_PREREGISTRATION",
     "cue_dimension": 8,
     "outcome_dimension": 8,
@@ -130,12 +128,7 @@
       "primary_cell_confirmation",
       "sample_size",
       "confidence_and_failure_rules",
-      "exact_runtime_pin",
-      "corpus_observation_noise_law_scale_and_scoring_targets",
-      "correction_density_counts_repeats_and_timing",
-      "upstream_gain_decay_ridge_grid_and_selection_rule",
-      "routine_practical_margin_confirmation_with_corpus",
-      "base_precheck_stop_rule_and_failed_cell_reporting"
+      "exact_runtime_pin"
     ],
     "eviction_arms": [
       "fifo",
@@ -162,14 +155,13 @@
       ],
       "tuning_split": "validation",
       "score": "mean_per_stream_balanced_joint_error",
+      "routine_feasibility_multiplier": 1.01,
       "tie_break": "smallest_radius",
       "no_feasible_candidate": "report_infeasible_and_abort_no_fallback",
       "eviction_pairing": "select_with_fifo_then_reuse_for_confirmation_refresh",
       "field_direct_pairing": "share_direct_moment_selection_for_matched_nonbinding_control",
       "record_all_candidates_and_failures": true,
-      "radius_frozen_before_evaluation": true,
-      "routine_feasibility_gate": "routine_retention_gate",
-      "requires_base_precheck": true
+      "radius_frozen_before_evaluation": true
     },
     "noise_designations": {
       "primary_candidate": {
@@ -196,64 +188,8 @@
         "radius_profile": "fixed_stress",
         "expectation": "low_same_context_pair_coverage_not_a_formal_automatic_fail"
       }
-    },
-    "routine_retention_gate": {
-      "relative_allowance": 0.01,
-      "absolute_allowance_nmse": 0.001,
-      "form": "Er <= Eref + 0.01*Eref + 0.001",
-      "scope": "base_screen_radius_feasibility_and_final_paired_gate",
-      "interpretation": "practical_error_allowance_not_numerical_roundoff_tolerance",
-      "reference_clamping": false
-    },
-    "selection_order": {
-      "order": "upstream_gain_decay_ridge_then_base_screen_then_radius",
-      "base_rejection": "record_base_contamination_skip_radius_for_this_configuration",
-      "radius_rejection": "record_radius_infeasible_for_screened_configuration",
-      "stop_scope": "configuration_only_retain_all_failed_cells",
-      "base_screen_is_conservative_design_constraint": true,
-      "upstream_grid_and_winner_rule": "PENDING_COMPLETE_REGISTRATION",
-      "gain_applies_to": "correction_feedback_normalized_joint_rows_routine_gain_one"
-    },
-    "corpus_requirements": {
-      "primary_observation_noise": "nonzero_model_to_be_frozen_from_task_not_from_achieved_reference_error",
-      "clean_control_required": true,
-      "observation_noise_is_distinct_from_cue_noise": true,
-      "measured_reference_minimum": null,
-      "reject_or_redraw_for_low_reference": false,
-      "correction_density": "conflicting_correction_feedback_writes/(routine_writes+all_correction_feedback_writes)",
-      "counts_include_repeat_sightings": true,
-      "freeze_noise_scale_target_law_trust_counts_and_schedule": true
     }
   },
-  "routine_gate_fabricated_examples": [
-    {
-      "routine_error": 0.0003,
-      "routine_reference_error": 0.0002,
-      "absolute_change": 9.999999999999996e-05,
-      "allowed_increase": 0.001002,
-      "limit": 0.0012020000000000002,
-      "excess": -0.0009020000000000002,
-      "feasible": true
-    },
-    {
-      "routine_error": 0.0001,
-      "routine_reference_error": 0.0,
-      "absolute_change": 0.0001,
-      "allowed_increase": 0.001,
-      "limit": 0.001,
-      "excess": -0.0009,
-      "feasible": true
-    },
-    {
-      "routine_error": 0.02,
-      "routine_reference_error": 0.0002,
-      "absolute_change": 0.0198,
-      "allowed_increase": 0.001002,
-      "limit": 0.0012020000000000002,
-      "excess": 0.018798,
-      "feasible": false
-    }
-  ],
   "radius_geometry": {
     "0.01": 0.9999999591324105,
     "0.05": 0.01898815687615385

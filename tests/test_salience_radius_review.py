@@ -6,7 +6,25 @@ import pytest
 
 from experiments.salience_v1.configuration import build_fixed_memory, policy_constants
 from experiments.salience_v1.memory import DirectMoment, FieldPredictor, ForgettingRLS, SurpriseMemory
-from experiments.salience_v1.radius_selection import select_validation_radius
+from experiments.salience_v1.radius_selection import select_validation_radius as _select_validation_radius
+
+
+from experiments.salience_v1.routine_gate import base_contamination_precheck
+
+
+def select_validation_radius(rows, **kwargs):
+    """Existing synthetic radius fixtures now supply the mandatory base screen."""
+    check = base_contamination_precheck(
+        [{"stream_id": s, "base_routine_error": .2, "routine_reference_error": .2}
+         for s in ("fixture-A", "fixture-B")],
+        backend=kwargs.get("backend"), noise_std=kwargs.get("noise_std"),
+        comparison=kwargs.get("comparison", "budget"),
+        configuration={"gain": 1., "decay": 0., "ridge": .01,
+                       "observation_noise_std": .1, "routine_writes": 1000,
+                       "correction_writes": 1, "conflicting_corrections": 1,
+                       "corpus_id": "fabricated-existing-radius-fixture"},
+        expected_stream_ids=["fixture-A", "fixture-B"])
+    return _select_validation_radius(rows, base_precheck=check, **kwargs)
 
 BASES = (FieldPredictor, DirectMoment, ForgettingRLS)
 
