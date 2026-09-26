@@ -1,0 +1,24 @@
+name: SAL1 radius review source
+on:
+  push:
+    branches: [develop/sal1-surprise-buffer]
+    paths: [.github/workflows/sal1-radius-review.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Snapshot reviewed source without rerunning experiments
+        run: |
+          mkdir -p outputs
+          git archive 00b5c86702d11d3df065ddfa657a9fa015d3f12e --format=zip --output=outputs/source.zip -- . ':!experiments/reconstruction_v1/raw_records.jsonl.gz'
+          git rev-parse 00b5c86702d11d3df065ddfa657a9fa015d3f12e^{tree} > outputs/tree.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sal1-radius-source
+          path: outputs/
+          retention-days: 7
