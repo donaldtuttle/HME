@@ -125,6 +125,11 @@ workload, raw signed-cosine NN remains the reference choice. See the
 
 ## Evidence and limitations
 
+The new [HME-REC-1 reconstruction study](experiments/reconstruction_v1/REPORT.md)
+tests recovery of missing coordinates in unseen correlated signals, with NN copying,
+weighted blending, a direct second-moment control, identity checks and measured costs.
+Its field readout is experimental; the released engine and defaults are unchanged.
+
 The next application-level study, [HME-CM-1](experiments/conversation_memory_v1/PROTOCOL.md),
 now has a runnable Ollama harness for project decisions, corrections, absent
 information, project separation and task resumption. It compares a rolling
