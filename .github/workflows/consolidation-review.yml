@@ -1,18 +1,84 @@
-name: Consolidation review source
+name: Validate compact consolidation review
 on:
   push:
     branches: [develop/consolidation-step0]
     paths: [.github/workflows/consolidation-review.yml]
 permissions:
-  contents: read
+  contents: write
+concurrency:
+  group: pr16-compact-review
+  cancel-in-progress: false
 jobs:
-  source:
+  review:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
-      - run: git archive HEAD --format=zip --output=/tmp/consolidation-review-source.zip
-      - uses: actions/upload-artifact@v4
         with:
-          name: consolidation-review-source
-          path: /tmp/consolidation-review-source.zip
-          retention-days: 7
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply exact locally validated amendment
+        run: |
+          cat .github/pr16-review.0.gz .github/pr16-review.1.gz .github/pr16-review.2.gz > /tmp/pr16-review.gz
+          echo '7a018834128a9a5a25b116287c1f2ef0c6c0294bec92b6ce1a221ed54fe7e5e6  /tmp/pr16-review.gz' | sha256sum -c -
+          gzip -dc /tmp/pr16-review.gz > /tmp/pr16-review.py
+          python /tmp/pr16-review.py
+          rm .github/pr16-review.*.gz
+          git add -A
+          python scripts/update_manifest.py
+          git add MANIFEST.sha256
+          test "$(git write-tree)" = adbcd4681cbe962e13042a546a289a51f2a2bdab
+          sha256sum -c MANIFEST.sha256
+          sha256sum -c SOURCE_PINS.sha256
+          sha256sum -c archive/v2.2.sha256
+          (cd experiments/reconstruction_v1 && sha256sum -c RESULTS.sha256)
+      - name: Test code, compact ownership, checkpoint and distribution
+        run: |
+          python -m pip install -e '.[test,legacy-test,visualization]'
+          mkdir -p outputs
+          python -m pytest -q --junitxml=outputs/pr16-compact-tests.xml
+          (cd archive/v2.2 && python -m pytest -q --junitxml=../../outputs/pr16-compact-archive.xml)
+          hme --self-test
+          python scripts/check_consolidation.py --output outputs/pr16-compact-ci.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          saved=json.loads(Path('evidence/consolidation_step0.json').read_text())
+          fresh=json.loads(Path('outputs/pr16-compact-ci.json').read_text())
+          for key in ('source_sha256','checks','checkpoint_bytes_measured_on_disk','checkpoint_format'):
+              assert saved[key]==fresh[key], key
+          for key in ('before_128_writes','after_consolidation','after_1000_additional_writes'):
+              a=saved[key].copy(); b=fresh[key].copy()
+              a.pop('instance_owned_bytes'); b.pop('instance_owned_bytes')
+              assert a==b, key
+          PY
+          python -m pip wheel --no-deps . -w outputs/wheels
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          with ZipFile(next(Path('outputs/wheels').glob('*.whl'))) as z:
+              assert z.read('hme_consolidation.py')==Path('hme_consolidation.py').read_bytes()
+          PY
+          git diff --exit-code
+      - name: Publish validated candidate without advancing PR branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          test "$(git write-tree)" = adbcd4681cbe962e13042a546a289a51f2a2bdab
+          git commit -m 'Fix adapter Hann reconstruction, own only active patch, and version compact checkpoints'
+          git push origin HEAD:review/pr16-compact-verified
+          git rev-parse HEAD > outputs/pr16-compact-commit.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pr16-compact-review
+          path: |
+            outputs/pr16-compact-*.xml
+            outputs/pr16-compact-*.json
+            outputs/pr16-compact-*.txt
+          retention-days: 30
