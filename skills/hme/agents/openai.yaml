@@ -1,6 +1,0 @@
-interface:
-  display_name: "HME"
-  short_description: "Standalone associative memory and retrieval audits"
-  default_prompt: "Use $hme to store and retrieve items, inspect provenance, and report retrieval scores with their limitations."
-policy:
-  allow_implicit_invocation: true
