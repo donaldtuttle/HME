@@ -1,0 +1,66 @@
+name: Validate SAL1 hybrid-aware policy review
+on:
+  push:
+    branches: [develop/sal1-surprise-buffer]
+    paths: [.github/workflows/sal1-policy-review.yml]
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply exact locally validated policy amendment
+        run: |
+          python - <<'PY'
+          import gzip, hashlib, subprocess
+          from pathlib import Path
+          parts=[Path(f'.sal1-policy-review.{i}') for i in range(1,5)]
+          payload=b''.join(p.read_bytes() for p in parts)
+          assert hashlib.sha256(payload).hexdigest()=='d2ec7aaca2c3ee764dc68bec20af9999590f04c6f90fcbedc13dcb17f0ee5c23'
+          patch=gzip.decompress(payload)
+          subprocess.run(['git','apply','--check','-'],input=patch,check=True)
+          subprocess.run(['git','apply','-'],input=patch,check=True)
+          for p in parts:p.unlink()
+          Path('.github/workflows/sal1-policy-review.yml').unlink()
+          PY
+          git add -A
+          test "$(git write-tree)" = 893d1c4861e66b23aac3b74d1c2ec53a820f01f6
+          sha256sum -c MANIFEST.sha256
+          sha256sum -c SOURCE_PINS.sha256
+          sha256sum -c archive/v2.2.sha256
+          (cd experiments/reconstruction_v1 && sha256sum -c RESULTS.sha256)
+      - name: Tests and deterministic development fixtures only
+        run: |
+          python -m pip install -e '.[test,legacy-test,visualization]'
+          mkdir -p /tmp/sal1-policy-validation
+          python -m pytest -q --junitxml=/tmp/sal1-policy-validation/active-tests.xml
+          (cd archive/v2.2 && python -m pytest -q --junitxml=/tmp/sal1-policy-validation/historical-tests.xml)
+          python hme_engine.py --self-test
+          python experiments/salience_v1/smoke.py --output /tmp/sal1-policy-validation/development.json
+          sha256sum -c MANIFEST.sha256
+          git add -A
+          test "$(git write-tree)" = 893d1c4861e66b23aac3b74d1c2ec53a820f01f6
+      - name: Publish validated candidate separately from PR branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Fix noisy-repeat admission and lock SAL1 development policy constants'
+          git push origin HEAD:refs/heads/review/sal1-policy-validated
+          git rev-parse HEAD > /tmp/sal1-policy-validation/commit.txt
+          git rev-parse HEAD^{tree} > /tmp/sal1-policy-validation/tree.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sal1-policy-review-validation
+          path: /tmp/sal1-policy-validation/
+          retention-days: 30
