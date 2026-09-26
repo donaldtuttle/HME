@@ -1,0 +1,63 @@
+name: Validate SAL1 development prototype
+on:
+  push:
+    branches: [develop/sal1-surprise-buffer]
+    paths: [.github/workflows/sal1-apply.yml]
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply exact locally tested prototype
+        run: |
+          python - <<'PY'
+          import base64, hashlib, zlib
+          from pathlib import Path
+          data=''.join(Path(f'.sal1-part{i}.b64').read_text() for i in range(3))
+          patch=zlib.decompress(base64.b64decode(data, validate=True))
+          assert hashlib.sha256(patch).hexdigest() == 'b73b1380c64bc9fa2101a2f8ff9bd25600c6c3125b821ff51a5aa8176c9ba99b'
+          Path('/tmp/sal1.patch').write_bytes(patch)
+          PY
+          git apply --index /tmp/sal1.patch
+          rm .sal1-part0.b64 .sal1-part1.b64 .sal1-part2.b64 .github/workflows/sal1-apply.yml
+          git add -A
+          test "$(git write-tree)" = baa3b8c7c5212e096e787371f18f1477f720037f
+          sha256sum -c MANIFEST.sha256
+          sha256sum -c SOURCE_PINS.sha256
+          sha256sum -c archive/v2.2.sha256
+          (cd experiments/reconstruction_v1 && sha256sum -c RESULTS.sha256)
+      - name: Correctness tests and deterministic smoke only
+        run: |
+          python -m pip install -e '.[test,legacy-test,visualization]'
+          mkdir -p outputs
+          python -m pytest -q --junitxml=outputs/sal1-tests.xml
+          (cd archive/v2.2 && python -m pytest -q --junitxml=../../outputs/sal1-historical.xml)
+          hme --self-test > outputs/sal1-selftest.json
+          python experiments/salience_v1/smoke.py --output outputs/sal1-development.json
+          test "$(git write-tree)" = baa3b8c7c5212e096e787371f18f1477f720037f
+          git write-tree > outputs/sal1-tree.txt
+      - name: Publish validated development candidate
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Add tested SAL-1 surprise-buffer prototype and draft protocol; no evaluation'
+          git push origin HEAD:refs/heads/review/sal1-prototype-validated
+          git rev-parse HEAD > outputs/sal1-candidate.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sal1-development-validation
+          path: outputs/sal1-*
+          retention-days: 30
