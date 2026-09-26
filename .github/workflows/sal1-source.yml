@@ -1,0 +1,18 @@
+name: SAL1 source snapshot
+on:
+  push:
+    branches: [develop/sal1-surprise-buffer]
+    paths: [.github/workflows/sal1-source.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: git archive HEAD --format=zip --output=/tmp/sal1-source.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sal1-source
+          path: /tmp/sal1-source.zip
+          retention-days: 7
