@@ -157,3 +157,7 @@ Every CI run also retains its own JUnit reports, single-seed retrieval audit,
 runtime example output and historical bridge output as `hme-results-*` artifacts.
 CI success establishes that the checks completed; quantitative outcomes belong
 to the associated result files and source commit.
+
+## HME-REC-1: partial-observation reconstruction
+
+See [protocol](../experiments/reconstruction_v1/PROTOCOL.md), [report](../experiments/reconstruction_v1/REPORT.md), [raw predictions](../experiments/reconstruction_v1/raw_records.jsonl.gz) and [results](../experiments/reconstruction_v1/results.json). The official run checks fresh canonical-origin visibility before evaluation. Direct second moments are an explicit algebraic control, not an omitted baseline.
