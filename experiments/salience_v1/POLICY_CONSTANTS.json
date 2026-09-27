@@ -1,6 +1,6 @@
 {
-  "schema": "sal1-policy-v5",
-  "status": "FIXED_DEVELOPMENT_POLICY_NOT_COMPLETE_PREREGISTRATION",
+  "schema": "sal1-policy-v6",
+  "status": "FROZEN_PRE_CORPUS_POLICY_STRUCTURE_NOT_COMPLETE_PREREGISTRATION",
   "cue_dimension": 8,
   "outcome_dimension": 8,
   "instance_owned_byte_cap": 8192,
@@ -54,7 +54,8 @@
     "upstream_gain_decay_ridge_grid_and_selection_rule",
     "routine_practical_margin_confirmation_with_corpus",
     "base_precheck_stop_rule_and_failed_cell_reporting",
-    "correction_contribution_delta_c_nmse_with_corpus_scale"
+    "correction_contribution_delta_c_nmse_with_corpus_scale",
+    "joint_vs_bare_rls_delta_J_nmse_with_corpus_scale"
   ],
   "eviction_arms": [
     "fifo",
@@ -143,18 +144,65 @@
     "counts_include_repeat_sightings": true,
     "freeze_noise_scale_target_law_trust_counts_and_schedule": true
   },
-  "correction_contribution_gate": {
-    "status": "PENDING_CORPUS_FREEZE",
-    "applies_to": "primary_cell_only",
-    "delta_definition": "Ec_disable_buffer_minus_Ec_hybrid",
-    "paired_unit": "same_independent_stream_seed",
-    "decision_rule": "LCB95_mean_seed_delta_c_gt_delta_c",
-    "delta_c_nmse": null,
-    "same_streams_and_seeds_required": true,
-    "secondary_cells": "report_delta_and_interval_not_additional_pass_opportunities",
-    "base_sufficient_definition": "disable_buffer_meets_correction_score_gate",
-    "base_sufficient_primary_effect": "cannot_satisfy_buffer_contribution_claim",
-    "base_sufficient_reporting": "report_never_drop",
-    "interpretation": "attribution_of_buffer_contribution_not_absolute_correction_adequacy"
+  "decision_gates": {
+    "headline_scope": "single_preregistered_primary_cell",
+    "stable_keys": [
+      "correction_adequacy",
+      "buffer_contribution",
+      "routine_noninferiority",
+      "joint_vs_bare_rls",
+      "budget_isolation"
+    ],
+    "correction_adequacy": {
+      "presentation_order": 1,
+      "status": "PENDING_COMPLETE_REGISTRATION",
+      "metric": "correction_score_equals_one_minus_correction_nmse",
+      "decision_rule": "LCB95_mean_seed_correction_score_gte_0.90",
+      "threshold_score": 0.9,
+      "interpretation": "absolute_correction_adequacy"
+    },
+    "buffer_contribution": {
+      "presentation_order": 2,
+      "status": "PENDING_CORPUS_BOUND_MARGIN",
+      "delta_definition": "Ec_disable_buffer_minus_Ec_hybrid",
+      "paired_unit": "same_independent_stream_seed",
+      "matched_control": "disable_buffer_on_identical_base_streams_queries_and_seeds",
+      "decision_rule": "LCB95_mean_seed_delta_c_gt_delta_c",
+      "delta_c_nmse": null,
+      "same_streams_and_seeds_required": true,
+      "secondary_cells": "report_delta_and_interval_not_additional_headline_pass_opportunities",
+      "base_sufficient_definition": "disable_buffer_meets_correction_adequacy_gate",
+      "base_sufficient_primary_effect": "buffer_contribution_not_demonstrated",
+      "base_sufficient_reporting": "report_never_drop",
+      "interpretation": "practically_meaningful_buffer_improvement_over_matched_disable_buffer_control"
+    },
+    "routine_noninferiority": {
+      "presentation_order": 3,
+      "status": "PENDING_CORPUS_SCALE_CONFIRMATION",
+      "decision_rule": "UCB95_mean_seed_Er_hybrid_minus_1.01_Er_reference_minus_0.001_lte_0",
+      "references": [
+        "field_reference",
+        "fixed_unweighted_no_correction_routine_reference"
+      ],
+      "relative_allowance": 0.01,
+      "absolute_allowance_nmse": 0.001,
+      "same_corpus_scale_as_delta_c_required": true,
+      "interpretation": "routine_retention_noninferiority_with_relative_plus_absolute_allowance"
+    },
+    "joint_vs_bare_rls": {
+      "presentation_order": 4,
+      "status": "PENDING_COMPLETE_REGISTRATION",
+      "metric": "J_equals_mean_of_correction_and_routine_nmse",
+      "decision_rule": "LCB95_mean_seed_J_bare_RLS_minus_J_hybrid_gt_delta_J",
+      "delta_J_nmse": null,
+      "rls_selection": "validation_only",
+      "interpretation": "joint_practical_improvement_over_validation_tuned_bare_RLS"
+    },
+    "budget_isolation": {
+      "presentation_order": 5,
+      "status": "FIXED_REQUIREMENT",
+      "decision_rule": "all_retained_state_budget_and_data_isolation_checks_pass",
+      "interpretation": "resource_and_information_contract"
+    }
   }
 }
