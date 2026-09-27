@@ -1,7 +1,8 @@
 # From record store to consolidating memory
 
-Status: DESIGN, not a preregistration. No REC-3, SAL-1, HOLO-1 or CONT-1 evaluation
-seeds, outcomes or success claims are published by this change. Step 0 provides
+Status: DESIGN, not a preregistration. No REC-3, SAL-1 (salience study), HOLO-1
+or CONT-1 evaluation seeds, outcomes or success claims are published by this
+change. Step 0 provides
 [an opt-in field-only adapter](../../docs/CONSOLIDATION.md) and invariant tests.
 It does not alter REC-1/REC-2 evidence, frozen modules, or the v3.1.0 tag.
 
@@ -28,6 +29,10 @@ all registered cells including failures. This design is not that registration.
 Software invariant tests in Step 0 are not claims of prospective efficacy testing.
 
 ## SAL-1: weighting is not automatically correction
+
+**SAL-1** is the identifier for HME's **salience study**; `SAL` abbreviates
+*salience*. The study asks whether important supplied corrections can be retained
+without degrading still-valid routine associations.
 
 Current positive-gain updates retain a weighted second moment. The mandatory
 matched control is a direct C with the identical gain, decay, normalizer and

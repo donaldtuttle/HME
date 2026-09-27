@@ -104,8 +104,13 @@ the memory mechanism separately from the model that might use it.
 [Demo source and technical notes](demos/hme-plate/README.md) cover the exact
 viewer contract, controls, limitations, and local build. The port has numerical
 and DOM regression checks; rendered desktop/mobile verification remains pending.
-It does not visualize consolidation or SAL-1, and its probe is separate from
-published experiments. See the [verification record](demos/hme-plate/verification.md).
+It does not visualize consolidation or SAL-1 (salience study), and its probe is
+separate from published experiments. See the [verification record](demos/hme-plate/verification.md).
+
+**SAL-1** is the identifier for HME's **salience study**; `SAL` abbreviates
+*salience*. It asks whether important supplied corrections can be retained
+without degrading still-valid routine associations. See the
+[study plan](experiments/consolidation_plan/README.md#sal-1-weighting-is-not-automatically-correction).
 
 ## Relationship to established work
 

@@ -58,7 +58,8 @@ contract. It uses a direct DFT implementation of the Fourier transforms, a
 - The browser accepts real numeric inputs. Symbol RNG, rounded hashes and viewer
   IDs intentionally differ from NumPy/canonical artifact IDs.
 - This represents the released model, not the optional consolidation adapter,
-  SAL-1, semantic-memory performance, or a reproduction of published NN studies.
+  SAL-1 (salience study), semantic-memory performance, or a reproduction of
+  published NN studies.
 - State is in-memory and resets on reload. The demo is not a persistence format.
 
 See [SOURCE.md](SOURCE.md) for captured asset hashes and exact port boundaries,
