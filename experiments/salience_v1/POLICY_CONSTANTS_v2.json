@@ -1,0 +1,29 @@
+{
+  "schema": "sal1-policy-v2",
+  "status": "FIXED_DEVELOPMENT_POLICY_NOT_COMPLETE_PREREGISTRATION",
+  "cue_dimension": 8,
+  "outcome_dimension": 8,
+  "instance_owned_byte_cap": 8192,
+  "capacities": {"field": 20, "direct_moment": 37, "rls": 43},
+  "nonbinding_matched_capacity": 4,
+  "threshold_nmse": 0.1,
+  "recall_and_revision_radius": 0.1,
+  "admission_prediction": "pre_update_hybrid",
+  "retirement_prediction": "pre_update_base",
+  "match_rule": "nearest_within_radius_newest_on_equal_distance",
+  "revision_anchor": "keep_first_accepted_cue",
+  "refresh_on_unsurprising_repeat": false,
+  "eviction_rule": "oldest_accepted",
+  "gain_semantics": "weight_of_unit_normalized_joint_row",
+  "development_backend_settings": {"decay": 0.0, "ridge": 0.01},
+  "required_cue_noise": {
+    "distribution": "independent_zero_mean_Gaussian_per_component",
+    "units": "absolute_raw_cue_coordinate_units",
+    "standard_deviations": [0.0, 0.000001, 0.01, 0.05],
+    "apply_to": ["repeated_feedback_cues", "held_out_recall_cues"],
+    "repeat_feedback_outcome": "same_supplied_target_for_same_scoped_correction"
+  },
+  "capacity_rule": "instantiate_constants_and_assert_cap_never_resize",
+  "reference_runtime": "64-bit CPython 3.12; exact release and NumPy build must be pinned by the complete registration",
+  "pending_registration": ["corpus", "gain_decay_selection", "evaluation_seeds", "primary_noise_condition", "sample_size", "confidence_and_failure_rules"]
+}

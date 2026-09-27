@@ -1,0 +1,69 @@
+{
+  "status": "DEVELOPMENT_ONLY_NOT_PREREGISTERED",
+  "python": "3.13.5",
+  "numpy": "2.3.5",
+  "base_commit": "3e93c66f0a2eadf7ad840d963276cdfead4836c7",
+  "byte_cap": 8192,
+  "arms": {
+    "field": {
+      "storage": {
+        "capacity": 20,
+        "occupied": 1,
+        "retained_array_bytes": 6957,
+        "instance_owned_bytes": 8101,
+        "admissions": 1
+      },
+      "checks": {
+        "admitted_surprising_reversal": true,
+        "exact_corrected_cue_hit": true,
+        "off_scope_uses_current_base": true,
+        "owned_bytes_constant": true,
+        "array_bytes_constant": true,
+        "within_cap": true
+      }
+    },
+    "direct_moment": {
+      "storage": {
+        "capacity": 37,
+        "occupied": 1,
+        "retained_array_bytes": 7190,
+        "instance_owned_bytes": 8150,
+        "admissions": 1
+      },
+      "checks": {
+        "admitted_surprising_reversal": true,
+        "exact_corrected_cue_hit": true,
+        "off_scope_uses_current_base": true,
+        "owned_bytes_constant": true,
+        "array_bytes_constant": true,
+        "within_cap": true
+      }
+    },
+    "rls": {
+      "storage": {
+        "capacity": 43,
+        "occupied": 1,
+        "retained_array_bytes": 6988,
+        "instance_owned_bytes": 8084,
+        "admissions": 1
+      },
+      "checks": {
+        "admitted_surprising_reversal": true,
+        "exact_corrected_cue_hit": true,
+        "off_scope_uses_current_base": true,
+        "owned_bytes_constant": true,
+        "array_bytes_constant": true,
+        "within_cap": true
+      }
+    }
+  },
+  "source_sha256": {
+    "hme_engine.py": "080a20056c6c5c88e49c6307845277002ad2091a6a1d7dec66961317bc2c0167",
+    "hme_consolidation.py": "6daa108f59208c88c7b59e119cb66273cc8faa229a816a5f1e624776912340f0",
+    "experiments/salience_v1/memory.py": "b728807a02c4a899c40532380d923c15dd645b418f90f21b2c5ff8156b16075e",
+    "experiments/salience_v1/smoke.py": "e978894b1b6657690f445657b4375836285ddb2fcc9daac3b29b0deb24c79084",
+    "tests/test_salience_memory.py": "dbfaadeffaf6a7c47c34058e6bb92c7df94917bf4b49b5da30c97673102267ac",
+    "experiments/salience_v1/PROTOCOL_DRAFT.md": "b085a28eddf57616a4088c99e992034e04c6adb40def04d3d20f2dae0f9f1b3a"
+  },
+  "limitations": "Exact-cue and off-scope routing checks only. No held-out accuracy, semantic truth, gain/decay efficacy sweep, or statistical PASS."
+}

@@ -29,6 +29,11 @@ Software invariant tests in Step 0 are not claims of prospective efficacy testin
 
 ## SAL-1: weighting is not automatically correction
 
+A [SAL-1 development prototype and draft protocol](../salience_v1/PROTOCOL_DRAFT.md)
+now implement a bounded surprise-gated exception store with field, direct-moment
+and forgetting-RLS backends. It includes matched hybrid controls, scoped revision
+rules and measured byte caps. It is NOT a preregistration or an efficacy result.
+
 Current positive-gain updates retain a weighted second moment. The mandatory
 matched control is a direct C with the identical gain, decay, normalizer and
 readout; they are mathematically equal in the aligned setup. Give every method
