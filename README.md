@@ -83,14 +83,29 @@ order, adapters, switches and the restoration boundary.
 
 ## Interactive browser demo
 
-[HME Plate](demos/hme-plate/README.md) provides a local browser instrument for
-the released field-plus-ledger model. Place writes and queries, inspect score
-components, and erase the field or ledger independently. It runs entirely in
-the browser, with a relative static build suitable for a repository subpath.
-The port has numerical and DOM regression checks; rendered desktop/mobile
-verification remains pending. It does not visualize consolidation or SAL-1,
-and its probe is separate from published experiments. See the
-[verification record](demos/hme-plate/verification.md).
+**[Open HME Plate live](https://donaldtuttle.github.io/HME/)**
+
+HME Plate is an interactive reference demo of the released HME field-plus-ledger
+memory model. It is more than a graphical mockup: the browser runs the numerical
+encoding and retrieval logic, and the port is checked against the repository's
+Python engine on deterministic numeric cases.
+
+For a general audience, think of it as a transparent workbench for an experimental
+memory component. You can store information, query with an imperfect clue, inspect
+why one item ranked above another, add controlled noise, and remove either the
+shared field or the retained ledger to see what each part contributes.
+
+The demo is **not an AI agent or chatbot**. Instead, it demonstrates a memory
+mechanism that an AI application could call. In a connected system, an application
+could encode information, ask HME for relevant records later, and supply the
+retrieved material to an AI model before it answers. HME Plate lets you inspect
+the memory mechanism separately from the model that might use it.
+
+[Demo source and technical notes](demos/hme-plate/README.md) cover the exact
+viewer contract, controls, limitations, and local build. The port has numerical
+and DOM regression checks; rendered desktop/mobile verification remains pending.
+It does not visualize consolidation or SAL-1, and its probe is separate from
+published experiments. See the [verification record](demos/hme-plate/verification.md).
 
 ## Relationship to established work
 
