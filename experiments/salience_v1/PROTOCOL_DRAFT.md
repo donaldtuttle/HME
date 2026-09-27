@@ -342,8 +342,11 @@ The shared margin, mandatory base-screen reducer, record binding, constructor us
 of screened settings, and deterministic regressions are implemented. No validation
 stream search, primary selection, evaluation seeds or efficacy test has run. All
 memory arrays, capacities, admission/retirement and confirmation policies are
-unchanged. `POLICY_CONSTANTS_v3.json` and `development_checks_radius_v3.json` preserve
-the preceding policy/evidence; current development output has updated source hashes.
+unchanged. Prior policy constants are preserved byte-for-byte through
+`POLICY_CONSTANTS_v4.json`; the active draft policy is v5. Prior development
+evidence remains preserved, including `development_checks_radius_v3.json`. The
+v5 amendment adds only the pre-evaluation buffer-contribution decision contract;
+no formal evaluator or SAL-1 efficacy result is introduced here.
 
 ## Eviction ablation: confirmation, not query popularity
 
@@ -472,18 +475,32 @@ numerically overwhelm a rare correction's metric. These are proposed, not final
 registered decision rules:
 
 1. Lower one-sided/paired-seed confidence bound for mean correction score >= 0.90.
-2. Upper paired-seed confidence bound for
+2. **Buffer-contribution gate, primary cell only.** For each independent seed,
+   using the exact same streams and queries in both arms, define
+   `delta_c_seed = Ec_disable_buffer - Ec_hybrid`. Require the lower 95% paired-seed
+   confidence bound on mean `delta_c_seed` to exceed a practical margin `delta_c`.
+   Freeze `delta_c` with the corpus, target scaling and observation-noise design
+   before validation or evaluation. Secondary density/noise/type cells report the
+   paired delta and interval but are not additional opportunities to satisfy the
+   headline contribution gate.
+   If the disable-buffer arm itself satisfies the correction-score gate, label that
+   cell `BASE_SUFFICIENT`. Report it and all raw scores; never drop it. A
+   base-sufficient primary cell is not a system failure, but it cannot establish the
+   claim that the exception buffer contributed necessary correction retention.
+3. Upper paired-seed confidence bound for
    `Er_hybrid - 1.01*Er_field_reference - 0.001` <= 0, and the same bound against
    the fixed unweighted no-correction routine reference. This combines a one-percent
    relative error allowance with a **0.001 NMSE absolute practical allowance**.
    It is not numerical roundoff tolerance, a floor on the reference, or a pure 1%
    relative guarantee. The shared `routine_gate()` exposes this signed excess for
    inference; validation uses its point-estimate counterpart, not a statistical PASS.
-   Do not bootstrap the ratio or compare separate unpaired confidence intervals.
-3. Positive paired lower confidence bound for `J_bare_RLS - J_hybrid`, with the
+   Confirm the 0.001 allowance against the same frozen corpus/outcome scale used to
+   set `delta_c`. Do not bootstrap the ratio or compare separate unpaired confidence
+   intervals.
+4. Positive paired lower confidence bound for `J_bare_RLS - J_hybrid`, with the
    minimum practical improvement fixed before evaluation. RLS settings are chosen
    on validation only, never by comparing test scores and selecting a weak run.
-4. All retained-state budget and data-isolation checks pass.
+5. All retained-state budget and data-isolation checks pass.
 
 A pass against **bare** RLS supports a hybrid benefit for that task, not superiority
 to the best classical hybrid. Report direct-plus-buffer and RLS-plus-buffer next
