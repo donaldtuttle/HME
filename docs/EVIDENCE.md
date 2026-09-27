@@ -33,8 +33,9 @@ adds the missing raw-input baseline without rewriting those reports. At sigma
 too worsens it by 13.44 points. These decomposition contrasts are descriptive.
 The no-window signed variant is close to raw NN, but the study does not register
 an equivalence claim or demonstrate a field advantage. No speed or storage
-claim is made. Ten regression tests bring the active suite to 138; earlier
-counts in this index describe their original runs and remain unchanged.
+claim is made. Ten regression tests brought the active suite to 138 at that
+stage. Counts in this index describe their original runs and remain unchanged;
+the [README](../README.md) records the current suite count.
 
 ## Preregistered baseline comparison
 
