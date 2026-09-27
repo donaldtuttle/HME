@@ -170,5 +170,6 @@ The original full-grid development evidence is retained byte-for-byte as
 `evidence/consolidation_step0.json` is regenerated for the compact adapter with
 its current source hashes and runtime. The amendment changes this unreleased
 adapter's default, retained layout and checkpoint version, not any frozen
-REC-1/NN evaluator or the pinned engine. SAL-1, HOLO-1, REC-3 and CONT-1 remain
-designs without preregistered efficacy outcomes.
+REC-1/NN evaluator or the pinned engine. SAL-1 (salience), HOLO-1 (spread-domain damage), REC-3 (retained-byte
+reconstruction/quality), and CONT-1 (consequence-retention/continuity) remain
+study designs without preregistered efficacy outcomes.

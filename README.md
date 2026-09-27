@@ -108,8 +108,10 @@ It does not visualize consolidation or SAL-1 (salience study), and its probe is
 separate from published experiments. See the [verification record](demos/hme-plate/verification.md).
 
 **SAL-1** is the identifier for HME's **salience study**; `SAL` abbreviates
-*salience*. It asks whether important supplied corrections can be retained
-without degrading still-valid routine associations. See the
+*salience*. The same study plan also uses **HOLO-1** for the spread-domain damage
+study, **REC-3** for retained-byte reconstruction/quality comparison, and
+**CONT-1** for consequence-retention/continuity testing. These are study IDs,
+not claimed acronym expansions. See the
 [study plan](experiments/consolidation_plan/README.md#sal-1-weighting-is-not-automatically-correction).
 
 ## Relationship to established work

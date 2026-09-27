@@ -69,6 +69,11 @@ gain is a distinct caller-controlled experimental input, not a silent ceiling ch
 
 ## HOLO-1: spread-domain damage is a separate representation
 
+**HOLO-1** is the identifier for HME's **spread-domain damage study**. It tests
+whether spreading retained state changes damage behavior under matched storage,
+decoding, and byte accounting. `HOLO` is treated here as a study label, not a
+formally expanded acronym.
+
 Store a spread-domain state persistently, rather than FFT-transforming only during
 query or immediately inverting every write. Freeze exactly what is transformed:
 packed symmetric moment coordinates, a full matrix, or the scalar grid. An FFT of
@@ -111,6 +116,11 @@ No FFT-specific advantage or hologram-fragment guarantee follows beforehand.
 
 ## REC-3: quality per actual retained byte
 
+**REC-3** is the identifier for HME's **retained-byte reconstruction/quality
+study**. It compares memory approaches under declared retained-state budgets and
+measures quality, storage, and cost. `REC` is treated here as a study label, not
+a formally expanded acronym.
+
 Compare at the same declared real-byte caps and actual used bytes:
 
 - Weighted/decayed direct C, packed symmetric and dense variants where relevant.
@@ -136,6 +146,11 @@ The adapter defaults to Hann off; Hann-on reconstruction is explicitly refused.
 No unreported null grid allocation, caller backup or retained field view is allowed.
 
 ## CONT-1: preserved consequences, not record IDs
+
+**CONT-1** is the identifier for HME's **consequence-retention/continuity study**.
+It asks whether useful consequences of prior information survive consolidation
+without requiring preservation of every original record ID. `CONT` is treated
+here as a study label, not a formally expanded acronym.
 
 Use explicit cue-conditioned preferences, corrections, relationships and commitments.
 Some old details may be discarded without failure; a scoped reversal or important
