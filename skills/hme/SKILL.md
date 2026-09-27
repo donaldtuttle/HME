@@ -20,6 +20,18 @@ artifact = engine.encode_memory(
 result = engine.retrieve_memory((20, 22), query=[0.12, 0.39, 0.88, 0.21], top_k=1)
 ```
 
+That snippet preserves the released defaults for compatibility; do not treat those
+defaults as the recommended identity-retrieval baseline. HME-NN-3 found that, at
+noise sigma 1.0, raw signed-cosine NN scored 74.11%, default HME scored 42.21%,
+and the experimental Hann-off + signed HME arm scored 73.93%. The latter differed
+from raw signed NN by -0.18 percentage points with a reported 95% interval of
+[-0.57, +0.21]: the observed difference stayed within +/-0.6 pp, but equivalence
+was not established. For the tested numeric identity-retrieval workload, use exact
+signed-cosine NN as the reference choice. For HME numeric experiments,
+`HMEConfig(use_hann_window=False)` is an available preprocessing opt-out; signed
+HME scoring remains an experimental ablation and is not a released configuration
+switch.
+
 - Use `operation="write"` by default. Use `strength` and `write_weight` to control the stored gain.
 - Inspect `result.outcome`, `result.rejected`, `result.hits`, and `result.relevance_score` together.
 - Treat `relevance_score` as the selected hit's uncalibrated base score. Never report it as probability of correctness.
