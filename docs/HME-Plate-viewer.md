@@ -1,36 +1,79 @@
 # HME Plate viewer
 
-Interactive browser demonstration of the **released field-plus-ledger** Holographic Memory Engine.
+GitHub-portable source of the live Grok HME Plate demo. Copy each fenced block into the path in its heading. `@/` means `src/`.
 
-Information is encoded into a shared pattern field. A ledger keeps the individual memories. Retrieval rank is `0.38` proximity + `0.42` absolute similarity + `0.20` pattern correlation. `relevance_score` is the top hit's base score. It is not a probability. `MATCH` means the hit cleared the threshold. It does not certify identity.
+Source date: 2026-09-27.
+
+This is a browser reimplementation of the released field-plus-ledger contract. It is not the NumPy engine and it is not bit-identical to it. It does not visualize consolidation or SAL-1.
+
+## Files changed
+
+UI pass only:
+
+- `src/routes/index.tsx`
+- `src/styles.css`
+
+Included unchanged, so the viewer can be reconstructed without guessing:
+
+- `src/lib/hme/fft.ts`
+- `src/lib/hme/sha256.ts`
+- `src/lib/hme/engine.ts`
+- `src/lib/hme/check.ts`
+- `src/components/hme/plate.tsx`
+
+## UI-only changes
+
+- Hero heading is `Explore HME`. Two short sentences replace the longer intro and the separate “What am I testing?” block. The size and energy line stays under the intro.
+- Quick start is collapsed by default. Explore shows three steps. Details still shows the five-step version.
+- Plate legend adds selected memory (solid brass), other memories (faint brass), and the search window (dashed).
+- Search modes are a 2×2 grid on small screens and in the desktop sidebar, and one row between those widths. Buttons share one size.
+- Range sliders and the checkbox use `accent-color: var(--color-accent)`.
+
+Explore stays the default. Details still shows write/query, sigma, top k, Hann window, the scoring equation, hashes, decoded vector, decoded surface, and model scope.
+
+## Behavior changes
+
+None. The numerical engine, retrieval scoring, FFT, field and ledger semantics, noise-probe counting, reset order, seeded examples, threshold logic, and mathematical outputs were not changed.
+
+## Checks run
+
+`node --experimental-strip-types` imported `runChecks`, `bootDemo`, `executeQuery`, `seedDemo`, and `noiseProbe` on 2026-09-27. All 11 viewer checks passed:
+
+- sha256
+- dft impulse
+- readme probe
+- overlap prefers query
+- field erase zeros pattern
+- ledger drop is NO_MATCH
+- missing query scores 1
+- hann changes payload
+- threshold can reject
+- symbols are exact, not paraphrase
+- probe uses threshold
+
+Seeded default, Hann on, noisy query of `reading-001` at sigma 0.15 seed 7, threshold 0:
+
+- 4 records
+- field energy 0.195509
+- outcome MATCH
+- score 0.890906
+- proximity 1, similarity 0.835809, field 0.799328
+
+Reset path used by the page (Hann forced on, then reseed) reproduced energy 0.195509 and score 0.890906.
+
+Noise probe at threshold 1.00, seeds 1–8, radius 4: 0/8 at sigma 0, 0.25, 0.5, and 1.
+
+Field erase: energy 0, pattern score 0, outcome still MATCH for the retained record.
+
+Ledger drop: 0 records, energy still 0.195509, outcome NO_MATCH, 0 hits.
+
+These checks do not claim full numerical parity with the Python engine. Direct DFT is the viewer transform. Symbol RNG and artifact ids differ from NumPy on purpose.
+
+Mobile check at 390×844: Quick start `open` is false, the plate starts inside the first viewport, search modes measure as a 2×2 grid of equal 157×44 buttons, and range/checkbox computed `accent-color` is `rgb(196, 163, 90)`. No horizontal overflow. No console errors.
 
 ## Model scope
 
 Released field-plus-ledger model: spatial FFT-pattern superposition plus a retained artifact ledger. Not consolidation, not SAL-1, not standard HRR binding, and not field-only identity recovery.
-
-This file is a **viewer reimplementation** of that published contract. It is not the NumPy engine and it is not bit-identical to it. Artifact ids are viewer insertion ids. The lineage list is insertion order, not a Merkle chain. Salience stays off. Numeric queries are not Hann-windowed. Symbol wording similarity is not vector similarity.
-
-## How to place this on GitHub
-
-Each section below is one source file. Create the path, then paste the fenced block into it.
-
-| Path | What it is |
-| --- | --- |
-| `src/lib/hme/fft.ts` | DFT and `fft2` |
-| `src/lib/hme/sha256.ts` | SHA-256 |
-| `src/lib/hme/engine.ts` | Encode, retrieve, ablations, noise probe |
-| `src/lib/hme/check.ts` | Demo plate and viewer checks |
-| `src/components/hme/plate.tsx` | Field plate |
-| `src/routes/index.tsx` | Page UI |
-| `src/styles.css` | Theme |
-
-The page is a TanStack Router file route (`createFileRoute("/")`). The engine, checks, FFT, and SHA-256 modules do not depend on React. `@/` means `src/`. Fonts are IBM Plex Sans and IBM Plex Mono. The only icon import is `Check` from `lucide-react`.
-
-Suggested home in the HME repo: `viewer/` or `docs/plate/`, with this note kept next to the code so the scope stays obvious.
-
-## Demo the page is built around
-
-Four memories are already stored. The brass `+` is a memory position. The paper `+` is a search position. With Hann on, a noisy query of `reading-001` (sigma `0.15`, seed `7`) scores about `0.891`, and the field energy is about `0.196`. Reset restores Hann **before** it reseeds the plate. The noise probe counts a trial only when that item is top-1 and clears the retrieval threshold shown on screen.
 
 ## `src/lib/hme/fft.ts`
 
@@ -102,7 +145,6 @@ export function fft2(src: Vec, height: number, width: number, inverse: boolean):
   return out;
 }
 ```
-
 ## `src/lib/hme/sha256.ts`
 
 SHA-256 used for viewer insertion ids and payload hashes. These are not NumPy byte hashes.
@@ -198,10 +240,9 @@ export function sha256Text(text: string): string {
   return sha256Hex(new TextEncoder().encode(text));
 }
 ```
-
 ## `src/lib/hme/engine.ts`
 
-Field-plus-ledger engine: encode, retrieve, score, ablations, and the thresholded noise probe.
+Field-plus-ledger engine. Not modified in the 2026-09-27 UI pass.
 
 ```ts
 import { fft2, dft, zeros, type Vec } from "./fft.ts";
@@ -887,10 +928,9 @@ export function noiseProbe(
   return { threshold, radius, trials, cells };
 }
 ```
-
 ## `src/lib/hme/check.ts`
 
-Viewer checks plus the four-memory demo. Not a claim of full numerical parity with the Python engine.
+Viewer checks and the four-memory demo. Not modified in the 2026-09-27 UI pass.
 
 ```ts
 import { HmeEngine, noiseProbe, seedDemo, type QueryForm } from "./engine.ts";
@@ -1033,10 +1073,9 @@ export function bootDemo(): { engine: HmeEngine; form: QueryForm } {
   return { engine, form: demoForm(first.artifactId) };
 }
 ```
-
 ## `src/components/hme/plate.tsx`
 
-Offscreen canvas painted to an image. Brass cross is a memory. Paper cross is a search.
+Offscreen canvas painted to an image. Brass cross is a memory. Paper cross is a search. Solid brass box is the selected memory. Faint brass boxes are the others. Dashed box is the search window.
 
 ```tsx
 import { useEffect, useRef, useState } from "react";
@@ -1215,10 +1254,9 @@ export function Plate(props: PlateProps) {
   );
 }
 ```
-
 ## `src/routes/index.tsx`
 
-Explore / Details page. `@/` is the `src/` alias. `Check` comes from `lucide-react`.
+Explore / Details page. Updated 2026-09-27. `@/` is the `src/` alias. `Check` comes from `lucide-react`.
 
 ```tsx
 import { createFileRoute } from "@tanstack/react-router";
@@ -1355,50 +1393,59 @@ function Home() {
             </button>
           </div>
         </div>
-        <h1 className="mt-2 max-w-xl text-balance text-3xl font-medium tracking-tight sm:text-4xl">Explore HME Memory</h1>
-        <div className="mt-3 grid max-w-2xl gap-3 text-sm leading-relaxed text-muted">
-          <p>
-            HME Plate is an interactive demonstration of the Holographic Memory Engine. Information is encoded into a shared pattern field while a ledger keeps track of the individual memories.
-          </p>
-          <p>Try storing, querying, and disrupting those memories to see how the system retrieves information and what each part contributes.</p>
-        </div>
-        <div className="mt-4 max-w-2xl">
-          <h2 className="text-sm font-medium">What am I testing?</h2>
-          <p className="mt-1 text-sm leading-relaxed text-muted">
-            HME Plate runs the actual numerical memory and retrieval logic in your browser. It is not an AI agent or chatbot. It demonstrates a memory component that can be connected to an AI system.
-          </p>
+        <h1 className="mt-2 max-w-xl text-balance text-3xl font-medium tracking-tight sm:text-4xl">Explore HME</h1>
+        <div className="mt-3 grid max-w-2xl gap-2 text-sm leading-relaxed text-muted">
+          <p>HME Plate lets you store, search, and disrupt memories to see how the Holographic Memory Engine retrieves information.</p>
+          <p>Not a chatbot: this is the actual numerical memory mechanism that an AI application could connect to.</p>
         </div>
         <p className="mt-3 font-mono text-xs text-muted tabular-nums">
           {engine.memorySize}² complex · {engine.config.encodingResolution}-point patterns · {engine.records.length} records · energy {engine.energy().toFixed(3)}
         </p>
       </header>
 
-      <details open className="panel mb-4 px-4 py-3 text-sm">
+      <details className="panel mb-4 px-4 py-3 text-sm">
         <summary className="cursor-pointer font-medium">Quick start</summary>
-        <ol className="mt-3 grid gap-3">
-          <li>
-            <p className="font-medium">1. Start with a memory</p>
-            <p className="text-muted">The demo begins with four example memories already stored. Their patterns appear on the plate.</p>
-          </li>
-          <li>
-            <p className="font-medium">2. Query a memory</p>
-            <p className="text-muted">Select Place search, then tap somewhere on the plate. Watch the result change as you move the search.</p>
-          </li>
-          <li>
-            <p className="font-medium">3. Make the clue imperfect</p>
-            <p className="text-muted">Choose Noisy memory and increase Noise level. See how much distortion the system can tolerate while still retrieving the intended memory.</p>
-          </li>
-          <li>
-            <p className="font-medium">4. See why it chose something</p>
-            <p className="text-muted">The result shows how proximity, similarity, and the field contributed to the ranking.</p>
-          </li>
-          <li>
-            <p className="font-medium">5. Break it on purpose</p>
-            <p className="text-muted">
-              Try Erase field, keep records and Remove records, keep field. These experiments show what each part of HME contributes. Hit Restore the demo whenever you want to start over.
-            </p>
-          </li>
-        </ol>
+        {showDetails ? (
+          <ol className="mt-3 grid gap-3">
+            <li>
+              <p className="font-medium">1. Start with a memory</p>
+              <p className="text-muted">The demo begins with four example memories already stored. Their patterns appear on the plate.</p>
+            </li>
+            <li>
+              <p className="font-medium">2. Query a memory</p>
+              <p className="text-muted">Select Place search, then tap somewhere on the plate. Watch the result change as you move the search.</p>
+            </li>
+            <li>
+              <p className="font-medium">3. Make the clue imperfect</p>
+              <p className="text-muted">Choose Noisy memory and increase Noise level. See how much distortion the system can tolerate while still retrieving the intended memory.</p>
+            </li>
+            <li>
+              <p className="font-medium">4. See why it chose something</p>
+              <p className="text-muted">The result shows how proximity, similarity, and the field contributed to the ranking.</p>
+            </li>
+            <li>
+              <p className="font-medium">5. Break it on purpose</p>
+              <p className="text-muted">
+                Try Erase field, keep records and Remove records, keep field. These experiments show what each part of HME contributes. Hit Restore the demo whenever you want to start over.
+              </p>
+            </li>
+          </ol>
+        ) : (
+          <ol className="mt-3 grid gap-3">
+            <li>
+              <p className="font-medium">1. Search a memory</p>
+              <p className="text-muted">Choose Place search and tap the plate to search the four example memories.</p>
+            </li>
+            <li>
+              <p className="font-medium">2. Add noise</p>
+              <p className="text-muted">Choose Noisy memory and raise Noise level to see whether HME still finds the intended memory.</p>
+            </li>
+            <li>
+              <p className="font-medium">3. Break it on purpose</p>
+              <p className="text-muted">Remove the field or the records and see what changes. Restore the demo whenever you want to start over.</p>
+            </li>
+          </ol>
+        )}
       </details>
 
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.8fr)]">
@@ -1445,16 +1492,28 @@ function Home() {
                 onPick={pick}
               />
             </div>
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-              <span>
+            <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+              <li>
                 <span className="font-mono text-accent">+</span> Memory position{" "}
-                <span className="font-mono text-xs text-muted tabular-nums">({writeRow}, {writeCol})</span>
-              </span>
-              <span>
+                <span className="font-mono tabular-nums">({writeRow}, {writeCol})</span>
+              </li>
+              <li>
                 <span className="font-mono text-fg">+</span> Search position{" "}
-                <span className="font-mono text-xs text-muted tabular-nums">({form.queryRow}, {form.queryCol})</span>
-              </span>
-            </div>
+                <span className="font-mono tabular-nums">({form.queryRow}, {form.queryCol})</span>
+              </li>
+              <li className="inline-flex items-center gap-1.5">
+                <span className="inline-block size-3 rounded-sm border-2 border-accent" aria-hidden="true" />
+                Selected memory
+              </li>
+              <li className="inline-flex items-center gap-1.5">
+                <span className="inline-block size-3 rounded-sm border border-accent/40" aria-hidden="true" />
+                Other memories
+              </li>
+              <li className="inline-flex items-center gap-1.5">
+                <span className="inline-block size-3 rounded-sm border border-dashed border-fg/80" aria-hidden="true" />
+                Search window
+              </li>
+            </ul>
             <p className="mt-2 text-xs text-muted">
               {view === "magnitude" ? "Magnitude: where field activity is strongest." : "Phase: the underlying complex-valued alignment."}
               {showDetails ? " Row down, column across." : ""}
@@ -1531,7 +1590,7 @@ function Home() {
               Search
               {showDetails ? <span className="font-mono text-xs font-normal text-muted">query</span> : null}
             </h2>
-            <div className="flex flex-wrap rounded-lg bg-bg p-1" role="group" aria-label="Search mode">
+            <div className="grid grid-cols-2 gap-1 rounded-lg bg-bg p-1 sm:grid-cols-4 lg:grid-cols-2" role="group" aria-label="Search mode">
               {(
                 [
                   ["noisy", "Noisy memory"],
@@ -1540,7 +1599,7 @@ function Home() {
                   ["spatial", "Spatial"],
                 ] as const
               ).map(([mode, label]) => (
-                <button key={mode} type="button" className="seg" aria-pressed={form.mode === mode} onClick={() => refresh({ mode })}>
+                <button key={mode} type="button" className="seg w-full px-2 text-center" aria-pressed={form.mode === mode} onClick={() => refresh({ mode })}>
                   {label}
                 </button>
               ))}
@@ -2015,10 +2074,9 @@ function Ledger({
   );
 }
 ```
-
 ## `src/styles.css`
 
-Tailwind v4 theme. Dark olive field, brass accent, IBM Plex.
+Tailwind v4 theme. Updated 2026-09-27 so range and checkbox use the brass accent.
 
 ```css
 @import "tailwindcss";
@@ -2059,6 +2117,10 @@ Tailwind v4 theme. Dark olive field, brass accent, IBM Plex.
   input,
   textarea {
     color-scheme: dark;
+  }
+  input[type="range"],
+  input[type="checkbox"] {
+    accent-color: var(--color-accent);
   }
   ::selection {
     background: var(--color-accent);
