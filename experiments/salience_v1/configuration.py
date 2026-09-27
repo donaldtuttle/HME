@@ -42,7 +42,7 @@ def build_fixed_memory(backend: str, *, comparison: str = "budget",
     if comparison not in ("budget", "matched_nonbinding"):
         raise ValueError("unknown comparison")
     p = policy_constants()
-    if p["schema"] != "sal1-policy-v4":
+    if p["schema"] != "sal1-policy-v5":
         raise ValueError("unsupported fixed policy schema")
     if eviction not in p["eviction_arms"]:
         raise ValueError("unknown eviction arm")
