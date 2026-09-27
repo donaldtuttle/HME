@@ -186,6 +186,15 @@ function FieldCanvas(e) {
     </div>
   );
 }
+function plainQueryNote(mode) {
+  if (mode === `noisy`)
+    return `The selected memory was distorted, then searched for at the paper cross.`;
+  if (mode === `vector`)
+    return `Searching with the values you typed, at the paper cross.`;
+  if (mode === `symbol`)
+    return `Searching for that exact symbol. Similar wording is not a similar pattern.`;
+  return `Searching by place only.`;
+}
 function HMEPlate() {
   let initialState = (0, React.useMemo)(() => createDemoState(), []),
     checks = (0, React.useMemo)(() => runViewerChecks(), []),
@@ -204,6 +213,8 @@ function HMEPlate() {
     [useHann, setUseHann] = (0, React.useState)(!0),
     [writeError, setWriteError] = (0, React.useState)(null),
     [probeResult, setProbeResult] = (0, React.useState)(null),
+    [layer, setLayer] = (0, React.useState)(`explore`),
+    showDetails = layer === `details`,
     queryResult = resolveQuery(engine, queryForm),
     updateQuery = (e) => {
       (e &&
@@ -278,21 +289,38 @@ function HMEPlate() {
           : `Plate and ledger are both live.`;
   return (
     <main className={`mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-6`}>
-      <header
-        className={`mb-5 flex flex-col gap-4 border-b border-line pb-5 sm:flex-row sm:items-end sm:justify-between`}
-      >
-        <div className={`max-w-2xl`}>
-          <p
-            className={`font-mono text-xs tracking-widest text-accent uppercase`}
-          >{`Published hme-v3 contract`}</p>
-          <h1
-            className={`mt-1 text-balance text-3xl font-medium tracking-tight sm:text-4xl`}
-          >{`HME Plate`}</h1>
-          <p
-            className={`mt-2 text-pretty text-sm leading-relaxed text-muted`}
-          >{`Released field-plus-ledger model: spatial FFT-pattern superposition plus a retained artifact ledger. Not consolidation, not SAL-1, not standard HRR binding, and not field-only identity recovery.`}</p>
+      <header className={`mb-5`}>
+        <div className={`flex flex-wrap items-start justify-between gap-3`}>
+          <p className={`font-mono text-xs tracking-widest text-accent uppercase`}>
+            {`HME Plate · Interactive memory demo`}
+          </p>
+          <div
+            className={`flex rounded-lg bg-bg p-1`}
+            role={`group`}
+            aria-label={`How much machinery to show`}
+          >
+            <button
+              type={`button`}
+              className={`seg`}
+              aria-pressed={layer === `explore`}
+              onClick={() => setLayer(`explore`)}
+            >{`Explore`}</button>
+            <button
+              type={`button`}
+              className={`seg`}
+              aria-pressed={layer === `details`}
+              onClick={() => setLayer(`details`)}
+            >{`Details`}</button>
+          </div>
         </div>
-        <p className={`font-mono text-xs text-muted tabular-nums`}>
+        <h1 className={`mt-2 text-balance text-3xl font-medium tracking-tight sm:text-4xl`}>
+          {`Explore HME`}
+        </h1>
+        <div className={`mt-3 grid max-w-2xl gap-2 text-sm leading-relaxed text-muted`}>
+          <p>{`HME Plate lets you store, search, and disrupt memories to see how the Holographic Memory Engine retrieves information.`}</p>
+          <p>{`Not a chatbot: this is the actual numerical memory mechanism that an AI application could connect to.`}</p>
+        </div>
+        <p className={`mt-3 font-mono text-xs text-muted tabular-nums`}>
           {engine.memorySize}
           {`² complex · `}
           {engine.config.encodingResolution}
@@ -302,180 +330,108 @@ function HMEPlate() {
           {engine.energy().toFixed(3)}
         </p>
       </header>
-      <div
-        className={`grid items-start gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,0.8fr)]`}
-      >
-        <section className={`grid gap-4`}>
-          <div className={`panel p-3 sm:p-4`}>
-            <div
-              className={`mb-3 flex flex-wrap items-center justify-between gap-3`}
-            >
-              <div
-                className={`flex rounded-lg bg-bg p-1`}
-                role={`group`}
-                aria-label={`Field view`}
-              >
-                <button
-                  type={`button`}
-                  className={`seg`}
-                  aria-pressed={fieldView === `magnitude`}
-                  onClick={() => setFieldView(`magnitude`)}
-                >{`Magnitude`}</button>
-                <button
-                  type={`button`}
-                  className={`seg`}
-                  aria-pressed={fieldView === `phase`}
-                  onClick={() => setFieldView(`phase`)}
-                >{`Phase`}</button>
-              </div>
-              <div
-                className={`flex rounded-lg bg-bg p-1`}
-                role={`group`}
-                aria-label={`What a click places`}
-              >
-                <button
-                  type={`button`}
-                  className={`seg`}
-                  aria-pressed={placementMode === `write`}
-                  onClick={() => setPlacementMode(`write`)}
-                >{`Place write`}</button>
-                <button
-                  type={`button`}
-                  className={`seg`}
-                  aria-pressed={placementMode === `query`}
-                  onClick={() => setPlacementMode(`query`)}
-                >{`Place query`}</button>
-              </div>
+
+      <details className={`panel px-4 py-3 text-sm`} style={{ marginBottom: `1rem` }}>
+        <summary className={`cursor-pointer font-medium`}>{`Quick start`}</summary>
+        {showDetails ? (
+          <ol className={`mt-3 grid gap-3`}>
+            <li><p className={`font-medium`}>{`1. Start with a memory`}</p><p className={`text-muted`}>{`The demo begins with four example memories already stored. Their patterns appear on the plate.`}</p></li>
+            <li><p className={`font-medium`}>{`2. Query a memory`}</p><p className={`text-muted`}>{`Select Place search, then tap somewhere on the plate. Watch the result change as you move the search.`}</p></li>
+            <li><p className={`font-medium`}>{`3. Make the clue imperfect`}</p><p className={`text-muted`}>{`Choose Noisy memory and increase Noise level. See how much distortion the system can tolerate while still retrieving the intended memory.`}</p></li>
+            <li><p className={`font-medium`}>{`4. See why it chose something`}</p><p className={`text-muted`}>{`The result shows how proximity, similarity, and the field contributed to the ranking.`}</p></li>
+            <li><p className={`font-medium`}>{`5. Break it on purpose`}</p><p className={`text-muted`}>{`Try Erase field, keep records and Remove records, keep field. These experiments show what each part of HME contributes. Hit Restore the demo whenever you want to start over.`}</p></li>
+          </ol>
+        ) : (
+          <ol className={`mt-3 grid gap-3`}>
+            <li><p className={`font-medium`}>{`1. Search a memory`}</p><p className={`text-muted`}>{`Choose Place search and tap the plate to search the four example memories.`}</p></li>
+            <li><p className={`font-medium`}>{`2. Add noise`}</p><p className={`text-muted`}>{`Choose Noisy memory and raise Noise level to see whether HME still finds the intended memory.`}</p></li>
+            <li><p className={`font-medium`}>{`3. Break it on purpose`}</p><p className={`text-muted`}>{`Remove the field or the records and see what changes. Restore the demo whenever you want to start over.`}</p></li>
+          </ol>
+        )}
+      </details>
+
+      <div className={`hme-main-grid`}>
+        <section className={`panel hme-plate-cell p-3 sm:p-4`}>
+          <div className={`mb-3 flex flex-wrap items-center justify-between gap-3`}>
+            <div className={`flex rounded-lg bg-bg p-1`} role={`group`} aria-label={`Field view`}>
+              <button type={`button`} className={`seg`} aria-pressed={fieldView === `magnitude`} onClick={() => setFieldView(`magnitude`)}>{`Magnitude`}</button>
+              <button type={`button`} className={`seg`} aria-pressed={fieldView === `phase`} onClick={() => setFieldView(`phase`)}>{`Phase`}</button>
             </div>
-            <div
-              onKeyDown={(e) => {
-                let t = e.shiftKey ? 4 : 1;
-                if (e.key === `ArrowUp`) movePosition(-t, 0);
-                else if (e.key === `ArrowDown`) movePosition(t, 0);
-                else if (e.key === `ArrowLeft`) movePosition(0, -t);
-                else if (e.key === `ArrowRight`) movePosition(0, t);
-                else return;
-                e.preventDefault();
-              }}
-            >
-              <FieldCanvas
-                engine={engine}
-                rev={revision}
-                view={fieldView}
-                writeRow={writeRow}
-                writeCol={writeCol}
-                queryRow={queryForm.queryRow}
-                queryCol={queryForm.queryCol}
-                selectedId={queryForm.selectedId}
-                radius={queryForm.radius}
-                onPick={placePosition}
-              />
+            <div className={`flex rounded-lg bg-bg p-1`} role={`group`} aria-label={`What a click places`}>
+              <button type={`button`} className={`seg`} aria-pressed={placementMode === `write`} onClick={() => setPlacementMode(`write`)}>{`Place memory`}</button>
+              <button type={`button`} className={`seg`} aria-pressed={placementMode === `query`} onClick={() => setPlacementMode(`query`)}>{`Place search`}</button>
             </div>
-            <div
-              className={`mt-3 flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-muted tabular-nums`}
-            >
-              <span>
-                {`Write (`}
-                {writeRow}
-                {`, `}
-                {writeCol}
-                {`) brass`}
-              </span>
-              <span>
-                {`Query (`}
-                {queryForm.queryRow}
-                {`, `}
-                {queryForm.queryCol}
-                {`) paper`}
-              </span>
-              <span>{`Row down, column across`}</span>
-            </div>
-            <p className={`mt-2 text-sm text-muted`}>{plateStatus}</p>
           </div>
-          <RetrievalPanel
-            retrieval={queryResult.retrieval}
-            error={queryResult.error}
-            note={queryResult.queryNote}
-            engine={engine}
-          />
-          <details className={`panel px-4 py-3 text-sm`}>
-            <summary
-              className={`cursor-pointer font-medium`}
-            >{`How to read a result`}</summary>
-            <ul className={`mt-3 grid gap-2 text-muted`}>
-              <li>{`Rank = 0.38 proximity + 0.42 absolute item/query similarity + 0.20 field/pattern correlation.`}</li>
-              <li>{`relevance_score is the top hit’s base score. It is not a probability of being correct.`}</li>
-              <li>{`MATCH means the hit cleared the threshold. It does not certify identity.`}</li>
-              <li>{`decoded_vector blends retained payloads. The inverse-FFT surface is not that vector.`}</li>
-              <li>{`Drop the ledger and identity retrieval stops. Erase the field and pattern correlation goes to zero. Evicted records would leave their field contribution behind.`}</li>
-              <li>{`Strings hash to seeded vectors. Similar wording is not similar geometry. This viewer is not bit-identical to the NumPy engine.`}</li>
-              <li>{`This viewer is the released field-plus-ledger model only. It does not show consolidation or SAL-1.`}</li>
-            </ul>
-          </details>
+          <div
+            onKeyDown={(e) => {
+              let t = e.shiftKey ? 4 : 1;
+              if (e.key === `ArrowUp`) movePosition(-t, 0);
+              else if (e.key === `ArrowDown`) movePosition(t, 0);
+              else if (e.key === `ArrowLeft`) movePosition(0, -t);
+              else if (e.key === `ArrowRight`) movePosition(0, t);
+              else return;
+              e.preventDefault();
+            }}
+          >
+            <FieldCanvas
+              engine={engine}
+              rev={revision}
+              view={fieldView}
+              writeRow={writeRow}
+              writeCol={writeCol}
+              queryRow={queryForm.queryRow}
+              queryCol={queryForm.queryCol}
+              selectedId={queryForm.selectedId}
+              radius={queryForm.radius}
+              onPick={placePosition}
+            />
+          </div>
+          <ul className={`mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted`}>
+            <li><span className={`font-mono text-accent`}>{`+`}</span>{` Memory position `}<span className={`font-mono tabular-nums`}>({writeRow}, {writeCol})</span></li>
+            <li><span className={`font-mono text-fg`}>{`+`}</span>{` Search position `}<span className={`font-mono tabular-nums`}>({queryForm.queryRow}, {queryForm.queryCol})</span></li>
+            <li><span className={`legend-box legend-selected`} aria-hidden={`true`} />{`Selected memory`}</li>
+            <li><span className={`legend-box legend-other`} aria-hidden={`true`} />{`Other memories`}</li>
+            <li><span className={`legend-box legend-search`} aria-hidden={`true`} />{`Search window`}</li>
+          </ul>
+          <p className={`mt-2 text-xs text-muted`}>
+            {fieldView === `magnitude` ? `Magnitude: where field activity is strongest.` : `Phase: the underlying complex-valued alignment.`}
+            {showDetails ? ` Row down, column across.` : ``}
+          </p>
+          <p className={`mt-1 text-sm text-muted`}>{plateStatus}</p>
         </section>
-        <aside className={`grid gap-4`}>
+
+        <div className={`hme-side-cell grid gap-4`}>
           <section className={`panel grid gap-3 p-4`}>
-            <h2 className={`text-sm font-medium`}>{`Write`}</h2>
-            <div
-              className={`flex rounded-lg bg-bg p-1`}
-              role={`group`}
-              aria-label={`Write kind`}
-            >
-              <button
-                type={`button`}
-                className={`seg flex-1`}
-                aria-pressed={writeKind === `vector`}
-                onClick={() => setWriteKind(`vector`)}
-              >{`Vector`}</button>
-              <button
-                type={`button`}
-                className={`seg flex-1`}
-                aria-pressed={writeKind === `symbol`}
-                onClick={() => setWriteKind(`symbol`)}
-              >{`Symbol`}</button>
+            <h2 className={`flex items-baseline gap-2 text-sm font-medium`}>
+              <span className={`font-mono text-xs text-accent`}>{`1`}</span>
+              {`Store`}
+              {showDetails ? <span className={`font-mono text-xs text-muted`}>{`write`}</span> : null}
+            </h2>
+            <div className={`flex rounded-lg bg-bg p-1`} role={`group`} aria-label={`Write kind`}>
+              <button type={`button`} className={`seg flex-1`} aria-pressed={writeKind === `vector`} onClick={() => setWriteKind(`vector`)}>{`Vector`}</button>
+              <button type={`button`} className={`seg flex-1`} aria-pressed={writeKind === `symbol`} onClick={() => setWriteKind(`symbol`)}>{`Symbol`}</button>
             </div>
             {writeKind === `vector` ? (
               <React.Fragment>
                 <label className={`grid gap-1 text-xs text-muted`}>
                   {`Tag`}
-                  <input
-                    className={`field`}
-                    value={tag}
-                    onChange={(e) => setTag(e.target.value)}
-                  />
+                  <input className={`field`} value={tag} onChange={(e) => setTag(e.target.value)} />
                 </label>
                 <label className={`grid gap-1 text-xs text-muted`}>
-                  {`Numeric item`}
-                  <input
-                    className={`field`}
-                    value={vectorText}
-                    onChange={(e) => setVectorText(e.target.value)}
-                    spellCheck={!1}
-                  />
+                  {`Values`}
+                  {showDetails ? <span className={`font-mono`}>{`numeric vector`}</span> : null}
+                  <input className={`field`} value={vectorText} onChange={(e) => setVectorText(e.target.value)} spellCheck={!1} />
                 </label>
               </React.Fragment>
             ) : (
               <label className={`grid gap-1 text-xs text-muted`}>
                 {`Exact symbol`}
-                <input
-                  className={`field`}
-                  value={symbolText}
-                  onChange={(e) => setSymbolText(e.target.value)}
-                  spellCheck={!1}
-                />
+                <input className={`field`} value={symbolText} onChange={(e) => setSymbolText(e.target.value)} spellCheck={!1} />
               </label>
             )}
             <label className={`grid gap-1 text-xs text-muted`}>
-              {`Strength `}
-              {strength.toFixed(2)}
-              <input
-                type={`range`}
-                min={0.02}
-                max={0.4}
-                step={0.01}
-                value={strength}
-                onChange={(e) => setStrength(Number(e.target.value))}
-              />
+              {`Strength `}{strength.toFixed(2)}
+              <input type={`range`} min={0.02} max={0.4} step={0.01} value={strength} onChange={(e) => setStrength(Number(e.target.value))} />
             </label>
             <label className={`flex min-h-11 items-center gap-2 text-sm`}>
               <input
@@ -486,200 +442,77 @@ function HMEPlate() {
                   (setUseHann(t), (engine.config.useHannWindow = t));
                 }}
               />
-              {`Hann window on later writes`}
+              {`Soften edges on later stores`}
+              {showDetails ? <span className={`font-mono text-xs text-muted`}>{`Hann window`}</span> : null}
             </label>
-            {writeError ? (
-              <p className={`text-sm text-accent`}>{writeError}</p>
-            ) : null}
-            <button
-              type={`button`}
-              className={`btn btn-accent`}
-              onClick={encodeWrite}
-            >{`Encode into plate`}</button>
+            {writeError ? <p className={`text-sm text-accent`}>{writeError}</p> : null}
+            <button type={`button`} className={`btn btn-accent`} onClick={encodeWrite}>{`Store memory`}</button>
           </section>
+
           <section className={`panel grid gap-3 p-4`}>
-            <h2 className={`text-sm font-medium`}>{`Retrieve`}</h2>
-            <div
-              className={`flex flex-wrap rounded-lg bg-bg p-1`}
-              role={`group`}
-              aria-label={`Query mode`}
-            >
+            <h2 className={`flex items-baseline gap-2 text-sm font-medium`}>
+              <span className={`font-mono text-xs text-accent`}>{`2`}</span>
+              {`Search`}
+              {showDetails ? <span className={`font-mono text-xs text-muted`}>{`query`}</span> : null}
+            </h2>
+            <div className={`search-mode-grid rounded-lg bg-bg p-1`} role={`group`} aria-label={`Search mode`}>
               {[
-                [`noisy`, `Noisy item`],
+                [`noisy`, `Noisy memory`],
                 [`vector`, `Vector`],
                 [`symbol`, `Symbol`],
                 [`spatial`, `Spatial`],
               ].map(([e, t]) => (
-                <button
-                  type={`button`}
-                  className={`seg`}
-                  aria-pressed={queryForm.mode === e}
-                  onClick={() =>
-                    updateQuery({
-                      mode: e,
-                    })
-                  }
-                  key={e}
-                >
-                  {t}
-                </button>
+                <button type={`button`} className={`seg`} aria-pressed={queryForm.mode === e} onClick={() => updateQuery({ mode: e })} key={e}>{t}</button>
               ))}
             </div>
             {queryForm.mode === `vector` ? (
               <label className={`grid gap-1 text-xs text-muted`}>
-                {`Query vector`}
-                <input
-                  className={`field`}
-                  value={queryForm.vectorText}
-                  spellCheck={!1}
-                  onChange={(e) =>
-                    updateQuery({
-                      vectorText: e.target.value,
-                    })
-                  }
-                />
+                {`Search values`}
+                {showDetails ? <span className={`font-mono`}>{`query vector`}</span> : null}
+                <input className={`field`} value={queryForm.vectorText} spellCheck={!1} onChange={(e) => updateQuery({ vectorText: e.target.value })} />
               </label>
             ) : null}
             {queryForm.mode === `symbol` ? (
               <label className={`grid gap-1 text-xs text-muted`}>
-                {`Query symbol`}
-                <input
-                  className={`field`}
-                  value={queryForm.symbolText}
-                  spellCheck={!1}
-                  onChange={(e) =>
-                    updateQuery({
-                      symbolText: e.target.value,
-                    })
-                  }
-                />
+                {`Search symbol`}
+                <input className={`field`} value={queryForm.symbolText} spellCheck={!1} onChange={(e) => updateQuery({ symbolText: e.target.value })} />
               </label>
             ) : null}
             {queryForm.mode === `noisy` ? (
               <div className={`grid gap-3`}>
                 <label className={`grid gap-1 text-xs text-muted`}>
-                  {`Noise sigma `}
-                  {queryForm.sigma.toFixed(2)}
-                  <input
-                    type={`range`}
-                    min={0}
-                    max={1.25}
-                    step={0.01}
-                    value={queryForm.sigma}
-                    onChange={(e) =>
-                      updateQuery({
-                        sigma: Number(e.target.value),
-                      })
-                    }
-                  />
+                  {`Noise level `}{queryForm.sigma.toFixed(2)}
+                  {showDetails ? <span className={`font-mono`}>{`sigma`}</span> : null}
+                  <input type={`range`} min={0} max={1.25} step={0.01} value={queryForm.sigma} onChange={(e) => updateQuery({ sigma: Number(e.target.value) })} />
                 </label>
                 <label className={`grid gap-1 text-xs text-muted`}>
                   {`Seed`}
-                  <input
-                    className={`field`}
-                    type={`number`}
-                    value={queryForm.seed}
-                    onChange={(e) =>
-                      updateQuery({
-                        seed: Number(e.target.value) || 0,
-                      })
-                    }
-                  />
+                  <input className={`field`} type={`number`} value={queryForm.seed} onChange={(e) => updateQuery({ seed: Number(e.target.value) || 0 })} />
                 </label>
               </div>
             ) : null}
             <div className={`grid grid-cols-2 gap-3`}>
               <label className={`grid gap-1 text-xs text-muted`}>
-                {`Top k`}
-                <input
-                  className={`field`}
-                  type={`number`}
-                  min={1}
-                  max={8}
-                  value={queryForm.topK}
-                  onChange={(e) =>
-                    updateQuery({
-                      topK: Math.max(
-                        1,
-                        Math.min(8, Number(e.target.value) || 1),
-                      ),
-                    })
-                  }
-                />
+                {`Results`}
+                {showDetails ? <span className={`font-mono`}>{`top k`}</span> : null}
+                <input className={`field`} type={`number`} min={1} max={8} value={queryForm.topK} onChange={(e) => updateQuery({ topK: Math.max(1, Math.min(8, Number(e.target.value) || 1)) })} />
               </label>
               <label className={`grid gap-1 text-xs text-muted`}>
                 {`Threshold`}
-                <input
-                  className={`field`}
-                  type={`number`}
-                  min={0}
-                  max={1}
-                  step={0.05}
-                  value={queryForm.threshold}
-                  onChange={(e) =>
-                    updateQuery({
-                      threshold: Math.max(
-                        0,
-                        Math.min(1, Number(e.target.value) || 0),
-                      ),
-                    })
-                  }
-                />
+                <input className={`field`} type={`number`} min={0} max={1} step={0.05} value={queryForm.threshold} onChange={(e) => updateQuery({ threshold: Math.max(0, Math.min(1, Number(e.target.value) || 0)) })} />
               </label>
             </div>
-            <p
-              className={`text-xs text-muted`}
-            >{`Threshold eligibility is not proof. Default is zero, so almost any candidate can MATCH.`}</p>
+            <p className={`text-xs text-muted`}>
+              {showDetails
+                ? `Threshold eligibility is not proof. Default is zero, so almost any candidate can MATCH.`
+                : `Raise this and a weak match becomes no match. The default is zero, so almost anything passes.`}
+            </p>
           </section>
-          <section className={`panel grid gap-2 p-4`}>
-            <h2 className={`text-sm font-medium`}>{`Ablations`}</h2>
-            <button
-              type={`button`}
-              className={`btn`}
-              onClick={() => {
-                (engine.eraseField(), setProbeResult(null), updateQuery());
-              }}
-            >{`Erase field, keep ledger`}</button>
-            <button
-              type={`button`}
-              className={`btn`}
-              onClick={() => {
-                (engine.dropLedger(),
-                  setProbeResult(null),
-                  updateQuery({
-                    selectedId: null,
-                    mode: `spatial`,
-                  }));
-              }}
-            >{`Drop ledger, keep field`}</button>
-            <button
-              type={`button`}
-              className={`btn`}
-              onClick={() => {
-                ((engine.config.useHannWindow = !0), setUseHann(!0));
-                let e = resetDemoPlate(engine);
-                (setProbeResult(null),
-                  setWriteError(null),
-                  setQueryForm({
-                    queryRow: 20,
-                    queryCol: 22,
-                    mode: `noisy`,
-                    sigma: 0.15,
-                    seed: 7,
-                    vectorText: `0.12, 0.39, 0.88, 0.21`,
-                    symbolText: `beacon`,
-                    topK: 4,
-                    threshold: 0,
-                    selectedId: e.artifactId,
-                    radius: 4,
-                  }),
-                  setRevision((e) => e + 1));
-              }}
-            >{`Reset demo plate`}</button>
-          </section>
+
           <LedgerPanel
             engine={engine}
             selectedId={queryForm.selectedId}
+            showDetails={showDetails}
             onSelect={(e) => {
               let t = engine.record(e);
               (setProbeResult(null),
@@ -690,176 +523,226 @@ function HMEPlate() {
                 }));
             }}
           />
-          <section className={`panel grid gap-3 p-4`}>
-            <h2 className={`text-sm font-medium`}>{`Noise probe`}</h2>
-            <p
-              className={`text-xs text-muted`}
-            >{`Seeds 1–8 at the selected item’s own position. A trial counts only when that item is top-1 and clears the retrieval threshold. Not the query sigma or seed, and not the published HME-NN study.`}</p>
-            <button
-              type={`button`}
-              className={`btn`}
-              disabled={!selectedRecord?.raw}
-              onClick={() => {
-                queryForm.selectedId &&
-                  setProbeResult(
-                    runNoiseProbe(
-                      engine,
-                      queryForm.selectedId,
-                      [0, 0.25, 0.5, 1],
-                      8,
-                      {
-                        threshold: queryForm.threshold,
-                        radius: queryForm.radius,
-                      },
-                    ),
-                  );
-              }}
-            >{`Run top-1 probe`}</button>
-            {probeResult ? (
-              <React.Fragment>
-                <p className={`font-mono text-xs text-muted tabular-nums`}>
-                  {`Counted at threshold `}
-                  {probeResult.threshold.toFixed(2)}
-                  {` · window radius `}
-                  {probeResult.radius}
-                  {probeResult.threshold === queryForm.threshold
-                    ? ``
-                    : `. Retrieval threshold is now ${queryForm.threshold.toFixed(2)}; run again to use it.`}
-                </p>
-                <table className={`w-full text-left text-sm`}>
-                  <thead className={`text-xs text-muted`}>
-                    <tr>
-                      <th className={`py-1 font-medium`}>{`Sigma`}</th>
-                      <th className={`py-1 font-medium`}>
-                        {`Top-1 ≥ `}
-                        {probeResult.threshold.toFixed(2)}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className={`font-mono tabular-nums`}>
-                    {probeResult.cells.map((e) => (
-                      <tr className={`border-t border-line`} key={e.sigma}>
-                        <td className={`py-1.5`}>{e.sigma.toFixed(2)}</td>
-                        <td className={`py-1.5`}>
-                          {e.hits}
-                          {`/`}
-                          {e.trials}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </React.Fragment>
-            ) : null}
-          </section>
-        </aside>
+        </div>
+
+        <div className={`hme-result-cell`}>
+          <RetrievalPanel
+            retrieval={queryResult.retrieval}
+            error={queryResult.error}
+            note={queryResult.queryNote}
+            plain={plainQueryNote(queryForm.mode)}
+            engine={engine}
+            showDetails={showDetails}
+          />
+        </div>
       </div>
-      <footer
-        className={`mt-6 grid gap-3 border-t border-line pt-4 text-xs text-muted`}
-      >
+
+      <div className={`hme-experiments`}>
+        <section className={`panel grid gap-3 p-4`}>
+          <p className={`font-mono text-xs tracking-widest text-accent uppercase`}>{`Experiment`}</p>
+          <h2 className={`text-sm font-medium`}>{`What does the memory need?`}</h2>
+          <p className={`text-sm text-muted`}>{`Remove one part of HME and see what happens to retrieval.`}</p>
+          <button type={`button`} className={`btn`} onClick={() => { (engine.eraseField(), setProbeResult(null), updateQuery()); }}>{`Erase field, keep records`}</button>
+          <button type={`button`} className={`btn`} onClick={() => { (engine.dropLedger(), setProbeResult(null), updateQuery({ selectedId: null, mode: `spatial` })); }}>{`Remove records, keep field`}</button>
+          <button
+            type={`button`}
+            className={`btn`}
+            onClick={() => {
+              ((engine.config.useHannWindow = !0), setUseHann(!0));
+              let e = resetDemoPlate(engine);
+              (setProbeResult(null),
+                setWriteError(null),
+                setQueryForm({
+                  queryRow: 20,
+                  queryCol: 22,
+                  mode: `noisy`,
+                  sigma: 0.15,
+                  seed: 7,
+                  vectorText: `0.12, 0.39, 0.88, 0.21`,
+                  symbolText: `beacon`,
+                  topK: 4,
+                  threshold: 0,
+                  selectedId: e.artifactId,
+                  radius: 4,
+                }),
+                setRevision((e) => e + 1));
+            }}
+          >{`Restore the demo`}</button>
+          {showDetails ? <p className={`text-xs text-muted`}>{`Ablation. Erase field, keep ledger: pattern correlation goes to zero. Drop ledger, keep field: identity retrieval stops. An evicted record would leave its field contribution behind.`}</p> : null}
+        </section>
+
+        <section className={`panel grid gap-3 p-4`}>
+          <p className={`font-mono text-xs tracking-widest text-accent uppercase`}>{`Experiment`}</p>
+          <h2 className={`text-sm font-medium`}>{`How much noise can it handle?`}</h2>
+          <p className={`text-sm text-muted`}>{`Gradually distort a stored memory and test whether HME still retrieves the intended item first.`}</p>
+          <button
+            type={`button`}
+            className={`btn`}
+            disabled={!selectedRecord?.raw}
+            onClick={() => {
+              queryForm.selectedId &&
+                setProbeResult(
+                  runNoiseProbe(engine, queryForm.selectedId, [0, 0.25, 0.5, 1], 8, {
+                    threshold: queryForm.threshold,
+                    radius: queryForm.radius,
+                  }),
+                );
+            }}
+          >{`Run the test`}</button>
+          {!selectedRecord?.raw ? <p className={`text-xs text-muted`}>{`Pick a numeric memory. A symbol has no raw values to distort.`}</p> : null}
+          {showDetails && !probeResult ? <p className={`text-xs text-muted`}>{`Seeds 1–8 at the selected memory’s own position, top-1, using the retrieval threshold and window radius. Not the search seed or noise level, and not the published HME-NN study.`}</p> : null}
+          {probeResult ? (
+            <React.Fragment>
+              <p className={`font-mono text-xs text-muted tabular-nums`}>
+                {`Counted at threshold `}{probeResult.threshold.toFixed(2)}{` · window radius `}{probeResult.radius}
+                {probeResult.threshold === queryForm.threshold ? `` : `. Retrieval threshold is now ${queryForm.threshold.toFixed(2)}; run again to use it.`}
+              </p>
+              {showDetails ? <p className={`text-xs text-muted`}>{`Seeds 1–8 at the item’s own position. A trial counts only when that item is top-1 and clears the threshold. Not the search sigma or seed.`}</p> : null}
+              <table className={`w-full text-left text-sm`}>
+                <thead className={`text-xs text-muted`}>
+                  <tr>
+                    <th className={`py-1 font-medium`}>{showDetails ? `Sigma` : `Noise`}</th>
+                    <th className={`py-1 font-medium`}>{showDetails ? `Top-1 ≥ ${probeResult.threshold.toFixed(2)}` : `Still first`}</th>
+                  </tr>
+                </thead>
+                <tbody className={`font-mono tabular-nums`}>
+                  {probeResult.cells.map((e) => (
+                    <tr className={`border-t border-line`} key={e.sigma}>
+                      <td className={`py-1.5`}>{e.sigma.toFixed(2)}</td>
+                      <td className={`py-1.5`}>{e.hits}{`/`}{e.trials}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </React.Fragment>
+          ) : null}
+        </section>
+      </div>
+
+      {showDetails ? (
+        <section className={`panel mt-4 px-4 py-3 text-sm`}>
+          <h2 className={`font-medium`}>{`Scoring`}</h2>
+          <ul className={`mt-3 grid gap-2 text-muted`}>
+            <li>{`Rank = 0.38 proximity + 0.42 absolute item/query similarity + 0.20 field/pattern correlation.`}</li>
+            <li>{`relevance_score is the top hit’s base score. It is not a probability of being correct.`}</li>
+            <li>{`MATCH means the hit cleared the threshold. It does not certify identity.`}</li>
+            <li>{`decoded_vector blends retained payloads. The inverse-FFT surface is not that vector.`}</li>
+            <li>{`Strings hash to seeded vectors. Similar wording is not similar geometry. This viewer is not bit-identical to the NumPy engine.`}</li>
+          </ul>
+          {checks.every((e) => e.pass) ? <p className={`mt-3 text-xs text-muted`}>{checks.length}{` viewer checks passed, including the readme probe, field erase, and ledger drop.`}</p> : null}
+        </section>
+      ) : null}
+
+      <details className={`panel mt-4 px-4 py-3 text-sm`}>
+        <summary className={`cursor-pointer font-medium`}>{`Technical details`}</summary>
+        <h2 className={`mt-3 text-sm font-medium`}>{`Model scope`}</h2>
+        <p className={`mt-2 leading-relaxed text-muted`}>{`Released field-plus-ledger model: spatial FFT-pattern superposition plus a retained artifact ledger. Not consolidation, not SAL-1, not standard HRR binding, and not field-only identity recovery.`}</p>
+      </details>
+
+      <footer className={`mt-6 grid gap-3 border-t border-line pt-4 text-xs text-muted`}>
+        {!checks.every((e) => e.pass) ? <p>{`Viewer checks failed: `}{checks.filter((e) => !e.pass).map((e) => e.name).join(`, `)}{`.`}</p> : null}
         <p>
-          {checks.every((e) => e.pass)
-            ? `${checks.length} viewer checks passed, including the readme probe, field erase, and ledger drop.`
-            : `Viewer checks failed: ${checks
-                .filter((e) => !e.pass)
-                .map((e) => e.name)
-                .join(`, `)}.`}
-        </p>
-        <p>
-          {`Browser instrument of the released field-plus-ledger scoring contract from`}
-          {` `}
-          <a
-            className={`text-fg underline decoration-line underline-offset-2`}
-            href={`https://github.com/donaldtuttle/HME`}
-          >{`donaldtuttle/HME`}</a>
-          {`. It does not visualize consolidation or SAL-1. Salience stays off. Artifact ids are viewer insertion ids, not NumPy byte hashes. The lineage graph is insertion order, not a Merkle chain.`}
+          {`Browser instrument of the released field-plus-ledger model from `}
+          <a className={`text-fg underline decoration-line underline-offset-2`} href={`https://github.com/donaldtuttle/HME`}>{`donaldtuttle/HME`}</a>
+          {`. It does not visualize consolidation or SAL-1.`}
+          {showDetails ? ` Salience stays off. Artifact ids are viewer insertion ids, not NumPy byte hashes. The lineage graph is insertion order, not a Merkle chain.` : ``}
         </p>
       </footer>
     </main>
   );
 }
-function RetrievalPanel({ retrieval: e, error: t, note: n, engine: r }) {
-  if (t || !e)
+function RetrievalPanel({
+  retrieval,
+  error,
+  note,
+  plain,
+  engine,
+  showDetails,
+}) {
+  if (error || !retrieval)
     return (
       <section className={`panel p-4`}>
-        <h2 className={`text-sm font-medium`}>{`Retrieval`}</h2>
-        <p className={`mt-2 text-sm text-muted`}>{t ?? `No query yet.`}</p>
+        <h2 className={`flex items-baseline gap-2 text-sm font-medium`}>
+          <span className={`font-mono text-xs text-accent`}>{`3`}</span>
+          {`Result`}
+        </h2>
+        <p className={`mt-2 text-sm text-muted`}>{error ?? `No search yet.`}</p>
       </section>
     );
-  let a = e.hits[0];
+  let top = retrieval.hits[0],
+    cleared = retrieval.outcome === `MATCH`;
   return (
     <section className={`panel grid gap-4 p-4`}>
       <div className={`flex flex-wrap items-end justify-between gap-3`}>
-        <div>
-          <h2 className={`text-sm font-medium`}>{`Retrieval`}</h2>
-          <p className={`mt-1 font-mono text-xs text-muted tabular-nums`}>
-            {`window radius `}
-            {e.radius}
-            {` at (`}
-            {e.position[0]}
-            {`, `}
-            {e.position[1]}
-            {`)`}
-          </p>
-        </div>
-        <div className={`text-right`}>
-          <p
-            className={`inline-block rounded-md px-2 py-1 font-mono text-xs ${e.outcome === `MATCH` ? `bg-accent text-ink` : `bg-elevated text-fg`}`}
-          >
-            {e.outcome}
-          </p>
-          <p className={`mt-1 font-mono text-sm tabular-nums`}>
-            {`relevance `}
-            {e.relevanceScore.toFixed(3)}
-          </p>
-          <p className={`text-xs text-muted`}>{`Uncalibrated base score`}</p>
-        </div>
+        <h2 className={`flex items-baseline gap-2 text-sm font-medium`}>
+          <span className={`font-mono text-xs text-accent`}>{`3`}</span>
+          {`Result`}
+          {showDetails ? <span className={`font-mono text-xs text-muted`}>{`retrieval`}</span> : null}
+        </h2>
+        <p className={`inline-block rounded-md px-2 py-1 font-mono text-xs ${cleared ? `bg-accent text-ink` : `bg-elevated text-fg`}`}>
+          {retrieval.outcome}
+        </p>
       </div>
-      <p className={`text-sm text-muted`}>{n}</p>
-      {a ? (
-        <ScoreMix hit={a} />
+      {top ? (
+        <div className={`grid gap-1`}>
+          <p className={`text-xs text-muted`}>{`Best match`}</p>
+          <p className={`text-lg font-medium tracking-tight`}>{top.tag}</p>
+          <p className={`font-mono text-sm tabular-nums`}>{`Match score `}{top.baseScore.toFixed(3)}</p>
+          <p className={`text-sm ${cleared ? `text-accent` : `text-muted`}`}>
+            {cleared ? `✓ Cleared the retrieval threshold` : `Below the retrieval threshold`}
+          </p>
+        </div>
       ) : (
-        <p className={`text-sm`}>{`No candidate cleared the threshold.`}</p>
+        <div className={`grid gap-1`}>
+          <p className={`text-lg font-medium tracking-tight`}>{`No match`}</p>
+          <p className={`text-sm text-muted`}>{`Nothing cleared the retrieval threshold.`}</p>
+        </div>
       )}
-      <ul className={`grid gap-2`}>
-        {e.hits.map((e, t) => (
-          <li className={`rounded-lg bg-bg px-3 py-2`} key={e.artifactId}>
-            <div className={`flex items-baseline justify-between gap-3`}>
-              <p className={`truncate text-sm font-medium`}>
-                {t + 1}
-                {`. `}
-                {e.tag}
-              </p>
-              <p className={`font-mono text-xs tabular-nums text-muted`}>
-                {e.baseScore.toFixed(3)}
-              </p>
-            </div>
-            <p className={`mt-1 font-mono text-xs text-muted tabular-nums`}>
-              {`prox `}
-              {e.distanceScore.toFixed(2)}
-              {` · sim `}
-              {e.queryScore.toFixed(2)}
-              {` · field `}
-              {e.patternScore.toFixed(2)}
-              {` · d `}
-              {e.distance.toFixed(1)}
-            </p>
-          </li>
-        ))}
-      </ul>
-      <div className={`grid gap-3 sm:grid-cols-2`}>
-        <VectorBars
-          title={`Decoded vector`}
-          hint={`Weighted average of retained payloads`}
-          values={e.decodedRe}
-        />
-        <VectorBars
-          title={`Top stored payload`}
-          hint={a ? `Processed vector, not the raw input` : `No hit`}
-          values={a ? Array.from(r.payload(a.artifactId)?.re ?? []) : []}
-        />
-      </div>
-      <DecodedSurface retrieval={e} />
+      <p className={`text-sm text-muted`}>{plain}</p>
+      {showDetails ? <p className={`text-xs text-muted`}>{note}</p> : null}
+      {top ? (
+        <div>
+          <p className={`text-sm font-medium`}>{`Why it ranked first`}</p>
+          <p className={`mt-1 font-mono text-xs text-muted tabular-nums`}>
+            {`Similarity `}{top.queryScore.toFixed(2)}{` · Proximity `}{top.distanceScore.toFixed(2)}{` · Field `}{top.patternScore.toFixed(2)}
+          </p>
+          <p className={`mt-2 text-xs text-muted`}>{`Scores rank candidates. They are not probabilities.`}</p>
+        </div>
+      ) : (
+        <p className={`text-xs text-muted`}>{`Scores rank candidates. They are not probabilities.`}</p>
+      )}
+      {showDetails && top ? <ScoreMix hit={top} /> : null}
+      {showDetails ? (
+        <p className={`font-mono text-xs text-muted tabular-nums`}>
+          {`relevance `}{retrieval.relevanceScore.toFixed(3)}{` · window radius `}{retrieval.radius}{` at (`}{retrieval.position[0]}{`, `}{retrieval.position[1]}{`)`}
+        </p>
+      ) : null}
+      {retrieval.hits.length > 1 ? (
+        <ul className={`grid gap-2`}>
+          {retrieval.hits.slice(1).map((hit, index) => (
+            <li className={`rounded-lg bg-bg px-3 py-2`} key={hit.artifactId}>
+              <div className={`flex items-baseline justify-between gap-3`}>
+                <p className={`truncate text-sm`}>{index + 2}{`. `}{hit.tag}</p>
+                <p className={`font-mono text-xs tabular-nums text-muted`}>{hit.baseScore.toFixed(3)}</p>
+              </div>
+              {showDetails ? (
+                <p className={`mt-1 font-mono text-xs text-muted tabular-nums`}>
+                  {`prox `}{hit.distanceScore.toFixed(2)}{` · sim `}{hit.queryScore.toFixed(2)}{` · field `}{hit.patternScore.toFixed(2)}{` · d `}{hit.distance.toFixed(1)}
+                </p>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {showDetails ? (
+        <React.Fragment>
+          <div className={`grid gap-3 sm:grid-cols-2`}>
+            <VectorBars title={`Decoded vector`} hint={`Weighted average of retained payloads`} values={retrieval.decodedRe} />
+            <VectorBars title={`Top stored payload`} hint={top ? `Processed vector, not the raw input` : `No hit`} values={top ? Array.from(engine.payload(top.artifactId)?.re ?? []) : []} />
+          </div>
+          <DecodedSurface retrieval={retrieval} />
+        </React.Fragment>
+      ) : null}
     </section>
   );
 }
@@ -967,39 +850,31 @@ function DecodedSurface({ retrieval: e }) {
     </div>
   );
 }
-function LedgerPanel({ engine: e, selectedId: t, onSelect: n }) {
+function LedgerPanel({ engine, selectedId, showDetails, onSelect }) {
   return (
     <section className={`panel p-4`}>
-      <h2 className={`text-sm font-medium`}>{`Ledger and lineage`}</h2>
-      {e.records.length === 0 ? (
-        <p className={`mt-2 text-sm text-muted`}>{`No retained records.`}</p>
-      ) : null}
+      <h2 className={`text-sm font-medium`}>{`On the plate`}</h2>
+      {showDetails ? <p className={`mt-1 font-mono text-xs text-muted`}>{`ledger`}</p> : null}
+      {engine.records.length === 0 ? <p className={`mt-2 text-sm text-muted`}>{`No retained records.`}</p> : null}
       <ul className={`mt-2 grid gap-1`}>
-        {e.records.map((e) => (
-          <li key={e.artifactId}>
+        {engine.records.map((artifact) => (
+          <li key={artifact.artifactId}>
             <button
               type={`button`}
-              onClick={() => n(e.artifactId)}
-              className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-lg px-2 text-left ${e.artifactId === t ? `bg-elevated` : ``}`}
+              onClick={() => onSelect(artifact.artifactId)}
+              className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-lg px-2 text-left ${artifact.artifactId === selectedId ? `bg-elevated` : ``}`}
             >
-              <span className={`truncate text-sm`}>{e.tag}</span>
-              <span className={`font-mono text-xs text-muted tabular-nums`}>
-                {`(`}
-                {e.position[0]}
-                {`, `}
-                {e.position[1]}
-                {`)`}
-              </span>
+              <span className={`truncate text-sm`}>{artifact.tag}</span>
+              <span className={`font-mono text-xs text-muted tabular-nums`}>({artifact.position[0]}, {artifact.position[1]})</span>
             </button>
           </li>
         ))}
       </ul>
-      {e.edges.length ? (
+      {showDetails && engine.edges.length ? (
         <ol className={`mt-3 grid gap-1 border-t border-line pt-3`}>
-          {e.nodes.map((e, t) => (
-            <li className={`font-mono text-xs text-muted`} key={e.nodeId}>
-              {t > 0 ? `next_memory → ` : ``}
-              {e.tag}
+          {engine.nodes.map((node, index) => (
+            <li className={`font-mono text-xs text-muted`} key={node.nodeId}>
+              {index > 0 ? `next_memory → ` : ``}{node.tag}
             </li>
           ))}
         </ol>

@@ -14,42 +14,69 @@ afterEach(cleanup);
 const mount=()=>render(React.createElement(App));
 const click=name=>fireEvent.click(screen.getByRole('button',{name,exact:true}));
 const change=(name,value)=>fireEvent.change(screen.getByLabelText(name,{exact:true}),{target:{value}});
-const section=name=>screen.getByRole('heading',{name,exact:true}).closest('section');
-test('Hann-off then reset restores the initial score and checked setting',()=>{
- mount();assert.match(document.body.textContent,/relevance 0\.891/);
- fireEvent.click(screen.getByLabelText('Hann window on later writes'));click('Reset demo plate');
- assert.equal(screen.getByLabelText('Hann window on later writes').checked,true);
- assert.match(document.body.textContent,/energy 0\.196/);assert.match(document.body.textContent,/relevance 0\.891/);
+
+test('Explore opens with compact onboarding and reset preserves the seeded result',()=>{
+ mount();
+ assert.ok(screen.getByRole('heading',{name:'Explore HME',exact:true}));
+ assert.equal(screen.getByText('Quick start',{exact:true}).closest('details').open,false);
+ assert.match(document.body.textContent,/Match score 0\.891/);
+ fireEvent.click(screen.getByLabelText('Soften edges on later stores',{exact:true}));
+ click('Restore the demo');
+ assert.equal(screen.getByLabelText('Soften edges on later stores',{exact:true}).checked,true);
+ assert.match(document.body.textContent,/energy 0\.196/);
+ assert.match(document.body.textContent,/Match score 0\.891/);
 });
+
 test('probe uses threshold and labels old results after a setting change',()=>{
- mount();change('Threshold','1');click('Run top-1 probe');
+ mount();change('Threshold','1');click('Run the test');
  assert.equal(within(screen.getByRole('table')).getAllByText('0/8').length,4);
  assert.match(document.body.textContent,/Counted at threshold 1\.00/);
  change('Threshold','0');assert.match(document.body.textContent,/Retrieval threshold is now 0\.00; run again to use it/);
- click('Run top-1 probe');assert.equal(within(screen.getByRole('table')).getAllByText('8/8').length,3);
+ click('Run the test');assert.equal(within(screen.getByRole('table')).getAllByText('8/8').length,3);
 });
-test('ledger drop renders All zeros without visible nonzero bar heights',()=>{
- mount();click('Drop ledger, keep field');assert.ok(screen.getByText('All zeros'));
- assert.ok(screen.getByText('No retained records.'));assert.ok(screen.getByText('NO_MATCH',{exact:true}));
+
+test('record removal keeps the field and Details exposes zero decoded output',()=>{
+ mount();click('Details');click('Remove records, keep field');
+ assert.ok(screen.getByText('All zeros'));
+ assert.ok(screen.getByText('No retained records.'));
+ assert.ok(screen.getByText('NO_MATCH',{exact:true}));
  const title=screen.getByText('Decoded vector',{exact:true});
  assert.equal(title.parentElement.querySelectorAll('[style*="height"]').length,0);
- assert.equal(screen.getByRole('button',{name:'Run top-1 probe'}).disabled,true);
+ assert.equal(screen.getByRole('button',{name:'Run the test'}).disabled,true);
 });
-test('vector write, invalid input, and symbol write update their own controls',()=>{
- mount();change('Numeric item','nonsense');click('Encode into plate');assert.ok(screen.getByText('Vector needs finite numbers, separated by commas.'));
- change('Numeric item','0.3, 0.1, 0.6, 0.8');click('Encode into plate');assert.match(document.body.textContent,/5 records/);assert.ok(screen.getByRole('button',{name:/^reading-004/}));
+
+test('vector write, invalid input, and symbol write update the friendly controls',()=>{
+ mount();change('Values','nonsense');click('Store memory');assert.ok(screen.getByText('Vector needs finite numbers, separated by commas.'));
+ change('Values','0.3, 0.1, 0.6, 0.8');click('Store memory');assert.match(document.body.textContent,/5 records/);assert.ok(screen.getByRole('button',{name:/^reading-004/}));
  fireEvent.click(within(screen.getByRole('group',{name:'Write kind'})).getByRole('button',{name:'Symbol'}));
- change('Exact symbol','dock');click('Encode into plate');assert.match(document.body.textContent,/6 records/);assert.ok(screen.getByRole('button',{name:/^symbol:dock/}));
+ change('Exact symbol','dock');click('Store memory');assert.match(document.body.textContent,/6 records/);assert.ok(screen.getByRole('button',{name:/^symbol:dock/}));
 });
-test('query modes, field view, keyboard placement and details remain interactive',()=>{
+
+test('search modes, field view, keyboard placement and plain-language notes remain interactive',()=>{
  mount();click('Phase');assert.equal(screen.getByRole('button',{name:'Phase'}).getAttribute('aria-pressed'),'true');
- click('Place query');fireEvent.keyDown(screen.getByRole('application'),{key:'ArrowRight'});assert.match(document.body.textContent,/Query \(20, 23\)/);
- const modes=screen.getByRole('group',{name:'Query mode'});
- fireEvent.click(within(modes).getByRole('button',{name:'Vector'}));change('Query vector','NaN');assert.ok(screen.getByText('Query vector needs finite numbers.'));
- fireEvent.click(within(modes).getByRole('button',{name:'Symbol'}));change('Query symbol','beacon');assert.match(document.body.textContent,/Symbol queries use the raw seeded vector/);
- fireEvent.click(within(modes).getByRole('button',{name:'Spatial'}));assert.match(document.body.textContent,/No query vector/);
+ click('Place search');fireEvent.keyDown(screen.getByRole('application'),{key:'ArrowRight'});assert.match(document.body.textContent,/Search position \(20, 23\)/);
+ const modes=screen.getByRole('group',{name:'Search mode'});
+ assert.match(modes.className,/search-mode-grid/);
+ fireEvent.click(within(modes).getByRole('button',{name:'Vector'}));change('Search values','NaN');assert.ok(screen.getByText('Query vector needs finite numbers.'));
+ fireEvent.click(within(modes).getByRole('button',{name:'Symbol'}));change('Search symbol','beacon');assert.match(document.body.textContent,/Searching for that exact symbol/);
+ fireEvent.click(within(modes).getByRole('button',{name:'Spatial'}));assert.match(document.body.textContent,/Searching by place only/);
 });
-test('field erase removes pattern scores and reset clears probe results',()=>{
- mount();click('Run top-1 probe');click('Erase field, keep ledger');assert.match(document.body.textContent,/energy 0\.000/);assert.match(document.body.textContent,/relevance 0\.731/);assert.equal(screen.queryByRole('table'),null);
- click('Reset demo plate');assert.match(document.body.textContent,/relevance 0\.891/);
+
+test('field erase removes pattern contribution and restore clears probe results',()=>{
+ mount();click('Run the test');click('Erase field, keep records');
+ assert.match(document.body.textContent,/energy 0\.000/);
+ assert.match(document.body.textContent,/Match score 0\.731/);
+ assert.equal(screen.queryByRole('table'),null);
+ click('Restore the demo');assert.match(document.body.textContent,/Match score 0\.891/);
+});
+
+test('Details restores technical vocabulary and deeper readouts',()=>{
+ mount();click('Details');
+ assert.ok(screen.getByRole('heading',{name:'Scoring',exact:true}));
+ assert.match(document.body.textContent,/relevance 0\.891/);
+ assert.match(document.body.textContent,/Hann window/);
+ assert.match(document.body.textContent,/numeric vector/);
+ assert.match(document.body.textContent,/ledger/);
+ assert.ok(screen.getByText('Decoded vector',{exact:true}));
+ assert.ok(screen.getByText('Search window',{exact:true}));
 });
