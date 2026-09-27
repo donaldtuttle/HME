@@ -20,17 +20,23 @@ artifact = engine.encode_memory(
 result = engine.retrieve_memory((20, 22), query=[0.12, 0.39, 0.88, 0.21], top_k=1)
 ```
 
-That snippet preserves the released defaults for compatibility; do not treat those
-defaults as the recommended identity-retrieval baseline. HME-NN-3 found that, at
-noise sigma 1.0, raw signed-cosine NN scored 74.11%, default HME scored 42.21%,
-and the experimental Hann-off + signed HME arm scored 73.93%. The latter differed
-from raw signed NN by -0.18 percentage points with a reported 95% interval of
-[-0.57, +0.21]: the observed difference stayed within +/-0.6 pp, but equivalence
-was not established. For the tested numeric identity-retrieval workload, use exact
-signed-cosine NN as the reference choice. For HME numeric experiments,
-`HMEConfig(use_hann_window=False)` is an available preprocessing opt-out; signed
-HME scoring remains an experimental ablation and is not a released configuration
-switch.
+That snippet preserves the released defaults for compatibility.
+
+## Choose the configuration by task
+
+HME-NN-3 found that disabling the Hann window recovered 73.5% of the
+default-to-raw-NN high-noise gap at sigma 1.0. Top-1 accuracy was 42.21% for
+default HME, 65.65% with Hann disabled, 73.93% for the experimental no-window
+signed HME arm, and 74.11% for raw signed-cosine NN. The experimental signed
+no-window arm differed from raw signed NN by -0.18 percentage points with a
+reported 95% interval of [-0.57, +0.21]. The observed difference stayed within
++/-0.6 pp; equivalence was not established.
+
+- General HME exploration or compatibility with earlier results: use the default `HMEEngine(...)`.
+- Numeric identity-retrieval benchmarks: use exact signed-cosine NN as the reference method; do not present default HME as the retrieval baseline.
+- HME numeric experiments: consider `HMEConfig(use_hann_window=False)`. Signed HME scoring remains an experimental ablation, not a supported API option.
+
+See the README HME-NN-3 section and the raw-vector report before running a retrieval comparison.
 
 - Use `operation="write"` by default. Use `strength` and `write_weight` to control the stored gain.
 - Inspect `result.outcome`, `result.rejected`, `result.hits`, and `result.relevance_score` together.
