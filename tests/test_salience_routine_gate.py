@@ -198,3 +198,19 @@ def test_radius_changes_do_not_change_base_state_for_fixed_feedback_stream():
         for m in pair:m.observe([1.,j*.001],[1. if j!=10 else -1.],gain=1)
     np.testing.assert_array_equal(pair[0].base._sum,pair[1].base._sum)
     np.testing.assert_array_equal(pair[0].base._cfg,pair[1].base._cfg)
+
+
+def test_policy_v5_freezes_primary_only_buffer_contribution_contract():
+    p = policy_constants()
+    assert p['schema'] == 'sal1-policy-v5'
+    gate = p['correction_contribution_gate']
+    assert gate['applies_to'] == 'primary_cell_only'
+    assert gate['delta_definition'] == 'Ec_disable_buffer_minus_Ec_hybrid'
+    assert gate['paired_unit'] == 'same_independent_stream_seed'
+    assert gate['decision_rule'] == 'LCB95_mean_seed_delta_c_gt_delta_c'
+    assert gate['delta_c_nmse'] is None
+    assert gate['same_streams_and_seeds_required'] is True
+    assert gate['secondary_cells'] == 'report_delta_and_interval_not_additional_pass_opportunities'
+    assert gate['base_sufficient_primary_effect'] == 'cannot_satisfy_buffer_contribution_claim'
+    assert gate['base_sufficient_reporting'] == 'report_never_drop'
+    assert 'correction_contribution_delta_c_nmse_with_corpus_scale' in p['pending_registration']
