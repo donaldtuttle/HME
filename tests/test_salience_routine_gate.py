@@ -200,17 +200,45 @@ def test_radius_changes_do_not_change_base_state_for_fixed_feedback_stream():
     np.testing.assert_array_equal(pair[0].base._cfg,pair[1].base._cfg)
 
 
-def test_policy_v5_freezes_primary_only_buffer_contribution_contract():
+def test_policy_v6_freezes_named_primary_decision_gates():
     p = policy_constants()
-    assert p['schema'] == 'sal1-policy-v5'
-    gate = p['correction_contribution_gate']
-    assert gate['applies_to'] == 'primary_cell_only'
-    assert gate['delta_definition'] == 'Ec_disable_buffer_minus_Ec_hybrid'
-    assert gate['paired_unit'] == 'same_independent_stream_seed'
-    assert gate['decision_rule'] == 'LCB95_mean_seed_delta_c_gt_delta_c'
-    assert gate['delta_c_nmse'] is None
-    assert gate['same_streams_and_seeds_required'] is True
-    assert gate['secondary_cells'] == 'report_delta_and_interval_not_additional_pass_opportunities'
-    assert gate['base_sufficient_primary_effect'] == 'cannot_satisfy_buffer_contribution_claim'
-    assert gate['base_sufficient_reporting'] == 'report_never_drop'
+    assert p['schema'] == 'sal1-policy-v6'
+    assert p['status'] == 'FROZEN_PRE_CORPUS_POLICY_STRUCTURE_NOT_COMPLETE_PREREGISTRATION'
+    gates = p['decision_gates']
+    names = [
+        'correction_adequacy',
+        'buffer_contribution',
+        'routine_noninferiority',
+        'joint_vs_bare_rls',
+        'budget_isolation',
+    ]
+    assert gates['stable_keys'] == names
+    assert [gates[name]['presentation_order'] for name in names] == [1, 2, 3, 4, 5]
+
+    correction = gates['correction_adequacy']
+    assert correction['decision_rule'] == 'LCB95_mean_seed_correction_score_gte_0.90'
+    assert correction['threshold_score'] == pytest.approx(.90)
+
+    contribution = gates['buffer_contribution']
+    assert contribution['delta_definition'] == 'Ec_disable_buffer_minus_Ec_hybrid'
+    assert contribution['paired_unit'] == 'same_independent_stream_seed'
+    assert contribution['decision_rule'] == 'LCB95_mean_seed_delta_c_gt_delta_c'
+    assert contribution['delta_c_nmse'] is None
+    assert contribution['same_streams_and_seeds_required'] is True
+    assert contribution['base_sufficient_primary_effect'] == 'buffer_contribution_not_demonstrated'
+    assert contribution['base_sufficient_reporting'] == 'report_never_drop'
+
+    routine = gates['routine_noninferiority']
+    assert routine['relative_allowance'] == pytest.approx(.01)
+    assert routine['absolute_allowance_nmse'] == pytest.approx(.001)
+    assert routine['same_corpus_scale_as_delta_c_required'] is True
+
+    joint = gates['joint_vs_bare_rls']
+    assert joint['decision_rule'] == 'LCB95_mean_seed_J_bare_RLS_minus_J_hybrid_gt_delta_J'
+    assert joint['delta_J_nmse'] is None
+
+    budget = gates['budget_isolation']
+    assert budget['decision_rule'] == 'all_retained_state_budget_and_data_isolation_checks_pass'
+
     assert 'correction_contribution_delta_c_nmse_with_corpus_scale' in p['pending_registration']
+    assert 'joint_vs_bare_rls_delta_J_nmse_with_corpus_scale' in p['pending_registration']
