@@ -1,5 +1,5 @@
 {
-  "schema": "sal1-policy-v4",
+  "schema": "sal1-policy-v5",
   "status": "FIXED_DEVELOPMENT_POLICY_NOT_COMPLETE_PREREGISTRATION",
   "cue_dimension": 8,
   "outcome_dimension": 8,
@@ -20,15 +20,15 @@
   "eviction_rule": "oldest_accepted_control_or_least_recently_confirmed_ablation",
   "gain_semantics": "weight_of_unit_normalized_joint_row",
   "development_backend_settings": {
-    "decay": 0.0,
+    "decay": 0,
     "ridge": 0.01
   },
   "required_cue_noise": {
     "distribution": "independent_zero_mean_Gaussian_per_component",
     "units": "absolute_raw_cue_coordinate_units",
     "standard_deviations": [
-      0.0,
-      1e-06,
+      0,
+      0.000001,
       0.01,
       0.05
     ],
@@ -53,7 +53,8 @@
     "correction_density_counts_repeats_and_timing",
     "upstream_gain_decay_ridge_grid_and_selection_rule",
     "routine_practical_margin_confirmation_with_corpus",
-    "base_precheck_stop_rule_and_failed_cell_reporting"
+    "base_precheck_stop_rule_and_failed_cell_reporting",
+    "correction_contribution_delta_c_nmse_with_corpus_scale"
   ],
   "eviction_arms": [
     "fifo",
@@ -96,11 +97,11 @@
     },
     "secondary_candidates": [
       {
-        "sigma": 0.0,
+        "sigma": 0,
         "radius_profile": "validation_selected"
       },
       {
-        "sigma": 1e-06,
+        "sigma": 0.000001,
         "radius_profile": "validation_selected"
       },
       {
@@ -141,5 +142,19 @@
     "correction_density": "conflicting_correction_feedback_writes/(routine_writes+all_correction_feedback_writes)",
     "counts_include_repeat_sightings": true,
     "freeze_noise_scale_target_law_trust_counts_and_schedule": true
+  },
+  "correction_contribution_gate": {
+    "status": "PENDING_CORPUS_FREEZE",
+    "applies_to": "primary_cell_only",
+    "delta_definition": "Ec_disable_buffer_minus_Ec_hybrid",
+    "paired_unit": "same_independent_stream_seed",
+    "decision_rule": "LCB95_mean_seed_delta_c_gt_delta_c",
+    "delta_c_nmse": null,
+    "same_streams_and_seeds_required": true,
+    "secondary_cells": "report_delta_and_interval_not_additional_pass_opportunities",
+    "base_sufficient_definition": "disable_buffer_meets_correction_score_gate",
+    "base_sufficient_primary_effect": "cannot_satisfy_buffer_contribution_claim",
+    "base_sufficient_reporting": "report_never_drop",
+    "interpretation": "attribution_of_buffer_contribution_not_absolute_correction_adequacy"
   }
 }
