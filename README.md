@@ -250,15 +250,20 @@ its median paired API latency ratio was 70.4 times, with the same decoded-output
 qualification described above. The signed variant is experimental; the default
 engine remains unchanged. That stage had **109 passing tests**, and Stage 2 had
 **117**. The active suite had **128** after conversation-harness development
-checks and now has **138** after raw-baseline and direct-checkout regression tests. Candidate-specific field
+checks and reached **138** after raw-baseline and direct-checkout regression tests. Candidate-specific field
 retrieval is evaluated in HME-NN-2B above; its
 [design rationale](docs/FIELD_RETRIEVAL_DESIGN.md) is retained.
+
+The current suite contains **233 active tests**, including the consolidation
+regressions, plus **11 archived v2.2 tests** run separately. These counts were
+checked on 2026-09-27 at `8bda7aa`; the earlier counts describe their original
+stages and pinned evidence runs.
 
 The extraction preserves the earlier memory core's numerical encoding and ranking, checked against the archived implementation under identical inputs. The `hme-v3` schema deliberately changes field names and artifact IDs. [Migration](docs/MIGRATION_V3.md) describes the boundary.
 
 The [current v3.1 results](evidence/current_release_v3_1.json) come from a fresh
 run against source commit `935b0d0`, with exact engine/harness hashes recorded.
-All **94 active tests** passed. The **11 archived tests** also passed, separately
+At that pinned commit, all **94 active tests** passed. The **11 archived tests** also passed, separately
 labelled as v2.2 preservation checks.
 
 The current memory core's retrieval sweep uses five preselected seeds, 128
