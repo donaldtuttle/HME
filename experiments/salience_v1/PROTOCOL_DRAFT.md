@@ -343,10 +343,10 @@ of screened settings, and deterministic regressions are implemented. No validati
 stream search, primary selection, evaluation seeds or efficacy test has run. All
 memory arrays, capacities, admission/retirement and confirmation policies are
 unchanged. Prior policy constants are preserved byte-for-byte through
-`POLICY_CONSTANTS_v4.json`; the active draft policy is v5. Prior development
+`POLICY_CONSTANTS_v5.json`; the active frozen pre-corpus structure is v6. Prior development
 evidence remains preserved, including `development_checks_radius_v3.json`. The
-v5 amendment adds only the pre-evaluation buffer-contribution decision contract;
-no formal evaluator or SAL-1 efficacy result is introduced here.
+v6 amendment gives the five decision gates stable machine-readable names and
+presentation order; no formal evaluator or SAL-1 efficacy result is introduced here.
 
 ## Eviction ablation: confirmation, not query popularity
 
@@ -461,7 +461,7 @@ allocator slack, temporary workspace, external input streams and caller-owned
 copies. Report update/query latency and peak workspace separately. Use no hidden
 full-record store. Any future checkpoint or transform metadata must be charged.
 
-## Proposed gates: preserve the user's thresholds without ambiguous percentages
+## Proposed gates: stable names, presentation order 1-5
 
 For a nonzero ground-truth outcome, define each error as
 `e=||prediction-target||^2/||target||^2`; score `s=1-e`. Keep negative scores;
@@ -471,47 +471,82 @@ be frozen or those targets excluded by the generator before evaluation.
 Per independent seed, average correction error over its held-out correction
 queries (Ec) and still-valid routine error over a distinct fixed suite (Er).
 Report a balanced joint error `J=(Ec+Er)/2`, so 1,000 routine observations do not
-numerically overwhelm a rare correction's metric. These are proposed, not final
-registered decision rules:
+numerically overwhelm a rare correction's metric.
 
-1. Lower one-sided/paired-seed confidence bound for mean correction score >= 0.90.
-2. **Buffer-contribution gate, primary cell only.** For each independent seed,
-   using the exact same streams and queries in both arms, define
-   `delta_c_seed = Ec_disable_buffer - Ec_hybrid`. Require the lower 95% paired-seed
-   confidence bound on mean `delta_c_seed` to exceed a practical margin `delta_c`.
-   Freeze `delta_c` with the corpus, target scaling and observation-noise design
-   before validation or evaluation. Secondary density/noise/type cells report the
-   paired delta and interval but are not additional opportunities to satisfy the
-   headline contribution gate.
-   If the disable-buffer arm itself satisfies the correction-score gate, label that
+The machine-readable contract uses stable names in
+`POLICY_CONSTANTS.json["decision_gates"]`. The numbers below are presentation
+order only; changing prose order must not change the machine mapping.
+
+1. **Correction adequacy (`correction_adequacy`).** Require the lower
+   one-sided/paired-seed confidence bound for mean correction score to be >= 0.90.
+
+2. **Buffer contribution (`buffer_contribution`).** Using the required
+   disable-buffer control on the identical base, streams, queries and seeds, define
+
+   ```text
+   delta_c_seed = Ec_disable_buffer - Ec_hybrid
+   PASS_contribution: LCB95[mean_seed(delta_c_seed)] > delta_c
+   ```
+
+   Gate 1 tests whether the correction target is met. Gate 2 tests whether the
+   exception buffer contributed a **practically meaningful improvement over the
+   matched disable-buffer control**. Freeze `delta_c` with the corpus, target
+   scaling and observation-noise model before validation or evaluation; never
+   choose it after seeing evaluation outcomes.
+
+   This headline gate applies to the single preregistered primary cell only.
+   Secondary density, noise and correction-type cells report `delta_c_seed`, its
+   interval and all other metrics, but are not additional opportunities to produce
+   the headline PASS.
+
+   If the disable-buffer arm itself satisfies `correction_adequacy`, label that
    cell `BASE_SUFFICIENT`. Report it and all raw scores; never drop it. A
-   base-sufficient primary cell is not a system failure, but it cannot establish the
-   claim that the exception buffer contributed necessary correction retention.
-3. Upper paired-seed confidence bound for
-   `Er_hybrid - 1.01*Er_field_reference - 0.001` <= 0, and the same bound against
-   the fixed unweighted no-correction routine reference. This combines a one-percent
-   relative error allowance with a **0.001 NMSE absolute practical allowance**.
-   It is not numerical roundoff tolerance, a floor on the reference, or a pure 1%
-   relative guarantee. The shared `routine_gate()` exposes this signed excess for
-   inference; validation uses its point-estimate counterpart, not a statistical PASS.
-   Confirm the 0.001 allowance against the same frozen corpus/outcome scale used to
-   set `delta_c`. Do not bootstrap the ratio or compare separate unpaired confidence
-   intervals.
-4. Positive paired lower confidence bound for `J_bare_RLS - J_hybrid`, with the
-   minimum practical improvement fixed before evaluation. RLS settings are chosen
-   on validation only, never by comparing test scores and selecting a weak run.
-5. All retained-state budget and data-isolation checks pass.
+   base-sufficient primary cell is not a system failure, but the primary
+   `buffer_contribution` hypothesis is **not demonstrated**.
 
-A pass against **bare** RLS supports a hybrid benefit for that task, not superiority
-to the best classical hybrid. Report direct-plus-buffer and RLS-plus-buffer next
-to the primary result. Their results may tie or outperform HME without invalidating
-an application-level benefit of bounded exceptions. No universal "field cannot,
-hybrid can" theorem follows from a finite sweep.
+3. **Routine noninferiority (`routine_noninferiority`).** Require the upper
+   paired-seed confidence bound for
+   `Er_hybrid - 1.01*Er_field_reference - 0.001` <= 0, and the same bound against
+   the fixed unweighted no-correction routine reference. The 0.001 NMSE term is a
+   practical allowance, not numerical roundoff, a reference floor or a pure 1%
+   relative guarantee. Confirm its meaning against the same frozen corpus/outcome
+   scale used to set `delta_c`. The shared `routine_gate()` exposes the signed
+   excess for inference; validation uses its point-estimate counterpart. Do not
+   bootstrap the ratio or compare separate unpaired confidence intervals.
+
+4. **Joint improvement versus bare RLS (`joint_vs_bare_rls`).** Require a
+   positive paired lower confidence bound for
+   `J_bare_RLS - J_hybrid` above a minimum practical improvement `delta_J`,
+   frozen before evaluation. RLS settings are selected on validation only, never
+   by inspecting test scores and choosing a weak run.
+
+5. **Budget and isolation (`budget_isolation`).** All retained-state budget and
+   data-isolation checks must pass.
+
+The single primary headline decision requires all five named gates once the
+corpus-bound margins, confidence procedure, evaluator and complete registration
+are frozen. A pass against **bare** RLS supports a hybrid benefit for that task,
+not superiority to the best classical hybrid. Report direct-plus-buffer and
+RLS-plus-buffer next to the primary result. Their results may tie or outperform
+HME without invalidating an application-level benefit of bounded exceptions. No
+universal "field cannot, hybrid can" theorem follows from a finite sweep.
+
+NMSE is normalized by target magnitude, but its achievable floor depends on target
+magnitudes relative to absolute observation noise. `delta_c`, `delta_J` and the
+routine 0.001 NMSE allowance therefore must be justified against the frozen corpus
+and noise model, not chosen in the abstract.
 
 Use independent stream seeds as the resampling unit, not correlated queries from
 one seed. Predeclare confidence levels, bootstrap seeds/counts, multiplicity policy,
 primary selection, sample size and all failures. No formal PASS is computed by
 this prototype: the dataset and statistical evaluator are not frozen or implemented.
+
+**Policy freeze boundary.** This v6 structure is frozen pending corpus freeze.
+The exact v5 bytes are retained as `POLICY_CONSTANTS_v5.json`. Corpus-bound
+numeric margins remain deliberately unset in v6. The complete corpus registration
+must publish a new policy version containing those frozen values before validation
+or evaluation. Any further structural policy change requires a demonstrated
+defect, a new public version, and a fresh audit trail.
 
 ## Publication and scope
 
