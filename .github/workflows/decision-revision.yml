@@ -1,0 +1,57 @@
+name: Decision Revision Bench
+
+on:
+  push:
+    paths:
+      - "experiments/decision_revision_v1/**"
+      - "demos/decision-revision/**"
+      - "demos/hme-plate/src/fonts.css"
+      - "demos/hme-plate/src/assets/fonts/**"
+      - ".github/workflows/decision-revision.yml"
+  pull_request:
+    paths:
+      - "experiments/decision_revision_v1/**"
+      - "demos/decision-revision/**"
+      - "demos/hme-plate/src/fonts.css"
+      - "demos/hme-plate/src/assets/fonts/**"
+      - ".github/workflows/decision-revision.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: demos/decision-revision
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: demos/decision-revision/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Fixture, interface, and type checks
+        run: |
+          npm test
+          npm run typecheck
+      - name: Build and verify static package
+        run: |
+          npm run build
+          npm run test:build
+          node --experimental-strip-types ../../experiments/decision_revision_v1/check.ts > outputs/fixture-checks.json
+      - name: Retain build and fixture diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: decision-revision-${{ github.sha }}
+          path: |
+            demos/decision-revision/dist/client/
+            demos/decision-revision/outputs/fixture-checks.json
+          if-no-files-found: error

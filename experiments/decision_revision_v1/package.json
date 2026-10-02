@@ -1,0 +1,11 @@
+{
+  "name": "hme-decision-revision-fixture",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.18.0" },
+  "scripts": {
+    "test": "node --experimental-strip-types rev.test.ts && node --experimental-strip-types regression.test.ts",
+    "check": "node --experimental-strip-types check.ts"
+  }
+}
