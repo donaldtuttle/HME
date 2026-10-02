@@ -114,6 +114,22 @@ study, **REC-3** for retained-byte reconstruction/quality comparison, and
 not claimed acronym expansions. See the
 [study plan](experiments/consolidation_plan/README.md#sal-1-weighting-is-not-automatically-correction).
 
+## Decision Revision Bench (DESIGN)
+
+The [Decision Revision Bench](demos/decision-revision/README.md) lets you apply a
+remembered rule after a later fact changes: **retain, revise or defer**, while
+preserving a second project’s unaffected decision. Start with the
+[user guide](experiments/decision_revision_v1/USER_GUIDE.md) or run the standalone
+browser demo locally.
+
+[HME-CM-REV-1](experiments/decision_revision_v1/README.md) currently contains an
+illustrative 32-history fixture, a deterministic policy solver, packet builders,
+evidence-grounded scoring and regression checks. Its lexical NN packets are
+stand-ins for semantic retrieval, and the hybrid is marked
+`MECHANISM_NOT_TESTED`. There are no model calls or registered evaluation results.
+This is a separate decision-revision design; the existing CM-1 protocol and
+published HME results are unchanged.
+
 ## Relationship to established work
 
 Holographic associative memory and **Holographic Reduced Representations (HRR)** are established research areas within the broader **Vector Symbolic Architecture (VSA)** literature. They provide useful reference designs and benchmarks for HME.
