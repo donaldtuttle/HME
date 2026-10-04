@@ -14,7 +14,7 @@ HME is a deterministic hybrid field-plus-ledger memory engine with reconstructiv
 > Memory Weather is a separate deterministic R¹² DEVELOP typed realization and visualization companion. It does not run the Python HME engine or broaden HME's claims.
 
 > **Related QOFT surfaces (separate realizations, no shared trajectory claim):**  
-> [QOFT Lab n=2 toy](https://pine-apple-dream-topaz.grok.me/) · source [donaldtuttle/qoft-lab](https://github.com/donaldtuttle/qoft-lab)  
+> [QOFT Lab n=2 toy](https://qoft-lab-toy.grok.me/) · source [donaldtuttle/qoft-lab](https://github.com/donaldtuttle/qoft-lab)  
 > Glyphogenic Calculus engine [donaldtuttle/qoft-calculus](https://github.com/donaldtuttle/qoft-calculus)
 
 ![HME symbolic overlay](assets/qosmos_hme_symbolic_overlay.gif)
