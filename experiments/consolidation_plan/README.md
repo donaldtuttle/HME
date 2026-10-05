@@ -34,6 +34,12 @@ Software invariant tests in Step 0 are not claims of prospective efficacy testin
 *salience*. The study asks whether important supplied corrections can be retained
 without degrading still-valid routine associations.
 
+A [SAL-1 development prototype and draft protocol](../salience_v1/PROTOCOL_DRAFT.md)
+implement a bounded surprise-gated exception store with field, direct-moment
+and forgetting-RLS backends, matched controls, scoped revision rules and byte caps.
+See [implementation status](../salience_v1/README.md). Integration completes this
+prototype change; a registered efficacy study is separate future research.
+
 Current positive-gain updates retain a weighted second moment. The mandatory
 matched control is a direct C with the identical gain, decay, normalizer and
 readout; they are mathematically equal in the aligned setup. Give every method

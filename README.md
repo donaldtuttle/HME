@@ -300,10 +300,12 @@ checks and reached **138** after raw-baseline and direct-checkout regression tes
 retrieval is evaluated in HME-NN-2B above; its
 [design rationale](docs/FIELD_RETRIEVAL_DESIGN.md) is retained.
 
-The current suite contains **233 active tests**, including the consolidation
-regressions, plus **11 archived v2.2 tests** run separately. These counts were
-checked on 2026-09-27 at `8bda7aa`; the earlier counts describe their original
-stages and pinned evidence runs.
+The suite had **233 active tests** plus **11 archived v2.2 tests** on
+2026-09-27 at `8bda7aa`. Later additions include REC-2 and the integrated
+[SAL-1 prototype](experiments/salience_v1/README.md). For current counts and
+results, use the [latest main-branch CI run](https://github.com/donaldtuttle/HME/actions/workflows/test.yml?query=branch%3Amain)
+and its retained test reports. Counts above describe their original stages and
+pinned evidence runs.
 
 The extraction preserves the earlier memory core's numerical encoding and ranking, checked against the archived implementation under identical inputs. The `hme-v3` schema deliberately changes field names and artifact IDs. [Migration](docs/MIGRATION_V3.md) describes the boundary.
 

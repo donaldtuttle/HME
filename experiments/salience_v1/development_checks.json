@@ -1,0 +1,299 @@
+{
+  "status": "DEVELOPMENT_ONLY_NOT_PREREGISTERED",
+  "python": "3.13.5",
+  "numpy": "2.3.5",
+  "base_commit": "3e93c66f0a2eadf7ad840d963276cdfead4836c7",
+  "byte_cap": 8192,
+  "arms": {
+    "field": {
+      "storage": {
+        "capacity": 20,
+        "occupied": 1,
+        "retained_array_bytes": 6957,
+        "instance_owned_bytes": 8101,
+        "admissions": 1
+      },
+      "checks": {
+        "admitted_surprising_reversal": true,
+        "six_sightings_one_entry": true,
+        "no_repeat_admissions": true,
+        "buffer_aware_repeat_error_zero": true,
+        "exact_corrected_cue_hit": true,
+        "off_scope_uses_current_base": true,
+        "owned_bytes_constant": true,
+        "array_bytes_constant": true,
+        "within_cap": true
+      }
+    },
+    "direct_moment": {
+      "storage": {
+        "capacity": 37,
+        "occupied": 1,
+        "retained_array_bytes": 7190,
+        "instance_owned_bytes": 8150,
+        "admissions": 1
+      },
+      "checks": {
+        "admitted_surprising_reversal": true,
+        "six_sightings_one_entry": true,
+        "no_repeat_admissions": true,
+        "buffer_aware_repeat_error_zero": true,
+        "exact_corrected_cue_hit": true,
+        "off_scope_uses_current_base": true,
+        "owned_bytes_constant": true,
+        "array_bytes_constant": true,
+        "within_cap": true
+      }
+    },
+    "rls": {
+      "storage": {
+        "capacity": 43,
+        "occupied": 1,
+        "retained_array_bytes": 6988,
+        "instance_owned_bytes": 8084,
+        "admissions": 1
+      },
+      "checks": {
+        "admitted_surprising_reversal": true,
+        "six_sightings_one_entry": true,
+        "no_repeat_admissions": true,
+        "buffer_aware_repeat_error_zero": true,
+        "exact_corrected_cue_hit": true,
+        "off_scope_uses_current_base": true,
+        "owned_bytes_constant": true,
+        "array_bytes_constant": true,
+        "within_cap": true
+      }
+    }
+  },
+  "source_sha256": {
+    "hme_engine.py": "080a20056c6c5c88e49c6307845277002ad2091a6a1d7dec66961317bc2c0167",
+    "hme_consolidation.py": "6daa108f59208c88c7b59e119cb66273cc8faa229a816a5f1e624776912340f0",
+    "experiments/salience_v1/memory.py": "54d5c38de7ce1ba4cf770591d0cdc9b5aa9e624b35e1cde871946b2d41bc69a5",
+    "experiments/salience_v1/smoke.py": "7d57861efac01824f523697869ce5cc2b27b772dd82f68506fcb5b96903f829c",
+    "tests/test_salience_memory.py": "c6f2c3ac328385cd28a995540cd648e4b21d71299c86559df3df652f24a9dea4",
+    "experiments/salience_v1/PROTOCOL_DRAFT.md": "0de7db9301d987ff411504c6d4e901dd78f8c3c62d8d03b8c0ccaa7d0d24f903",
+    "experiments/salience_v1/configuration.py": "c1c8065796dd19e8bb2ad85d4abf28caf7378667ff54718c86a075184ca68eed",
+    "experiments/salience_v1/POLICY_CONSTANTS.json": "905099fa047be101df4bf56fb83c38d06e3966ddce08c1c69eb1a39501248526",
+    "experiments/salience_v1/radius_selection.py": "142b4c63e254e836463ced5f6484ae5a7f06693ceb4eade34f81e5119dbd30ea",
+    "tests/test_salience_radius_review.py": "66c7f8fbe5aaa5d4099de55cbff58476609d2176831a939d92e2936650ee599c",
+    "experiments/salience_v1/routine_gate.py": "5ced352b7cf98aca1be959e5c2cc13cd2dd627523721b645c44d5ee900e33950",
+    "tests/test_salience_routine_gate.py": "d7315e60dd099f82c6fa8ac7588213137d94dfbb603b6bd0b530fff19f16720f"
+  },
+  "policy": {
+    "schema": "sal1-policy-v4",
+    "status": "FIXED_DEVELOPMENT_POLICY_NOT_COMPLETE_PREREGISTRATION",
+    "cue_dimension": 8,
+    "outcome_dimension": 8,
+    "instance_owned_byte_cap": 8192,
+    "capacities": {
+      "field": 20,
+      "direct_moment": 37,
+      "rls": 43
+    },
+    "nonbinding_matched_capacity": 4,
+    "threshold_nmse": 0.1,
+    "recall_and_revision_radius": 0.1,
+    "admission_prediction": "pre_update_hybrid",
+    "retirement_prediction": "pre_update_base",
+    "match_rule": "nearest_within_radius_newest_accepted_on_equal_distance",
+    "revision_anchor": "keep_first_accepted_cue",
+    "refresh_on_unsurprising_repeat": "eviction_arm_dependent_with_trusted_eligible_feedback_only",
+    "eviction_rule": "oldest_accepted_control_or_least_recently_confirmed_ablation",
+    "gain_semantics": "weight_of_unit_normalized_joint_row",
+    "development_backend_settings": {
+      "decay": 0.0,
+      "ridge": 0.01
+    },
+    "required_cue_noise": {
+      "distribution": "independent_zero_mean_Gaussian_per_component",
+      "units": "absolute_raw_cue_coordinate_units",
+      "standard_deviations": [
+        0.0,
+        1e-06,
+        0.01,
+        0.05
+      ],
+      "apply_to": [
+        "repeated_feedback_cues",
+        "held_out_recall_cues"
+      ],
+      "repeat_feedback_outcome": "same_supplied_target_for_same_scoped_correction"
+    },
+    "capacity_rule": "instantiate_constants_and_assert_cap_never_resize",
+    "reference_runtime": "64-bit CPython 3.12; exact release and NumPy build must be pinned by the complete registration",
+    "pending_registration": [
+      "corpus_and_cue_scale",
+      "gain_decay_selection",
+      "validation_stream_ids_and_selection_table",
+      "evaluation_seeds",
+      "primary_cell_confirmation",
+      "sample_size",
+      "confidence_and_failure_rules",
+      "exact_runtime_pin",
+      "corpus_observation_noise_law_scale_and_scoring_targets",
+      "correction_density_counts_repeats_and_timing",
+      "upstream_gain_decay_ridge_grid_and_selection_rule",
+      "routine_practical_margin_confirmation_with_corpus",
+      "base_precheck_stop_rule_and_failed_cell_reporting"
+    ],
+    "eviction_arms": [
+      "fifo",
+      "confirmation_refresh"
+    ],
+    "eviction_ablation": {
+      "primary_control": "fifo",
+      "confirmation_requires": "trusted_eligible_feedback_with_adequate_pre_update_hybrid_and_inadequate_base",
+      "refresh_on_predict": false,
+      "hold_radius_gain_decay_stream_and_capacity_fixed": true,
+      "retained_layout": "same_age_array_and_bit_in_existing_policy_byte",
+      "tie_preservation": "physical_slot_order_tracks_acceptance_independently_of_eviction_age"
+    },
+    "radius_selection": {
+      "strategy": "validation_per_noise_with_fixed_radius_stress",
+      "candidate_radii": [
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3,
+        0.4
+      ],
+      "tuning_split": "validation",
+      "score": "mean_per_stream_balanced_joint_error",
+      "tie_break": "smallest_radius",
+      "no_feasible_candidate": "report_infeasible_and_abort_no_fallback",
+      "eviction_pairing": "select_with_fifo_then_reuse_for_confirmation_refresh",
+      "field_direct_pairing": "share_direct_moment_selection_for_matched_nonbinding_control",
+      "record_all_candidates_and_failures": true,
+      "radius_frozen_before_evaluation": true,
+      "routine_feasibility_gate": "routine_retention_gate",
+      "requires_base_precheck": true
+    },
+    "noise_designations": {
+      "primary_candidate": {
+        "sigma": 0.01,
+        "radius_profile": "validation_selected"
+      },
+      "secondary_candidates": [
+        {
+          "sigma": 0.0,
+          "radius_profile": "validation_selected"
+        },
+        {
+          "sigma": 1e-06,
+          "radius_profile": "validation_selected"
+        },
+        {
+          "sigma": 0.05,
+          "radius_profile": "validation_selected"
+        }
+      ],
+      "declared_stress": {
+        "sigma": 0.05,
+        "radius": 0.1,
+        "radius_profile": "fixed_stress",
+        "expectation": "low_same_context_pair_coverage_not_a_formal_automatic_fail"
+      }
+    },
+    "routine_retention_gate": {
+      "relative_allowance": 0.01,
+      "absolute_allowance_nmse": 0.001,
+      "form": "Er <= Eref + 0.01*Eref + 0.001",
+      "scope": "base_screen_radius_feasibility_and_final_paired_gate",
+      "interpretation": "practical_error_allowance_not_numerical_roundoff_tolerance",
+      "reference_clamping": false
+    },
+    "selection_order": {
+      "order": "upstream_gain_decay_ridge_then_base_screen_then_radius",
+      "base_rejection": "record_base_contamination_skip_radius_for_this_configuration",
+      "radius_rejection": "record_radius_infeasible_for_screened_configuration",
+      "stop_scope": "configuration_only_retain_all_failed_cells",
+      "base_screen_is_conservative_design_constraint": true,
+      "upstream_grid_and_winner_rule": "PENDING_COMPLETE_REGISTRATION",
+      "gain_applies_to": "correction_feedback_normalized_joint_rows_routine_gain_one"
+    },
+    "corpus_requirements": {
+      "primary_observation_noise": "nonzero_model_to_be_frozen_from_task_not_from_achieved_reference_error",
+      "clean_control_required": true,
+      "observation_noise_is_distinct_from_cue_noise": true,
+      "measured_reference_minimum": null,
+      "reject_or_redraw_for_low_reference": false,
+      "correction_density": "conflicting_correction_feedback_writes/(routine_writes+all_correction_feedback_writes)",
+      "counts_include_repeat_sightings": true,
+      "freeze_noise_scale_target_law_trust_counts_and_schedule": true
+    }
+  },
+  "routine_gate_fabricated_examples": [
+    {
+      "routine_error": 0.0003,
+      "routine_reference_error": 0.0002,
+      "absolute_change": 9.999999999999996e-05,
+      "allowed_increase": 0.001002,
+      "limit": 0.0012020000000000002,
+      "excess": -0.0009020000000000002,
+      "feasible": true
+    },
+    {
+      "routine_error": 0.0001,
+      "routine_reference_error": 0.0,
+      "absolute_change": 0.0001,
+      "allowed_increase": 0.001,
+      "limit": 0.001,
+      "excess": -0.0009,
+      "feasible": true
+    },
+    {
+      "routine_error": 0.02,
+      "routine_reference_error": 0.0002,
+      "absolute_change": 0.0198,
+      "allowed_increase": 0.001002,
+      "limit": 0.0012020000000000002,
+      "excess": 0.018798,
+      "feasible": false
+    }
+  ],
+  "radius_geometry": {
+    "0.01": 0.9999999591324105,
+    "0.05": 0.01898815687615385
+  },
+  "eviction_ablation": {
+    "field": {
+      "same_retained_bytes": true,
+      "storage": {
+        "capacity": 20,
+        "occupied": 0,
+        "retained_array_bytes": 6957,
+        "instance_owned_bytes": 8101,
+        "admissions": 0
+      }
+    },
+    "direct_moment": {
+      "same_retained_bytes": true,
+      "storage": {
+        "capacity": 37,
+        "occupied": 0,
+        "retained_array_bytes": 7190,
+        "instance_owned_bytes": 8150,
+        "admissions": 0
+      }
+    },
+    "rls": {
+      "same_retained_bytes": true,
+      "storage": {
+        "capacity": 43,
+        "occupied": 0,
+        "retained_array_bytes": 6988,
+        "instance_owned_bytes": 8084,
+        "admissions": 0
+      }
+    }
+  },
+  "eviction_fixture": {
+    "fifo_evicts_confirmed_old_entry": true,
+    "refresh_retains_confirmed_entry": true,
+    "scope": "constructed correctness fixture, no efficacy claim"
+  },
+  "limitations": "Exact-cue and off-scope routing checks only. No held-out accuracy, semantic truth, gain/decay efficacy sweep, or statistical PASS."
+}
