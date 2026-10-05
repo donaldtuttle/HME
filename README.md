@@ -195,6 +195,8 @@ workload, raw signed-cosine NN remains the reference choice. See the
 
 ## Evidence and limitations
 
+The registered [HME-REC-2 study](experiments/rec2_v1/REPORT.md) checks disjoint aligned blocks against ordinary per-block matrices, and checks an experimental shift writer against the biased autocorrelation. The released engine and its defaults are unchanged. Numbers and pass/fail live in the report, which was produced only after the protocol was public.
+
 The new [HME-REC-1 reconstruction study](experiments/reconstruction_v1/REPORT.md)
 tests recovery of missing coordinates in unseen correlated signals, with NN copying,
 weighted blending, a direct second-moment control, identity checks and measured costs.
