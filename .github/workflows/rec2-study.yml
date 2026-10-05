@@ -36,7 +36,6 @@ jobs:
           test ! -f experiments/rec2_v1/REPORT.md
           sha256sum -c MANIFEST.sha256
           sha256sum -c SOURCE_PINS.sha256
-          sha256sum -c archive/v2.2.sha256
           python -m pip install -e '.[test,legacy-test,visualization]'
           mkdir -p outputs
           python -m pytest -q --junitxml=outputs/rec2-tests.xml

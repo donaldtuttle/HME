@@ -112,3 +112,9 @@ number, or drop a failure. A crash writes `FAILURE.json` and does not count as
 a success report. A repair after evaluation has started must be labeled a
 deviation. Raw predictions, hashes, costs and versions stay with the report.
 Use a fresh output directory. Leave the pinned engine bytes alone.
+
+The workflow checks `SOURCE_PINS.sha256` and `MANIFEST.sha256`. It does not
+check `archive/v2.2.sha256`. That archive checksum already fails on main because
+`archive/v2.2/README.md` changed in 128ea4a and the checksum file was not
+updated. A workflow attempt at 387b3a8 failed on that stale check before any
+seed was drawn. This registration does not change the archive or the engine.
