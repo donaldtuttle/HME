@@ -9,6 +9,27 @@ HME is a standalone experimental memory engine that combines **complex-valued pa
 
 Use it to investigate how overlapping stored patterns, query noise, spatial cues, and retained item records affect recall. For example, store a set of numeric sensor signatures, query with a noisy signature, and inspect both the ranked matches and the contribution of each scoring component. Field-only and ledger-only ablations help identify what actually produced the match.
 
+## What is this?
+
+An experimental memory component that stores numeric patterns in a shared field
+and keeps item records in a ledger.
+
+## Why care?
+
+Suppose a sensor reading is noisy and you want to find the earlier reading it
+resembles. HME lets you inspect the ranked matches and ask which part of the
+memory produced them. Its value here is as an inspectable research workbench;
+the published comparisons do not establish a retrieval advantage over ordinary
+nearest-neighbor search.
+
+## Try this
+
+Run the numeric sensor example in [Quick start](#quick-start). Compare the
+returned artifact ID with the stored ID, then change the query values and
+inspect the score. The score ranks a match; it is not a probability that the
+answer is correct. For a visual introduction, open [HME Plate](https://donaldtuttle.github.io/HME/).
+
+
 ## Quick start
 
 ```bash
