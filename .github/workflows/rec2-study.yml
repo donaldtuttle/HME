@@ -1,0 +1,96 @@
+name: HME-REC-2 registered study
+on:
+  push:
+    branches: [experiment/rec2-v1]
+    paths:
+      - experiments/rec2_v1/evaluate.py
+      - experiments/rec2_v1/protocol.json
+      - experiments/rec2_v1/PROTOCOL.md
+      - tests/test_rec2.py
+      - .github/workflows/rec2-study.yml
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: hme-rec2-registration
+  cancel-in-progress: false
+jobs:
+  study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Correctness and pinned-source validation before evaluation
+        run: |
+          test ! -f experiments/rec2_v1/REPORT.md
+          sha256sum -c MANIFEST.sha256
+          sha256sum -c SOURCE_PINS.sha256
+          python -m pip install -e '.[test,legacy-test,visualization]'
+          mkdir -p outputs
+          python -m pytest -q --junitxml=outputs/rec2-tests.xml
+          (cd archive/v2.2 && python -m pytest -q --junitxml=../../outputs/rec2-historical-tests.xml)
+          hme --self-test
+      - name: Run frozen remote-verified study
+        run: |
+          python experiments/rec2_v1/evaluate.py \
+            --registration-commit '${{ github.sha }}' \
+            --output outputs/rec2_v1
+      - name: Publish every result without changing registered sources
+        run: |
+          cp outputs/rec2_v1/* experiments/rec2_v1/
+          python - <<'PY'
+          from pathlib import Path
+          paragraph = (
+              "The registered [HME-REC-2 study](experiments/rec2_v1/REPORT.md) "
+              "checks disjoint aligned blocks against ordinary per-block matrices, "
+              "and checks an experimental shift writer against the biased autocorrelation. "
+              "The released engine and its defaults are unchanged. Numbers and pass/fail "
+              "live in the report, which was produced only after the protocol was public.\n\n"
+          )
+          readme = Path("README.md")
+          text = readme.read_text()
+          needle = "## Evidence and limitations\n\n"
+          if "experiments/rec2_v1/REPORT.md" not in text:
+              readme.write_text(text.replace(needle, needle + paragraph, 1))
+          evidence = Path("docs/EVIDENCE.md")
+          extra = (
+              "\n## HME-REC-2: aligned banks and shift pooling\n\n"
+              "See [protocol](../experiments/rec2_v1/PROTOCOL.md), "
+              "[report](../experiments/rec2_v1/REPORT.md), "
+              "[raw predictions](../experiments/rec2_v1/raw_records.jsonl.gz) and "
+              "[results](../experiments/rec2_v1/results.json). "
+              "The official run checks fresh canonical-origin visibility before evaluation. "
+              "The primary comparison is an identity check against direct local moments, "
+              "not an accuracy claim. The shift writer is experimental and is not the shipped engine.\n"
+          )
+          body = evidence.read_text()
+          if "HME-REC-2" not in body:
+              evidence.write_text(body + extra)
+          PY
+          python scripts/update_manifest.py
+          sha256sum -c MANIFEST.sha256
+          sha256sum -c SOURCE_PINS.sha256
+          (cd experiments/rec2_v1 && sha256sum -c RESULTS.sha256)
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add experiments/rec2_v1 README.md docs/EVIDENCE.md MANIFEST.sha256
+          git commit -m 'Report all HME-REC-2 aligned-bank and shift-pool checks'
+          git push origin HEAD:experiment/rec2-v1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hme-rec2-${{ github.run_id }}
+          path: |
+            outputs/
+          retention-days: 30

@@ -1,0 +1,28 @@
+{
+  "source_archive": "grok-workspace_v3(1).zip",
+  "archive_sha256": "04884374f8024f510fae4ca35893e838be71495cda178fcb7ec301f2b97f3faa",
+  "captured_date": "2026-10-02",
+  "files": {
+    "experiments/decision_revision_v1/USER_GUIDE.md": "df2c37a8b532bfca47bad811b1e3e3a96b4c1f890a990799f031ea87fcfc9cc8",
+    "experiments/decision_revision_v1/baselines.ts": "683452f61ca122fc684b53b127725e417ba82acea868dcfeb2f7d635b2565b17",
+    "experiments/decision_revision_v1/corpus.ts": "1933d1a8b47843266234e21c2541fd2bd596eeeb8c4a888b02a58ba1909d140a",
+    "experiments/decision_revision_v1/diagnose.ts": "0d8ed29cdb1d60a753f388f464b20415e7e1d3a238efe96e4edf562fbb937dd5",
+    "experiments/decision_revision_v1/generator.ts": "3807a823bb04ca83948a7ae87749603ce2d4a9b4de498c5442b62ebd07b6a987",
+    "experiments/decision_revision_v1/index.ts": "4e55b45bb1a99e2ae81d2c225488825886ef214724aec07c7f2e1d9fc10e6b3a",
+    "experiments/decision_revision_v1/memory.ts": "8077b91586876cb64aae543f4b779d062ef0135ede209000d8f26574bc330370",
+    "experiments/decision_revision_v1/preflight.ts": "1171a2aaab86b9d0c52b8027dc352028534f08a9d07cab5ff160e141459b0515",
+    "experiments/decision_revision_v1/regression.test.ts": "51c656a06d481a0dd88e98f310770f329b6f6e65bc8c79a77e82309772143e5f",
+    "experiments/decision_revision_v1/report.ts": "1f965fc31385179ae04825013a5e12f2248d9d1197b0411aa7e8ce3cf6d4a1c5",
+    "experiments/decision_revision_v1/rev.test.ts": "07e66c3a403c0e32903e09359d34dfe07ea12a96e8dd2834c3ad56ad6e3122b5",
+    "experiments/decision_revision_v1/score.ts": "ff347475e94ffea4b0df5b9665387557cedb219415a34a101845d34c93943f43",
+    "experiments/decision_revision_v1/solver-types.ts": "45d6cd868cfe5379100fa39eaa946a579a7995420e04e7b4627946c1598db2a3",
+    "experiments/decision_revision_v1/solver.ts": "f6a31ea16ca932c0cf2bd24ff08308e753cd9f8928fc62ccbea58ab9f44bcd7f",
+    "experiments/decision_revision_v1/text.ts": "b4013632ab7469e0658fbc1aff8d10264f7a5e691a975d8a18b1d6df24f26baf",
+    "experiments/decision_revision_v1/types.ts": "724233af9d3098e2115860ef365c2b22eb0f658163e9e6182caa55f6a51f477d",
+    "experiments/decision_revision_v1/user-guide.ts": "722f02e67859710e59c83b898ec52eec8648d29f33cf884aaa16811e6c71030f",
+    "src/components/workbench/Workbench.tsx": "b3baaf8e497d6d5a2b631058eea94ed578ff675a34dabc314249251392995a24",
+    "src/components/workbench/Guide.tsx": "12a850529f1095f2aeaec12027a3417bc8393f0c44d8cc72867dfb7cd6c82b0a",
+    "src/styles.css": "beaddb547e4a1955de27e552a823375e366a88210a373bbe3f874cba66f599c5",
+    "public/favicon.svg": "532e10ac3ec5b03406f4d7f0767ccc5557fdf5854969351be2bcafd321b37b10"
+  }
+}

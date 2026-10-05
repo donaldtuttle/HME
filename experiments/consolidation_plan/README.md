@@ -1,7 +1,8 @@
 # From record store to consolidating memory
 
-Status: DESIGN, not a preregistration. No REC-3, SAL-1, HOLO-1 or CONT-1 evaluation
-seeds, outcomes or success claims are published by this change. Step 0 provides
+Status: DESIGN, not a preregistration. No REC-3, SAL-1 (salience study), HOLO-1
+or CONT-1 evaluation seeds, outcomes or success claims are published by this
+change. Step 0 provides
 [an opt-in field-only adapter](../../docs/CONSOLIDATION.md) and invariant tests.
 It does not alter REC-1/REC-2 evidence, frozen modules, or the v3.1.0 tag.
 
@@ -29,10 +30,15 @@ Software invariant tests in Step 0 are not claims of prospective efficacy testin
 
 ## SAL-1: weighting is not automatically correction
 
+**SAL-1** is the identifier for HME's **salience study**; `SAL` abbreviates
+*salience*. The study asks whether important supplied corrections can be retained
+without degrading still-valid routine associations.
+
 A [SAL-1 development prototype and draft protocol](../salience_v1/PROTOCOL_DRAFT.md)
-now implement a bounded surprise-gated exception store with field, direct-moment
-and forgetting-RLS backends. It includes matched hybrid controls, scoped revision
-rules and measured byte caps. It is NOT a preregistration or an efficacy result.
+implement a bounded surprise-gated exception store with field, direct-moment
+and forgetting-RLS backends, matched controls, scoped revision rules and byte caps.
+See [implementation status](../salience_v1/README.md). Integration completes this
+prototype change; a registered efficacy study is separate future research.
 
 Current positive-gain updates retain a weighted second moment. The mandatory
 matched control is a direct C with the identical gain, decay, normalizer and
@@ -68,6 +74,11 @@ The released optional salience multiplier has a ceiling; the adapter's explicit
 gain is a distinct caller-controlled experimental input, not a silent ceiling change.
 
 ## HOLO-1: spread-domain damage is a separate representation
+
+**HOLO-1** is the identifier for HME's **spread-domain damage study**. It tests
+whether spreading retained state changes damage behavior under matched storage,
+decoding, and byte accounting. `HOLO` is treated here as a study label, not a
+formally expanded acronym.
 
 Store a spread-domain state persistently, rather than FFT-transforming only during
 query or immediately inverting every write. Freeze exactly what is transformed:
@@ -111,6 +122,11 @@ No FFT-specific advantage or hologram-fragment guarantee follows beforehand.
 
 ## REC-3: quality per actual retained byte
 
+**REC-3** is the identifier for HME's **retained-byte reconstruction/quality
+study**. It compares memory approaches under declared retained-state budgets and
+measures quality, storage, and cost. `REC` is treated here as a study label, not
+a formally expanded acronym.
+
 Compare at the same declared real-byte caps and actual used bytes:
 
 - Weighted/decayed direct C, packed symmetric and dense variants where relevant.
@@ -136,6 +152,11 @@ The adapter defaults to Hann off; Hann-on reconstruction is explicitly refused.
 No unreported null grid allocation, caller backup or retained field view is allowed.
 
 ## CONT-1: preserved consequences, not record IDs
+
+**CONT-1** is the identifier for HME's **consequence-retention/continuity study**.
+It asks whether useful consequences of prior information survive consolidation
+without requiring preservation of every original record ID. `CONT` is treated
+here as a study label, not a formally expanded acronym.
 
 Use explicit cue-conditioned preferences, corrections, relationships and commitments.
 Some old details may be discarded without failure; a scoped reversal or important

@@ -9,6 +9,27 @@ HME is a standalone experimental memory engine that combines **complex-valued pa
 
 Use it to investigate how overlapping stored patterns, query noise, spatial cues, and retained item records affect recall. For example, store a set of numeric sensor signatures, query with a noisy signature, and inspect both the ranked matches and the contribution of each scoring component. Field-only and ledger-only ablations help identify what actually produced the match.
 
+## What is this?
+
+An experimental memory component that stores numeric patterns in a shared field
+and keeps item records in a ledger.
+
+## Why care?
+
+Suppose a sensor reading is noisy and you want to find the earlier reading it
+resembles. HME lets you inspect the ranked matches and ask which part of the
+memory produced them. Its value here is as an inspectable research workbench;
+the published comparisons do not establish a retrieval advantage over ordinary
+nearest-neighbor search.
+
+## Try this
+
+Run the numeric sensor example in [Quick start](#quick-start). Compare the
+returned artifact ID with the stored ID, then change the query values and
+inspect the score. The score ranks a match; it is not a probability that the
+answer is correct. For a visual introduction, open [HME Plate](https://donaldtuttle.github.io/HME/).
+
+
 ## Quick start
 
 ```bash
@@ -81,6 +102,55 @@ only NumPy. Install `.[dynamics]` for text rasterization or `.[visualization]`
 for plots and GIF export. The [runtime guide](docs/RUNTIME.md) explains update
 order, adapters, switches and the restoration boundary.
 
+## Interactive browser demo
+
+**[Open HME Plate live](https://donaldtuttle.github.io/HME/)**
+
+HME Plate is an interactive reference demo of the released HME field-plus-ledger
+memory model. It is more than a graphical mockup: the browser runs the numerical
+encoding and retrieval logic, and the port is checked against the repository's
+Python engine on deterministic numeric cases.
+
+For a general audience, think of it as a transparent workbench for an experimental
+memory component. You can store information, query with an imperfect clue, inspect
+why one item ranked above another, add controlled noise, and remove either the
+shared field or the retained ledger to see what each part contributes.
+
+The demo is **not an AI agent or chatbot**. Instead, it demonstrates a memory
+mechanism that an AI application could call. In a connected system, an application
+could encode information, ask HME for relevant records later, and supply the
+retrieved material to an AI model before it answers. HME Plate lets you inspect
+the memory mechanism separately from the model that might use it.
+
+[Demo source and technical notes](demos/hme-plate/README.md) cover the exact
+viewer contract, controls, limitations, and local build. The port has numerical
+and DOM regression checks; rendered desktop/mobile verification remains pending.
+It does not visualize consolidation or SAL-1 (salience study), and its probe is
+separate from published experiments. See the [verification record](demos/hme-plate/verification.md).
+
+**SAL-1** is the identifier for HME's **salience study**; `SAL` abbreviates
+*salience*. The same study plan also uses **HOLO-1** for the spread-domain damage
+study, **REC-3** for retained-byte reconstruction/quality comparison, and
+**CONT-1** for consequence-retention/continuity testing. These are study IDs,
+not claimed acronym expansions. See the
+[study plan](experiments/consolidation_plan/README.md#sal-1-weighting-is-not-automatically-correction).
+
+## Decision Revision Bench (DESIGN)
+
+The [Decision Revision Bench](demos/decision-revision/README.md) lets you apply a
+remembered rule after a later fact changes: **retain, revise or defer**, while
+preserving a second project’s unaffected decision. Start with the
+[user guide](experiments/decision_revision_v1/USER_GUIDE.md) or run the standalone
+browser demo locally.
+
+[HME-CM-REV-1](experiments/decision_revision_v1/README.md) currently contains an
+illustrative 32-history fixture, a deterministic policy solver, packet builders,
+evidence-grounded scoring and regression checks. Its lexical NN packets are
+stand-ins for semantic retrieval, and the hybrid is marked
+`MECHANISM_NOT_TESTED`. There are no model calls or registered evaluation results.
+This is a separate decision-revision design; the existing CM-1 protocol and
+published HME results are unchanged.
+
 ## Relationship to established work
 
 Holographic associative memory and **Holographic Reduced Representations (HRR)** are established research areas within the broader **Vector Symbolic Architecture (VSA)** literature. They provide useful reference designs and benchmarks for HME.
@@ -124,6 +194,8 @@ workload, raw signed-cosine NN remains the reference choice. See the
 [review response](docs/REVIEW_2026_09_25.md) for fixes and decision boundaries.
 
 ## Evidence and limitations
+
+The registered [HME-REC-2 study](experiments/rec2_v1/REPORT.md) checks disjoint aligned blocks against ordinary per-block matrices, and checks an experimental shift writer against the biased autocorrelation. The released engine and its defaults are unchanged. Numbers and pass/fail live in the report, which was produced only after the protocol was public.
 
 The new [HME-REC-1 reconstruction study](experiments/reconstruction_v1/REPORT.md)
 tests recovery of missing coordinates in unseen correlated signals, with NN copying,
@@ -224,15 +296,20 @@ its median paired API latency ratio was 70.4 times, with the same decoded-output
 qualification described above. The signed variant is experimental; the default
 engine remains unchanged. That stage had **109 passing tests**, and Stage 2 had
 **117**. The active suite had **128** after conversation-harness development
-checks and now has **138** after raw-baseline and direct-checkout regression tests. Candidate-specific field
+checks and reached **138** after raw-baseline and direct-checkout regression tests. Candidate-specific field
 retrieval is evaluated in HME-NN-2B above; its
 [design rationale](docs/FIELD_RETRIEVAL_DESIGN.md) is retained.
+
+The current suite contains **233 active tests**, including the consolidation
+regressions, plus **11 archived v2.2 tests** run separately. These counts were
+checked on 2026-09-27 at `8bda7aa`; the earlier counts describe their original
+stages and pinned evidence runs.
 
 The extraction preserves the earlier memory core's numerical encoding and ranking, checked against the archived implementation under identical inputs. The `hme-v3` schema deliberately changes field names and artifact IDs. [Migration](docs/MIGRATION_V3.md) describes the boundary.
 
 The [current v3.1 results](evidence/current_release_v3_1.json) come from a fresh
 run against source commit `935b0d0`, with exact engine/harness hashes recorded.
-All **94 active tests** passed. The **11 archived tests** also passed, separately
+At that pinned commit, all **94 active tests** passed. The **11 archived tests** also passed, separately
 labelled as v2.2 preservation checks.
 
 The current memory core's retrieval sweep uses five preselected seeds, 128

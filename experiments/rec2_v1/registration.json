@@ -1,0 +1,26 @@
+{
+  "commit": "d88484a7e3564dc7b0e0e1106dcfe1180713bcde",
+  "origin": "https://github.com/donaldtuttle/HME",
+  "containing_remote_refs": [
+    "refs/remotes/origin/experiment/rec2-v1 d88484a7e3564dc7b0e0e1106dcfe1180713bcde"
+  ],
+  "verified_at_utc": "2026-10-05T15:32:29.427730+00:00",
+  "frozen_sha256": {
+    "hme_engine.py": "080a20056c6c5c88e49c6307845277002ad2091a6a1d7dec66961317bc2c0167",
+    "experiments/sign_ablation_v1/signed_variant.py": "829806ea0304e15f244991e0494be93e954c296e87864fac8c1e523445b28b86",
+    "experiments/rec2_v1/protocol.json": "3520ce3af1ecef31dc362ba66c2e571c2c8e8d1d8a6dea1ff3018a3727a94811",
+    "experiments/rec2_v1/PROTOCOL.md": "ca75b510ee90cb4ea91bc904318486bb1af7ad2efc13f79f2055f01e9781754f",
+    "experiments/rec2_v1/evaluate.py": "d3fe1c47376570e89aa460c457deefaaa19131275acbebbce842040a7bb9d044",
+    "tests/test_rec2.py": "bc943629e8f0c4558b5b7ddee62d2670ec947eb8ebb98986bbd676beb6f36486",
+    ".github/workflows/rec2-study.yml": "bdca23e8f76f497477a888a60994006d8fe04aa66aa606fdf1b39077dac9a98d"
+  },
+  "github_run": {
+    "id": 37333592650,
+    "head_sha": "d88484a7e3564dc7b0e0e1106dcfe1180713bcde",
+    "event": "push",
+    "created_at": "2026-10-05T15:32:01Z",
+    "run_started_at": "2026-10-05T15:32:01Z",
+    "html_url": "https://github.com/donaldtuttle/HME/actions/runs/37333592650",
+    "server_response_date": "Mon, 05 Oct 2026 15:32:29 GMT"
+  }
+}

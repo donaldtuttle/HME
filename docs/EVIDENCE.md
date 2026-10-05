@@ -33,8 +33,9 @@ adds the missing raw-input baseline without rewriting those reports. At sigma
 too worsens it by 13.44 points. These decomposition contrasts are descriptive.
 The no-window signed variant is close to raw NN, but the study does not register
 an equivalence claim or demonstrate a field advantage. No speed or storage
-claim is made. Ten regression tests bring the active suite to 138; earlier
-counts in this index describe their original runs and remain unchanged.
+claim is made. Ten regression tests brought the active suite to 138 at that
+stage. Counts in this index describe their original runs and remain unchanged;
+the [README](../README.md) records the current suite count.
 
 ## Preregistered baseline comparison
 
@@ -161,3 +162,7 @@ to the associated result files and source commit.
 ## HME-REC-1: partial-observation reconstruction
 
 See [protocol](../experiments/reconstruction_v1/PROTOCOL.md), [report](../experiments/reconstruction_v1/REPORT.md), [raw predictions](../experiments/reconstruction_v1/raw_records.jsonl.gz) and [results](../experiments/reconstruction_v1/results.json). The official run checks fresh canonical-origin visibility before evaluation. Direct second moments are an explicit algebraic control, not an omitted baseline.
+
+## HME-REC-2: aligned banks and shift pooling
+
+See [protocol](../experiments/rec2_v1/PROTOCOL.md), [report](../experiments/rec2_v1/REPORT.md), [raw predictions](../experiments/rec2_v1/raw_records.jsonl.gz) and [results](../experiments/rec2_v1/results.json). The official run checks fresh canonical-origin visibility before evaluation. The primary comparison is an identity check against direct local moments, not an accuracy claim. The shift writer is experimental and is not the shipped engine.
