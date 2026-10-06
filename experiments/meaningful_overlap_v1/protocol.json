@@ -1,0 +1,54 @@
+{
+  "protocol_id": "HME-MO-1",
+  "status": "DESIGN / DEVELOP",
+  "version": "0.1-proposed",
+  "base_commit": "a4d871618e31b8184c2cf5c2e13c9256accd254d",
+  "historical_registration": "6d837326fccabd79fd2bd431dbfd895df4bee5ed",
+  "historical_engine_commit": "4662023b005ea7757cb6af4726961c214634b1b7",
+  "dataset": {
+    "items": 128, "families": 16, "members_per_family": 8, "dimension": 16,
+    "canvas": 256, "grid_shape": [8, 16], "overlap_spacing": 8,
+    "separated_spacing": 16, "write_strength": 0.1, "write_weight": 1.0,
+    "hybrid_a": 0.42, "hybrid_b": 0.20,
+    "search_restarts": 2, "swap_proposals": 4096, "swap_tolerance": 1e-12
+  },
+  "primary": {"r": 0.5, "sigma": 1.0, "mode": "symmetric", "repeats": 4},
+  "descriptive": {
+    "shared_variances": [0.0, 0.25, 0.5, 0.75],
+    "noise_sigmas": [0.0, 0.25, 0.5, 1.0], "query_modes": ["symmetric", "native"],
+    "larger_canvas": 512, "larger_spacing": 12
+  },
+  "namespaces": {
+    "scheme": "SHA256('HME-MO-1/{split}/{index:03d}/{stream}') -> eight little-endian uint32 -> SeedSequence -> PCG64",
+    "development": 4, "validation_tune": 12, "validation_check": 12, "reserved_test": 50,
+    "historical_seed_policy": "Separate string namespace and hashed entropy; no direct reuse of historical numerical evaluation seeds. No reserved_test generation before verified approval and registration."
+  },
+  "validation_plan": {
+    "tuning": "All 12 validation_tune corpora, r=.5, sigma=1, symmetric only, four queries/item, 30 vector rules; no field selection.",
+    "checking": "All 12 independent validation_check corpora, every r/sigma/mode, three principal layouts plus content shuffle and association permutation. Primary canvas translation and 512/spacing12 descriptive study. No layout tuning.",
+    "precision": "SD of paired primary corpus effects / sqrt(50); approximate simultaneous halfwidth 2.394 * SE. Planning diagnostic only. Keep proposed n=50 unless reviewed before registration."
+  },
+  "vector_grid": {"representations": ["raw", "processed"], "k": [4, 8, 16], "lambda": [0.0, 0.1, 0.25, 0.5, 0.75]},
+  "vector_selection": {
+    "criterion": "Maximize mean sibling_precision_at_5 among rules whose mean exact_top1 >= RAW_SIGNED_NN mean minus .01; raw lambda=0 guarantees a feasible rule.",
+    "ties": "Within 1e-12 sibling mean: smaller lambda, then smaller k, then raw before processed.",
+    "weights": "Top k other items by signed stored-vector cosine, stable insertion tie order; positive cosines normalized to sum one; empty neighborhood falls back to own signed score.",
+    "budget": 30
+  },
+  "statistics": {"analysis_seed": 73610491, "resamples": 20000, "family_alpha": 0.05},
+  "decision": {
+    "margins": [0.02, 0.02, 0.02, 0.02, -0.01, -0.01],
+    "placement_achieved": "Weighted overlapping signed similarity improves over RANDOM_MATCHED by >1e-6 on every primary corpus. Family enrichment and actual-offset pattern agreement are measured separately.",
+    "all_six_required": true, "bootstrap_coverage": "approximate"
+  },
+  "integrity": {"atol": 1e-12, "cache_atol": 1e-13, "placement_delta_min": 1e-6,
+    "persistent_bytes_cap": 16777216, "decay": 0.0, "salience": false, "clipping": false, "eviction": false},
+  "costs": {"query_count": 16, "warmups": 3, "repetitions": 3, "cache_cycles": 3,
+    "threads": 1, "output_top_k": 5,
+    "measurement": "Primary symmetric queries, all snapshots return five indices and scores; rotated arm order; cached and uncached field variants; uncompressed NPZ plus JSON serialization measured independently of retained Python state."},
+  "registration": {
+    "approval_required": true, "immutable_remote_reference_required": true,
+    "source_hashes_required": true, "refuse_existing_output": true,
+    "failure_policy": "Log every attempted corpus failure, preserve all partial outputs, no replacement seeds. A post-exposure correction requires a public amendment and explicit contamination decision before another run."
+  }
+}
