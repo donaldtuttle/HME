@@ -1,0 +1,198 @@
+{
+  "baseline_rule": {
+    "k": 8,
+    "lambda": 0.25,
+    "representation": "raw"
+  },
+  "head": "a4d871618e31b8184c2cf5c2e13c9256accd254d",
+  "machine": "x86_64",
+  "numpy": "2.3.5",
+  "phase": "validation",
+  "planned_namespaces": [
+    "HME-MO-1/validation_check/000",
+    "HME-MO-1/validation_check/001",
+    "HME-MO-1/validation_check/002",
+    "HME-MO-1/validation_check/003",
+    "HME-MO-1/validation_check/004",
+    "HME-MO-1/validation_check/005",
+    "HME-MO-1/validation_check/006",
+    "HME-MO-1/validation_check/007",
+    "HME-MO-1/validation_check/008",
+    "HME-MO-1/validation_check/009",
+    "HME-MO-1/validation_check/010",
+    "HME-MO-1/validation_check/011"
+  ],
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "processor": "x86_64",
+  "protocol": {
+    "base_commit": "a4d871618e31b8184c2cf5c2e13c9256accd254d",
+    "costs": {
+      "cache_cycles": 3,
+      "measurement": "Primary symmetric queries, all snapshots return five indices and scores; rotated arm order; cached and uncached field variants; uncompressed NPZ plus JSON serialization measured independently of retained Python state.",
+      "output_top_k": 5,
+      "query_count": 16,
+      "repetitions": 3,
+      "threads": 1,
+      "warmups": 3
+    },
+    "dataset": {
+      "canvas": 256,
+      "dimension": 16,
+      "families": 16,
+      "grid_shape": [
+        8,
+        16
+      ],
+      "hybrid_a": 0.42,
+      "hybrid_b": 0.2,
+      "items": 128,
+      "members_per_family": 8,
+      "overlap_spacing": 8,
+      "search_restarts": 2,
+      "separated_spacing": 16,
+      "swap_proposals": 4096,
+      "swap_tolerance": 1e-12,
+      "write_strength": 0.1,
+      "write_weight": 1.0
+    },
+    "decision": {
+      "all_six_required": true,
+      "bootstrap_coverage": "approximate",
+      "margins": [
+        0.02,
+        0.02,
+        0.02,
+        0.02,
+        -0.01,
+        -0.01
+      ],
+      "placement_achieved": "Weighted overlapping signed similarity improves over RANDOM_MATCHED by >1e-6 on every primary corpus. Family enrichment and actual-offset pattern agreement are measured separately."
+    },
+    "descriptive": {
+      "larger_canvas": 512,
+      "larger_spacing": 12,
+      "noise_sigmas": [
+        0.0,
+        0.25,
+        0.5,
+        1.0
+      ],
+      "query_modes": [
+        "symmetric",
+        "native"
+      ],
+      "shared_variances": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    "historical_engine_commit": "4662023b005ea7757cb6af4726961c214634b1b7",
+    "historical_registration": "6d837326fccabd79fd2bd431dbfd895df4bee5ed",
+    "integrity": {
+      "atol": 1e-12,
+      "cache_atol": 1e-13,
+      "clipping": false,
+      "decay": 0.0,
+      "eviction": false,
+      "persistent_bytes_cap": 16777216,
+      "placement_delta_min": 1e-06,
+      "salience": false
+    },
+    "namespaces": {
+      "development": 4,
+      "historical_seed_policy": "Separate string namespace and hashed entropy; no direct reuse of historical numerical evaluation seeds. No reserved_test generation before verified approval and registration.",
+      "reserved_test": 50,
+      "scheme": "SHA256('HME-MO-1/{split}/{index:03d}/{stream}') -> eight little-endian uint32 -> SeedSequence -> PCG64",
+      "validation_check": 12,
+      "validation_tune": 12
+    },
+    "primary": {
+      "mode": "symmetric",
+      "r": 0.5,
+      "repeats": 4,
+      "sigma": 1.0
+    },
+    "protocol_id": "HME-MO-1",
+    "registration": {
+      "approval_required": true,
+      "failure_policy": "Log every attempted corpus failure, preserve all partial outputs, no replacement seeds. A post-exposure correction requires a public amendment and explicit contamination decision before another run.",
+      "immutable_remote_reference_required": true,
+      "refuse_existing_output": true,
+      "source_hashes_required": true
+    },
+    "statistics": {
+      "analysis_seed": 73610491,
+      "family_alpha": 0.05,
+      "resamples": 20000
+    },
+    "status": "DESIGN / DEVELOP",
+    "validation_plan": {
+      "checking": "All 12 independent validation_check corpora, every r/sigma/mode, three principal layouts plus content shuffle and association permutation. Primary canvas translation and 512/spacing12 descriptive study. No layout tuning.",
+      "precision": "SD of paired primary corpus effects / sqrt(50); approximate simultaneous halfwidth 2.394 * SE. Planning diagnostic only. Keep proposed n=50 unless reviewed before registration.",
+      "tuning": "All 12 validation_tune corpora, r=.5, sigma=1, symmetric only, four queries/item, 30 vector rules; no field selection."
+    },
+    "vector_grid": {
+      "k": [
+        4,
+        8,
+        16
+      ],
+      "lambda": [
+        0.0,
+        0.1,
+        0.25,
+        0.5,
+        0.75
+      ],
+      "representations": [
+        "raw",
+        "processed"
+      ]
+    },
+    "vector_selection": {
+      "budget": 30,
+      "criterion": "Maximize mean sibling_precision_at_5 among rules whose mean exact_top1 >= RAW_SIGNED_NN mean minus .01; raw lambda=0 guarantees a feasible rule.",
+      "ties": "Within 1e-12 sibling mean: smaller lambda, then smaller k, then raw before processed.",
+      "weights": "Top k other items by signed stored-vector cosine, stable insertion tie order; positive cosines normalized to sum one; empty neighborhood falls back to own signed score."
+    },
+    "version": "0.1-proposed"
+  },
+  "python": "3.12.14",
+  "registration": null,
+  "source_sha256": {
+    "experiments/field_retrieval_v1/retrieval.py": "e088c7115c3644132507c14d332b18c3cc962517581ef9692f3f34470546d042",
+    "experiments/meaningful_overlap_v1/DEVELOPMENT_RECEIPT.json": "0e382409978d349345de081b0a5b59c2a4748ae511b4c375e9694b3a88e0b899",
+    "experiments/meaningful_overlap_v1/DEVELOPMENT_SUMMARY.json": "4f570b6008944054ff69d5874e7304579ba545df1fa4ed231e516ee9d4b746c7",
+    "experiments/meaningful_overlap_v1/FROZEN_BASELINE.json": "fbbc6864064f6f799a7a2974db4b5ee7c698b5f7ae6f04e2dfcf0934007f4425",
+    "experiments/meaningful_overlap_v1/IMPLEMENTATION_MAP.md": "4dc7a0ccea0a2817a82e036c9a8f91344f1eda7b71ac92e1f29ef0e2fddae1f0",
+    "experiments/meaningful_overlap_v1/PROTOCOL.md": "302c088245615fa6a06d60be0757c0e722c8d2b0bb4eefe8ed01308df6f33128",
+    "experiments/meaningful_overlap_v1/README.md": "7bbea76a974bcc7948a85d7d354c88c09d0cac1969b4d7de9a67e903e94f7c06",
+    "experiments/meaningful_overlap_v1/REGISTRATION_REVIEW.md": "8c36e4fd5b9a5cccedd0507e9300c74013349a5215247da2eca7172b2d4462d6",
+    "experiments/meaningful_overlap_v1/SOURCE_PROVENANCE.json": "4aeee769f68cec32e276e16db578784853e77e7ade96bed1c149f86e266f611c",
+    "experiments/meaningful_overlap_v1/__init__.py": "943442c84d6aec27da2b4a52e1061762c38480086920ba4e8892b816238c0e3a",
+    "experiments/meaningful_overlap_v1/costs.py": "8bb3c6a7b63ae4403f2b827309ba79fd556f03a876bedd3304f17177aaa860c0",
+    "experiments/meaningful_overlap_v1/dataset.py": "e8cca5cb6cd3ba8dbedf9e28b8b8fdf4852ba37c206215cd986a0031c8c2d78d",
+    "experiments/meaningful_overlap_v1/evaluate.py": "9f2330d301d58d4f88141dd61178ec33e0af9c7e5860113f20228f143b33b32d",
+    "experiments/meaningful_overlap_v1/integrity.py": "72dad87829bbd015a30f4ea858274e80daaaf55756dc6987d4c21c4775dc1f5a",
+    "experiments/meaningful_overlap_v1/placement.py": "427228010c8ad0991afbbb8d038a81f73a0d1ba39d5df91494464abcb98a1e04",
+    "experiments/meaningful_overlap_v1/protocol.json": "421e95df8c27ecdcb0b24219d5fd3167d83d82e10fec101bd11bd5c4c674aba5",
+    "experiments/meaningful_overlap_v1/remeasure_costs.py": "94e60b86aecb78a39b8228b9f1dda5f6af8daa1af3f6d5f0f2ae1ae83f583351",
+    "experiments/meaningful_overlap_v1/render_report.py": "dea242486351eb04b646650df151d0e5e4bdf9b2fa0bb83be925a12ee67d3b71",
+    "experiments/meaningful_overlap_v1/retrieval.py": "b87ae9c8f018591963ac339e06c8908caef6a388fc8d578c8f869ee1375d5a93",
+    "experiments/meaningful_overlap_v1/statistics.py": "7c0328e80111f409d9ebf4e79e9af53d94cf3f44fc8991838d36bc2d7c4d76de",
+    "experiments/nn_baseline_v1/evaluate.py": "14b65414ee4db3268bfcc479e52a80830f9a384fb9eff2da55c696290258c244",
+    "hme_engine.py": "080a20056c6c5c88e49c6307845277002ad2091a6a1d7dec66961317bc2c0167",
+    "tests/test_meaningful_overlap.py": "09e62b3f1a7d774e0851e928c885bad4bef7cabc92aa4bbf7e3ec0a4f3ccc6b7"
+  },
+  "started_utc": "2026-10-09T20:35:11.233554+00:00",
+  "threads": {
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "worktree_status": "?? experiments/meaningful_overlap_v1/\n?? tests/test_meaningful_overlap.py"
+}

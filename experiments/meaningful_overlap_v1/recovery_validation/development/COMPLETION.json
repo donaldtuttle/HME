@@ -1,0 +1,7 @@
+{
+  "completed_corpora": 2,
+  "completed_utc": "2026-10-09T20:34:39.236688+00:00",
+  "failures": [],
+  "peak_process_rss_bytes": 115384320,
+  "rss_scope": "Linux whole runner high-water mark including evaluator arrays, build states, output accumulation and all arms; not per-arm retained bytes."
+}

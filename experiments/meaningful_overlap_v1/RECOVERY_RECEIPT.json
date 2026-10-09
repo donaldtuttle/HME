@@ -1,0 +1,164 @@
+{
+  "current_base_commit": "a4d871618e31b8184c2cf5c2e13c9256accd254d",
+  "files": {
+    "recovery_validation/development/COMPLETION.json": {
+      "bytes": 298,
+      "sha256": "409a771c3f745109d0bed3c9ee0bc5617718d2cd0f4541a9381856bf86c54a5b"
+    },
+    "recovery_validation/development/RUN_MANIFEST.json": {
+      "bytes": 8231,
+      "sha256": "1159af50835fa4d2574f9f52dc6656733391509541076fe261cecc4ddb8e2836"
+    },
+    "recovery_validation/development/corpus_000.json.gz": {
+      "bytes": 176108,
+      "sha256": "287ea65cc37a41b5ba3e36801cbba41cad615b4579a671ff2b3490ae4711a4c2"
+    },
+    "recovery_validation/development/corpus_001.json.gz": {
+      "bytes": 176542,
+      "sha256": "7acc49a141446c4cc563d4215293228ede1244a2c969bd30914c1b7260887660"
+    },
+    "recovery_validation/development/summary.json": {
+      "bytes": 10287,
+      "sha256": "17d5ea2d1653ddf657976d1a26d66eb8bf91c3bf52664bb131c81edfb1f955e8"
+    },
+    "recovery_validation/tune/COMPLETION.json": {
+      "bytes": 298,
+      "sha256": "22d48f2c7cb374feb7d6af2fd281ad45369f71aba773984f99f403daa656d6ac"
+    },
+    "recovery_validation/tune/FROZEN_BASELINE.json": {
+      "bytes": 7733,
+      "sha256": "fbbc6864064f6f799a7a2974db4b5ee7c698b5f7ae6f04e2dfcf0934007f4425"
+    },
+    "recovery_validation/tune/RUN_MANIFEST.json": {
+      "bytes": 8592,
+      "sha256": "9903d18d301fbdaf6124c4715213c3ea41512b8c8ac1e295a9137358bd9b989a"
+    },
+    "recovery_validation/tune/corpus_000.json.gz": {
+      "bytes": 93871,
+      "sha256": "4569b4dae3bf58dc1fc8d249fafeec9887beb85f1a9d45ddd1b816f9a783ec77"
+    },
+    "recovery_validation/tune/corpus_001.json.gz": {
+      "bytes": 91431,
+      "sha256": "e4c2e9e4c2cc69a692ff40bd316e4f209208e4c25e82e95d742f47c3c5601ba7"
+    },
+    "recovery_validation/tune/corpus_002.json.gz": {
+      "bytes": 93983,
+      "sha256": "668103a55d158c8b3e350c58caef9b202fdbc9c4896d7de5fa5b76f831a98738"
+    },
+    "recovery_validation/tune/corpus_003.json.gz": {
+      "bytes": 92719,
+      "sha256": "5cfc2fc712e595b052961e61ed6f13b5259fc610c9b58b0b379bf56e31ba4d21"
+    },
+    "recovery_validation/tune/corpus_004.json.gz": {
+      "bytes": 94139,
+      "sha256": "97a440495b5cf92325dbde75f91a8a448f26e0e3967ab7c133a40b7487ff9418"
+    },
+    "recovery_validation/tune/corpus_005.json.gz": {
+      "bytes": 92856,
+      "sha256": "eebcdb7048b5ad5882a40b81cc14421b252c9857135708912ab32e7681f85e14"
+    },
+    "recovery_validation/tune/corpus_006.json.gz": {
+      "bytes": 94432,
+      "sha256": "081d55696d8fe7511e35227fce093aba3a476cc13363e3078443d40b6fdcc2eb"
+    },
+    "recovery_validation/tune/corpus_007.json.gz": {
+      "bytes": 93404,
+      "sha256": "2e35ee8369da4082de4c0696bfea18718c7e268550c48358a53066f29a50d764"
+    },
+    "recovery_validation/tune/corpus_008.json.gz": {
+      "bytes": 92307,
+      "sha256": "306e3b9e6ab52966bb14b22a2bd0d97adea02bca96cae72e66fdbd94f52fbfa1"
+    },
+    "recovery_validation/tune/corpus_009.json.gz": {
+      "bytes": 94547,
+      "sha256": "e6a6fbaac77e412920ea190500cb2a97e7b8be45c320df76fa549d63d82e4c3f"
+    },
+    "recovery_validation/tune/corpus_010.json.gz": {
+      "bytes": 91782,
+      "sha256": "40d50fcea5ab59f97bf6e70fdd8ea7db74c824b205e3bb0679a9965e51e5182c"
+    },
+    "recovery_validation/tune/corpus_011.json.gz": {
+      "bytes": 92905,
+      "sha256": "f4b5bbef5ef7dad19db2d02635dcfaf8d2617e7c57524d54214642d9c114e79c"
+    },
+    "recovery_validation/validation/COMPLETION.json": {
+      "bytes": 299,
+      "sha256": "b6c9f79e8fa947b28343c80b10ff1ade686584660ea15c25a5ca8bef24a2a937"
+    },
+    "recovery_validation/validation/RUN_MANIFEST.json": {
+      "bytes": 8611,
+      "sha256": "a1ee481e5ef2f94d1b27d8309ba98146fadeb9b493ada83bf11453f4ff2abd40"
+    },
+    "recovery_validation/validation/corpus_000.json.gz": {
+      "bytes": 1669137,
+      "sha256": "b79eeabdd7e4682f3c1c5cdc1064676dd091325120c55c1618bf7ddc40976e9b"
+    },
+    "recovery_validation/validation/corpus_001.json.gz": {
+      "bytes": 1678502,
+      "sha256": "de7346533e4f718de073cdc217056fbc7d5e65fda4dd2102f20c827a1e382f43"
+    },
+    "recovery_validation/validation/corpus_002.json.gz": {
+      "bytes": 1696473,
+      "sha256": "244b0d84a39187bf1c36f2d67fcd9dfb657451a3d4daf497bc0ea67eac197185"
+    },
+    "recovery_validation/validation/corpus_003.json.gz": {
+      "bytes": 1669534,
+      "sha256": "1efb6dc27083f1ecb6121d8841b7cd9aedb7c35146bb6a391d6de45b291cde1c"
+    },
+    "recovery_validation/validation/corpus_004.json.gz": {
+      "bytes": 1674884,
+      "sha256": "db27576dfb391ed20845b67db20551abf8f573bebbf02ae7f15d2de138414964"
+    },
+    "recovery_validation/validation/corpus_005.json.gz": {
+      "bytes": 1658655,
+      "sha256": "49be6d9b0f382fb4912f5363ddcc3aa81a5d537f6e8e283b69ac7b1c9dfdc16a"
+    },
+    "recovery_validation/validation/corpus_006.json.gz": {
+      "bytes": 1666719,
+      "sha256": "6dabf2df5d92fde4342d0d63eadc04dd1938ad113c975e8ad867fc25d7542f09"
+    },
+    "recovery_validation/validation/corpus_007.json.gz": {
+      "bytes": 1675244,
+      "sha256": "77abab79c5b3b8482cf3a571ef72f0b561202da5e4639e7add7c7585797c73e0"
+    },
+    "recovery_validation/validation/corpus_008.json.gz": {
+      "bytes": 1690236,
+      "sha256": "58931faabe2605c590652db830e5de512b0b7aa1a24c387fb2c279d0022b0526"
+    },
+    "recovery_validation/validation/corpus_009.json.gz": {
+      "bytes": 1676298,
+      "sha256": "a02e4e9287dbd430375f2cc04a0a0eab7808b2f9a1877e1b200136b38aa51811"
+    },
+    "recovery_validation/validation/corpus_010.json.gz": {
+      "bytes": 1697462,
+      "sha256": "2f5adac0817d160681be885d7fc85d62fc4ad4c7c8edac03e64d4d1f1cdd4341"
+    },
+    "recovery_validation/validation/corpus_011.json.gz": {
+      "bytes": 1661527,
+      "sha256": "64091ada69003388fe7aa5bc55c20db4028108ba80c75375f4e8b16b5e880841"
+    },
+    "recovery_validation/validation/summary.json": {
+      "bytes": 12554,
+      "sha256": "a4cf9f63c40461e0aa4174d5ce5ea96f180d4a06ffc452ab010f0341fac23b60"
+    }
+  },
+  "frozen_baseline_identical": true,
+  "python": "3.12.14",
+  "recovered_commit": "a0d123bca583deb790cfbb33346f3cd3e3b4b21c",
+  "replayed_corpora": {
+    "development": 2,
+    "validation_check": 12,
+    "validation_tune": 12
+  },
+  "reserved_corpora_generated": 0,
+  "status": "DESIGN / DEVELOP",
+  "summary_reproduction": {
+    "all_integrity_passed": true,
+    "all_placement_achieved": true,
+    "analysis": true,
+    "phase": true,
+    "planning_for_50": true,
+    "primary_means": true,
+    "status": true
+  }
+}
