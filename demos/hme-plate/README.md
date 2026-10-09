@@ -28,8 +28,9 @@ npm run preview
 
 `dist/client/` contains the complete static app, including fonts and the favicon.
 Relative asset paths support a repository subpath such as `/HME/`. Copy the
-**contents** of that directory into the chosen static hosting root. This PR
-does not enable GitHub Pages or publish a live deployment. The starter also
+**contents** of that directory into the chosen static hosting root. The repository's
+HME Plate workflow verifies the demo and publishes successful builds from `main`
+to the `gh-pages` branch. The starter also
 retains its optional Sites packaging under `dist/server/` and `dist/.openai/`;
 those directories are not needed for ordinary static hosting.
 
