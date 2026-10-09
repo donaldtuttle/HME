@@ -1,0 +1,79 @@
+{
+  "base_commit": "a4d871618e31b8184c2cf5c2e13c9256accd254d",
+  "condition": "HME-MO-1 DESIGN / DEVELOP; historical files read only",
+  "files": {
+    "MANIFEST.sha256": {
+      "bytes": 37232,
+      "encoding": "UTF-8",
+      "last_source_commit": "348d164f13452a903f7ccf25c916ef36a5095de0",
+      "sha256": "017d9eb160685059f0ad0a12ad828a41fab4af699c810e717b96f6a0944d667e"
+    },
+    "SOURCE_PINS.sha256": {
+      "bytes": 462,
+      "encoding": "UTF-8",
+      "last_source_commit": "935b0d05dd8eb3caaff034d1662a58683c9423f5",
+      "sha256": "2623e41d6299259d09172daa2dfac65f96c36081a233bb8ebca4aea7b2669408"
+    },
+    "archive/v2.2.sha256": {
+      "bytes": 6443,
+      "encoding": "UTF-8",
+      "last_source_commit": "8b0d164d4a4f6cc36069a9d461817bd65e423ae9",
+      "sha256": "137ded7a0d71e1d21c4e3deb15806f64afcd2f56f475ce3b6a174b64f4f55c9a"
+    },
+    "docs/ARCHITECTURE.md": {
+      "bytes": 4089,
+      "encoding": "UTF-8",
+      "last_source_commit": "935b0d05dd8eb3caaff034d1662a58683c9423f5",
+      "sha256": "b89397cbb9b7acd6ac1bbafc05d1a47cefd59e244d87cb95a5ffd8694a627ea4"
+    },
+    "experiments/field_retrieval_v1/PROTOCOL.md": {
+      "bytes": 4649,
+      "encoding": "UTF-8",
+      "last_source_commit": "6d837326fccabd79fd2bd431dbfd895df4bee5ed",
+      "sha256": "59fe7420041b72a4df0e7a00a8fcb175fb6722ee22a8bfe6d2b0bebd12fff651"
+    },
+    "experiments/field_retrieval_v1/REPORT.md": {
+      "bytes": 19875,
+      "encoding": "UTF-8",
+      "last_source_commit": "8cf8c60d1838bc967498c80dc08973935997bfef",
+      "sha256": "4597c3b93a939526ff347ccdeeba522cd32f15387114dd6315ca3cb86fbc70fc"
+    },
+    "experiments/field_retrieval_v1/evaluate.py": {
+      "bytes": 17696,
+      "encoding": "UTF-8",
+      "last_source_commit": "6d837326fccabd79fd2bd431dbfd895df4bee5ed",
+      "sha256": "b14dc3c9050d7fbcd140f6039338c3868e911ccfa9a534e95a414dee306e1663"
+    },
+    "experiments/field_retrieval_v1/protocol.json": {
+      "bytes": 10254,
+      "encoding": "UTF-8",
+      "last_source_commit": "6d837326fccabd79fd2bd431dbfd895df4bee5ed",
+      "sha256": "ffc0f759274fecdc749b2f23f6568691ce8effaea35ee1de255fb90c8b66e201"
+    },
+    "experiments/field_retrieval_v1/retrieval.py": {
+      "bytes": 5803,
+      "encoding": "UTF-8",
+      "last_source_commit": "6d837326fccabd79fd2bd431dbfd895df4bee5ed",
+      "sha256": "e088c7115c3644132507c14d332b18c3cc962517581ef9692f3f34470546d042"
+    },
+    "experiments/nn_baseline_v1/evaluate.py": {
+      "bytes": 16443,
+      "encoding": "UTF-8",
+      "last_source_commit": "88520eb82d9852e1176132fe5b2dd4ea011026f5",
+      "sha256": "14b65414ee4db3268bfcc479e52a80830f9a384fb9eff2da55c696290258c244"
+    },
+    "hme_engine.py": {
+      "bytes": 35779,
+      "encoding": "UTF-8",
+      "last_source_commit": "8b0d164d4a4f6cc36069a9d461817bd65e423ae9",
+      "sha256": "080a20056c6c5c88e49c6307845277002ad2091a6a1d7dec66961317bc2c0167"
+    },
+    "tests/test_field_retrieval.py": {
+      "bytes": 7103,
+      "encoding": "UTF-8",
+      "last_source_commit": "6d837326fccabd79fd2bd431dbfd895df4bee5ed",
+      "sha256": "56bf6cc1a920fcc57f963d392ec2a5d0a72fdbc696d862d0b246088b4ec9f23a"
+    }
+  },
+  "loaded_utc": "2026-10-06T01:43:48.535592+00:00"
+}

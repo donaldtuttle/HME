@@ -1,0 +1,323 @@
+{
+  "archive": {
+    "bytes": 21718741,
+    "file_count": 59,
+    "filename": "HME-MO-1-development-records.zip",
+    "sha256": "7f7282390d605ee3781b7932aa6283897d71797e2f9dbfcebc1059502d74a8b0"
+  },
+  "base_commit": "a4d871618e31b8184c2cf5c2e13c9256accd254d",
+  "commands": [
+    {
+      "command": ".venv/bin/python -m pytest -q tests/test_meaningful_overlap.py",
+      "exit_code": 0,
+      "passed": 28
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q --junitxml=outputs/hme-mo-1/current-tests-final.xml",
+      "exit_code": 0,
+      "passed": 456
+    },
+    {
+      "command": "(cd archive/v2.2 && ../../.venv/bin/python -m pytest -q --junitxml=../../outputs/hme-mo-1/historical-tests.xml)",
+      "exit_code": 0,
+      "passed": 11
+    },
+    {
+      "command": ".venv/bin/python hme_engine.py --self-test",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "command": ".venv/bin/python tests/hme_independent_audit.py --engine ./hme_engine.py --output outputs/hme-mo-1/hme-audit.json",
+      "exit_code": 0,
+      "scope": "existing regression audit; not new HME-MO-1 research evidence"
+    },
+    {
+      "command": ".venv/bin/python examples/runtime_demo.py > outputs/hme-mo-1/runtime-demo.json",
+      "exit_code": 0
+    },
+    {
+      "command": "sha256sum --check --quiet MANIFEST.sha256 && sha256sum --check --quiet SOURCE_PINS.sha256 && sha256sum --check --quiet archive/v2.2.sha256",
+      "exit_code": 0,
+      "scope": "inspection before new root payload entries"
+    },
+    {
+      "command": "(cd archive/v2.2 && sha256sum --check --quiet SOURCE_PINS.sha256)",
+      "exit_code": 0
+    },
+    {
+      "command": ".venv/bin/python -m experiments.meaningful_overlap_v1.evaluate development --output outputs/hme-mo-1/development",
+      "completed_corpora": 2,
+      "exit_code": 0
+    },
+    {
+      "command": ".venv/bin/python -m experiments.meaningful_overlap_v1.evaluate tune --output outputs/hme-mo-1/validation-tune",
+      "completed_corpora": 12,
+      "exit_code": 0
+    },
+    {
+      "command": ".venv/bin/python -m experiments.meaningful_overlap_v1.evaluate validation --output outputs/hme-mo-1/validation-check",
+      "completed_corpora": 12,
+      "exit_code": 0
+    },
+    {
+      "command": ".venv/bin/python -m experiments.meaningful_overlap_v1.remeasure_costs outputs/hme-mo-1/validation-check --output outputs/hme-mo-1/costs-serial",
+      "completed_corpora": 12,
+      "exact_primary_rank_and_metric_records_unchanged": true,
+      "exit_code": 0
+    },
+    {
+      "command": ".venv/bin/python -m experiments.meaningful_overlap_v1.render_report outputs/hme-mo-1/validation-check --cost-source outputs/hme-mo-1/costs-serial --output experiments/meaningful_overlap_v1/figures",
+      "exit_code": 0,
+      "figures": 4,
+      "visually_inspected": true
+    },
+    {
+      "command": ".venv/bin/python -m pytest -q --junitxml=outputs/hme-mo-1/verified-final-tests.xml",
+      "exit_code": 0,
+      "passed": 456,
+      "seconds": 8.72,
+      "verification": "direct tool result, not inferred from a shell chain"
+    }
+  ],
+  "failed_corpora": 0,
+  "post_tuning_changes": "constant bootstrap correction before validation; cost snapshot isolation and serial remeasurement; remote registration stale-ref guard; no encoder, layout or baseline retuning",
+  "raw_inventory": {
+    "COMMAND_RECEIPT.json": {
+      "bytes": 2663,
+      "sha256": "f7121efc5d706d0b89632dbf556e2ebedca861dba0c97ad01ec465c028655be2"
+    },
+    "VERIFIED_FINAL_TEST_RESULT.json": {
+      "bytes": 229,
+      "sha256": "3fff923215428a68d2a8b77d70e69b4d9e55dd114bcffb4a411bfe15271e609b"
+    },
+    "costs-serial/COMPLETION.json": {
+      "bytes": 142,
+      "sha256": "789daf7d73c419afaabc2860c4eafb9cc7a4c4e51d586e934f3478f228e000b6"
+    },
+    "costs-serial/RUN_MANIFEST.json": {
+      "bytes": 3396,
+      "sha256": "08f2d0294c82057dc2ea61eb27a94f4c89c7593d97dbf1f59e044e004be4282b"
+    },
+    "costs-serial/corpus_000.json": {
+      "bytes": 38249,
+      "sha256": "0024e9c5eca9410383bc6d49c6744c4eb37b25db0ea8e54666b505aeefcabbf4"
+    },
+    "costs-serial/corpus_001.json": {
+      "bytes": 38269,
+      "sha256": "1ad6f6fe778f325f15df1b3e6d9ab23b385c7b762c8d9e32c791d0f0356e8fd8"
+    },
+    "costs-serial/corpus_002.json": {
+      "bytes": 38214,
+      "sha256": "3f619efc2bd0b10e29953be3ea5efa794ab5024b46fa6ea6a2f803803f320e3e"
+    },
+    "costs-serial/corpus_003.json": {
+      "bytes": 38251,
+      "sha256": "23956c5b3b6be7adc5bc840f5210e1b6233905adb078a5a4740d29f71c6e1fd2"
+    },
+    "costs-serial/corpus_004.json": {
+      "bytes": 38223,
+      "sha256": "fef277aa52873e879935efb1e4bb73675ebb9c29fd4eecf749847ba013368205"
+    },
+    "costs-serial/corpus_005.json": {
+      "bytes": 38346,
+      "sha256": "73ae49eef0cfd46a29ca4df2e87572ff87f9f6bb3e766ad10428f762587e1250"
+    },
+    "costs-serial/corpus_006.json": {
+      "bytes": 38255,
+      "sha256": "e3d64d778426b00748119a9e2d37c18ef9aa021a67928ca538f912906811c65e"
+    },
+    "costs-serial/corpus_007.json": {
+      "bytes": 38237,
+      "sha256": "7875f717a01b56b6ec4ec5a4bba90b958472ed366b47b1940d406bf17e8ee6b4"
+    },
+    "costs-serial/corpus_008.json": {
+      "bytes": 38262,
+      "sha256": "a9954f6094c5324d63be3e949c3586b5956bac4446aa89b87fc60399f38c40cd"
+    },
+    "costs-serial/corpus_009.json": {
+      "bytes": 38238,
+      "sha256": "fe346c5068b563789ebc51d5d636ce373f338bdfadc9aca1ecfe5786080fa842"
+    },
+    "costs-serial/corpus_010.json": {
+      "bytes": 38156,
+      "sha256": "01544a420f676a32a6b73cb8644f576047257def9531a006022d39ab70130844"
+    },
+    "costs-serial/corpus_011.json": {
+      "bytes": 38240,
+      "sha256": "32863afb8a041c036c938aa189c2461638c8168450418ba3dffc7bbc92cc6276"
+    },
+    "current-tests-final.xml": {
+      "bytes": 60297,
+      "sha256": "9159d78f56a18a6867086ccfd15e14caac2bec2bb91f15dbeeeedbb9e97b5d80"
+    },
+    "current-tests.xml": {
+      "bytes": 59751,
+      "sha256": "c6873b3046ca3ec401f2cda97115a92293b9498234615cf39eb582fa6008dec6"
+    },
+    "development/COMPLETION.json": {
+      "bytes": 298,
+      "sha256": "490ac2fff91fa53cc1d7ba8e0e49df330110273b62c8d2ba59bf5f2ec94e6def"
+    },
+    "development/RUN_MANIFEST.json": {
+      "bytes": 7328,
+      "sha256": "6d4df2992a0b6b72999f97167291dd4a431166fe434cfa0d3e9a94b08f6855be"
+    },
+    "development/corpus_000.json.gz": {
+      "bytes": 176047,
+      "sha256": "81a5b54c5c567bae4f3ab461b12c9f055a28905482256b3fc5ede9974033a48e"
+    },
+    "development/corpus_001.json.gz": {
+      "bytes": 176492,
+      "sha256": "edce4b8fbf452574855bd334343f4c583025f6dbe6187a7cdb46418ff2303d87"
+    },
+    "development/summary.json": {
+      "bytes": 10287,
+      "sha256": "17d5ea2d1653ddf657976d1a26d66eb8bf91c3bf52664bb131c81edfb1f955e8"
+    },
+    "final-tests.log": {
+      "bytes": 132,
+      "sha256": "b2836c780fddff989a3484a989f36b0d8b8b0d9dbb1a8738574a26a0703e5285"
+    },
+    "historical-tests.xml": {
+      "bytes": 1456,
+      "sha256": "25eb64d244075253015fd26227dbb96fe612df501ea833d9488cc8113f4d8b6f"
+    },
+    "hme-audit.json": {
+      "bytes": 9313,
+      "sha256": "41da6b37b248018bd6fd40a9a89f6d0e1fcc14df48b5a16ef2ca01cd8377e3a1"
+    },
+    "runtime-demo.json": {
+      "bytes": 780,
+      "sha256": "49b06c36fb5d86655239c20914f57d98ef854e6bc0c28c2dab83de3492e65d3e"
+    },
+    "validation-check/COMPLETION.json": {
+      "bytes": 299,
+      "sha256": "776c09074f255291dacac9bd328ef2b64d8c4472ae572efe1b63d1bacfecfcc6"
+    },
+    "validation-check/RUN_MANIFEST.json": {
+      "bytes": 8141,
+      "sha256": "815f637698966842c46cc101de83e9d274e45450cd08d94bdc3386d14bd39fe8"
+    },
+    "validation-check/corpus_000.json.gz": {
+      "bytes": 1669127,
+      "sha256": "2ee71daecc0144061393f5ef241540c9e684820d30d7cf9e6b8ac0d4ed0566f1"
+    },
+    "validation-check/corpus_001.json.gz": {
+      "bytes": 1678317,
+      "sha256": "4d9c23f1cecb7555ab4d5876f2853fbfe5097015d6f6bde7fe99cbc88dfd5be9"
+    },
+    "validation-check/corpus_002.json.gz": {
+      "bytes": 1696476,
+      "sha256": "4f6d4c40d1d8573989cece74aee0806c5396d3fb163171c41dc887264acd02d5"
+    },
+    "validation-check/corpus_003.json.gz": {
+      "bytes": 1669595,
+      "sha256": "4288a3d3e1ed62d9f476659931eddd11dec8d100fd14c1ce6051fa5c7ad1ae79"
+    },
+    "validation-check/corpus_004.json.gz": {
+      "bytes": 1674833,
+      "sha256": "0104d6c5e88d50f04e452b2ad386914001672da0cfb7c979bee4f2ee5a6c8b5c"
+    },
+    "validation-check/corpus_005.json.gz": {
+      "bytes": 1658622,
+      "sha256": "971b2f7c775499cf5ba0a779a7cc2eccbc013e8af0c9576d9ceeee8c6c8d055a"
+    },
+    "validation-check/corpus_006.json.gz": {
+      "bytes": 1666612,
+      "sha256": "31ca6a0c21bc0cc690f525983ceeed3a162df688a190ef2397af117d64afb030"
+    },
+    "validation-check/corpus_007.json.gz": {
+      "bytes": 1675247,
+      "sha256": "3c125aadb67fdcfb1d89d31adea7a0ca06f7a7a0f67c47196c505da187b4a07d"
+    },
+    "validation-check/corpus_008.json.gz": {
+      "bytes": 1690095,
+      "sha256": "96abed22945ca07054719b6df40e3531cbdf13ba0b31a1bedc4892fc8401429b"
+    },
+    "validation-check/corpus_009.json.gz": {
+      "bytes": 1676147,
+      "sha256": "fe01283def8468375676e8a554dc36eee5019b159985e493495b1b100272fffa"
+    },
+    "validation-check/corpus_010.json.gz": {
+      "bytes": 1697469,
+      "sha256": "94b78820cc32ab84eb213c80a6964a4a3e1b30aa2c691b0aa4c47b7cd17e2621"
+    },
+    "validation-check/corpus_011.json.gz": {
+      "bytes": 1661659,
+      "sha256": "76623cb98b1228ee988de335faec02bee1f44a7f6193facb412b7a12b300b3b7"
+    },
+    "validation-check/summary.json": {
+      "bytes": 12554,
+      "sha256": "a4cf9f63c40461e0aa4174d5ce5ea96f180d4a06ffc452ab010f0341fac23b60"
+    },
+    "validation-tune/COMPLETION.json": {
+      "bytes": 298,
+      "sha256": "b98510f2e2f95ce17cf37efc07f8120ebfc2b6e92910dc2504a19327ee3b18af"
+    },
+    "validation-tune/FROZEN_BASELINE.json": {
+      "bytes": 7733,
+      "sha256": "fbbc6864064f6f799a7a2974db4b5ee7c698b5f7ae6f04e2dfcf0934007f4425"
+    },
+    "validation-tune/RUN_MANIFEST.json": {
+      "bytes": 7992,
+      "sha256": "3e41e5478df624f952982684821ce5f6e1a1837974c1f1feeebd809ddd09da4b"
+    },
+    "validation-tune/corpus_000.json.gz": {
+      "bytes": 93871,
+      "sha256": "4569b4dae3bf58dc1fc8d249fafeec9887beb85f1a9d45ddd1b816f9a783ec77"
+    },
+    "validation-tune/corpus_001.json.gz": {
+      "bytes": 91431,
+      "sha256": "e4c2e9e4c2cc69a692ff40bd316e4f209208e4c25e82e95d742f47c3c5601ba7"
+    },
+    "validation-tune/corpus_002.json.gz": {
+      "bytes": 93983,
+      "sha256": "668103a55d158c8b3e350c58caef9b202fdbc9c4896d7de5fa5b76f831a98738"
+    },
+    "validation-tune/corpus_003.json.gz": {
+      "bytes": 92719,
+      "sha256": "5cfc2fc712e595b052961e61ed6f13b5259fc610c9b58b0b379bf56e31ba4d21"
+    },
+    "validation-tune/corpus_004.json.gz": {
+      "bytes": 94139,
+      "sha256": "97a440495b5cf92325dbde75f91a8a448f26e0e3967ab7c133a40b7487ff9418"
+    },
+    "validation-tune/corpus_005.json.gz": {
+      "bytes": 92856,
+      "sha256": "eebcdb7048b5ad5882a40b81cc14421b252c9857135708912ab32e7681f85e14"
+    },
+    "validation-tune/corpus_006.json.gz": {
+      "bytes": 94432,
+      "sha256": "081d55696d8fe7511e35227fce093aba3a476cc13363e3078443d40b6fdcc2eb"
+    },
+    "validation-tune/corpus_007.json.gz": {
+      "bytes": 93404,
+      "sha256": "2e35ee8369da4082de4c0696bfea18718c7e268550c48358a53066f29a50d764"
+    },
+    "validation-tune/corpus_008.json.gz": {
+      "bytes": 92307,
+      "sha256": "306e3b9e6ab52966bb14b22a2bd0d97adea02bca96cae72e66fdbd94f52fbfa1"
+    },
+    "validation-tune/corpus_009.json.gz": {
+      "bytes": 94547,
+      "sha256": "e6a6fbaac77e412920ea190500cb2a97e7b8be45c320df76fa549d63d82e4c3f"
+    },
+    "validation-tune/corpus_010.json.gz": {
+      "bytes": 91782,
+      "sha256": "40d50fcea5ab59f97bf6e70fdd8ea7db74c824b205e3bb0679a9965e51e5182c"
+    },
+    "validation-tune/corpus_011.json.gz": {
+      "bytes": 92905,
+      "sha256": "f4b5bbef5ef7dad19db2d02635dcfaf8d2617e7c57524d54214642d9c114e79c"
+    },
+    "verified-final-tests.xml": {
+      "bytes": 60297,
+      "sha256": "e9df61f86d6fd81dd50048fef8e09e29bdd34436ff4b99b5825131ef6f69f23d"
+    }
+  },
+  "research_status": "DESIGN / DEVELOP; no confirmatory execution",
+  "reserved_test_corpora_generated": 0,
+  "source_history_bundle_sha256": "7b9313d9cb24454e425a7addc02db5d158b3e4016b448ecccd0ffe90e8f89df8",
+  "status": "READY_FOR_PROTOCOL_REVIEW"
+}
