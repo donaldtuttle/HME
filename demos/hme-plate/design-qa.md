@@ -20,5 +20,5 @@ Build and jsdom interaction checks cannot substitute for browser rendering.
 | Ledger and write controls | Numeric/symbol writes and reset pass DOM checks | Confirm scrolling, focus visibility and keyboard interaction |
 | Mobile layout | Original responsive CSS retained | Check narrow viewport, overflow, touch targets and field sizing |
 
-Keep the PR draft until desktop and mobile browser checks are completed.
-No deployment or visual-fidelity signoff is claimed.
+Visual-fidelity verification remains pending until desktop and mobile browser
+checks are completed.
